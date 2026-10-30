@@ -251,6 +251,28 @@ footer a{color:var(--mute)}
 .fxbanner.loss{color:var(--red);background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--bg) 88%,transparent) 20%,color-mix(in srgb,var(--bg) 88%,transparent) 80%,transparent)}
 @keyframes bannerin{0%{opacity:0;transform:scale(1.25);letter-spacing:.3em}12%{opacity:1;transform:scale(1);letter-spacing:.08em}75%{opacity:1}100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.fxbanner{animation:none;opacity:0}}
+.chip.tokc{border-color:var(--gold);color:var(--gold);margin-left:4px}
+.ns.full{position:relative}
+.rd{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:1px solid var(--gold);background:var(--bg);color:var(--gold);font-size:12px;line-height:1;display:grid;place-items:center;padding:0}
+.rd:hover{background:var(--gold);color:var(--bg)}
+.btn.tiny{font-size:11px;padding:2px 8px;border-color:var(--gold);color:var(--gold)}
+.tokbox{border-color:color-mix(in srgb,var(--gold) 40%,var(--line))}
+.mvpwrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:10px;animation:fadeup .6s ease-out both;animation-delay:var(--d)}
+.mvpwrap:has(.mvpcard:only-child){grid-template-columns:minmax(0,1fr)}
+@media (max-width:700px){.mvpwrap{grid-template-columns:1fr}}
+.mvpcard{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;padding:14px;border-radius:8px;background:linear-gradient(120deg,color-mix(in srgb,var(--c) 22%,var(--panel2)),var(--panel2) 60%);border:1px solid color-mix(in srgb,var(--c) 45%,var(--line));text-align:left}
+.mvpcard.second{opacity:.92}
+.mvpart{position:relative}
+.ag.mvpimg{width:112px;height:112px;border-radius:10px;font-size:52px}
+.mvpcard.second .ag.mvpimg{width:84px;height:84px;font-size:40px}
+.mvpbadge{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);white-space:nowrap;background:var(--c);color:var(--bg);font-family:var(--f-display);font-weight:900;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:3px}
+.mvpcard.first .mvpbadge{background:var(--gold)}
+.mvpname{font-family:var(--f-display);font-weight:900;font-size:34px;line-height:1;text-transform:uppercase;overflow-wrap:anywhere}
+.mvpcard.second .mvpname{font-size:26px}
+.mvpstats{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px}
+.mvpstats div{display:flex;flex-direction:column}
+.mvpstats b{font-family:var(--f-display);font-size:22px;font-weight:800;line-height:1.1}
+.mvpstats span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
 .chip.blindc{border-color:var(--controller);color:var(--controller)}
 .rating.qm{color:var(--dim)}
 .blindbox{border-color:color-mix(in srgb,var(--controller) 45%,var(--line))}
@@ -573,7 +595,7 @@ function makeSession(mode, o = {}){
   else if (mode === "local"){ drafters = [mk(G.p1 || "Player 1", 0, null), mk(G.p2 || "Player 2", 1, null)]; order = [0,1,1,0,0,1,1,0,0,1]; }
   else if (mode === "autobot") drafters = [mk("Bot", 0, o.level || "Pro")];
   else drafters = [mk(me, 0, null)];
-  const s = {mode, seed, filt, deck, pos:0, maps, drafters, order, turn:0, deal:null, dealPicks:0, phase:"draft", result:null, opts:o, blind: !!G.blind && mode !== "autobot", timer: !!G.timer && mode !== "autobot", tkey: "", deadline: 0};
+  const s = {mode, seed, filt, deck, pos:0, maps, drafters, order, turn:0, deal:null, dealPicks:0, phase:"draft", result:null, opts:o, blind: (o.blind != null ? !!o.blind : !!G.blind) && mode !== "autobot", timer: (o.timer != null ? !!o.timer : !!G.timer) && mode !== "autobot", tkey: "", deadline: 0};
   nextDeal(s);
   return s;
 }
@@ -623,7 +645,7 @@ function autoDraft(rand, level = "Pro", filt){
 const CHAMPS = D.events.map(e => ({e, rows: (TE.get(e.id + "|" + e.winner) || []).slice(0, 5)})).filter(c => c.rows.length === 5);
 
 // ---------- multiplayer (live room + challenge code) ----------
-const NET = {lobby: undefined, room: null, code: "", round: 0, peers: [], sig: "", unsub: null};
+const NET = {lobby: undefined, room: null, code: "", round: 0, peers: [], sig: "", unsub: null, host: false, rules: null};
 (async () => {
   let r = null;
   try { if (window.claude && typeof window.claude.use === "function") r = await window.claude.use("room"); } catch(e){ r = null; }
@@ -676,14 +698,14 @@ function netStatusHTML(){
   return NET.lobby ? `<span class="chip ok">● Live rooms on</span>`
     : `<span class="chip">Live rooms off here</span> <span class="small muted">They work on the game's website or when the page is open in Claude. Challenge codes work anywhere.</span>`;
 }
-async function enterRoom(raw){
+async function enterRoom(raw, host = false){
   if (!NET.lobby){ toast("Live rooms aren't available in this view"); return; }
   const code = String(raw || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 8);
   if (code.length < 4){ toast("Room codes are 4 to 8 letters or numbers"); return; }
   let room;
   try { room = await NET.lobby.join("g13-" + code); } catch(e){ toast("Couldn't open that room. Try again."); return; }
   leaveRoom(room);
-  NET.room = room; NET.code = code; NET.round = 0; NET.sig = "";
+  NET.room = room; NET.code = code; NET.round = 0; NET.sig = ""; NET.host = host; NET.rules = host ? {blind: !!G.blind, timer: !!G.timer} : null;
   NET.unsub = room.onPeers(ch => { NET.peers = ch.peers; onNet(); }, () => toast("Lost the room connection"));
   startOnlineRound();
 }
@@ -691,14 +713,14 @@ function leaveRoom(keep){
   if (NET.room && NET.room !== keep){ try { NET.unsub && NET.unsub(); NET.room.leave().catch(() => {}); } catch(e){} NET.room = null; NET.unsub = null; }
 }
 function startOnlineRound(){
-  S = makeSession("online", {seed: hashStr(NET.code + ":" + NET.round), allEvents: true});
+  S = makeSession("online", {seed: hashStr(NET.code + ":" + NET.round), allEvents: true, ...(NET.rules || {})});
   PLAYUI = "session"; pushPresence(); showPlay();
 }
 function pushPresence(){
   if (!NET.room || !S || S.mode !== "online") return;
   const d = S.drafters[0];
   NET.room.presence({v: 1, nick: (G.nick || "Player").slice(0, 16), round: NET.round,
-    picks: SLOTS.map(sl => d.lineup[sl] ? d.lineup[sl].id : -1), done: S.phase !== "draft", gg: !!S.gg}).catch(() => {});
+    picks: SLOTS.map(sl => d.lineup[sl] ? d.lineup[sl].id : -1), done: S.phase !== "draft", gg: !!S.gg, host: NET.host, blind: !!S.blind, timer: !!S.timer}).catch(() => {});
 }
 const roomPeers = () => { try { return NET.room ? NET.room.peers() : []; } catch(e){ return []; } };
 const opponent = () => roomPeers().find(p => !p.sameTab && p.kind === "viewer" && p.presence && p.presence.v === 1) || null;
@@ -711,9 +733,18 @@ const oppName = p => String((p && p.presence && p.presence.nick) || "Friend").sl
 function onNet(){
   if (!S || S.mode !== "online") return;
   const o = opponent();
-  const sig = o ? JSON.stringify([o.peer, o.presence.nick, o.presence.round, o.presence.picks, o.presence.done, o.presence.gg]) : "none";
+  const sig = o ? JSON.stringify([o.peer, o.presence.nick, o.presence.round, o.presence.picks, o.presence.done, o.presence.gg, o.presence.host, o.presence.blind, o.presence.timer]) : "none";
   if (sig === NET.sig) return;
   NET.sig = sig;
+  if (o && !NET.host && o.presence.host === true){
+    const rules = {blind: o.presence.blind === true, timer: o.presence.timer === true};
+    const changed = !NET.rules || NET.rules.blind !== rules.blind || NET.rules.timer !== rules.timer;
+    NET.rules = rules;
+    if (changed && !S.result && (S.blind !== rules.blind || S.timer !== rules.timer)){
+      S.blind = rules.blind; S.timer = rules.timer; S.tkey = ""; pushPresence();
+      toast(`Room settings from ${oppName(o)}: blind draft ${rules.blind ? "on" : "off"}, timer ${rules.timer ? "on" : "off"}`);
+    }
+  }
   maybeOnlineResult();
   if (curView() === "play" && PLAYUI === "session") renderPlay();
 }
@@ -730,15 +761,15 @@ function maybeOnlineResult(){
   S.result = {type: "series", sr: meFirst ? sr : flipSeries(sr), nameA: S.drafters[0].name, nameB: oppName(o), oppRows: them};
 }
 function challengeCode(s){
-  return s.seed.toString(36).toUpperCase().padStart(7, "0") + "-" + SLOTS.map(sl => s.drafters[0].lineup[sl].id.toString(36).padStart(3, "0")).join("").toUpperCase();
+  return s.seed.toString(36).toUpperCase().padStart(7, "0") + "-" + SLOTS.map(sl => s.drafters[0].lineup[sl].id.toString(36).padStart(3, "0")).join("").toUpperCase() + (s.blind ? "-B" : "");
 }
 function parseChallenge(raw){
-  const m = String(raw || "").trim().toUpperCase().replace(/\s/g, "").match(/^([0-9A-Z]{7})-([0-9A-Z]{15})$/);
+  const m = String(raw || "").trim().toUpperCase().replace(/\s/g, "").match(/^([0-9A-Z]{7})-([0-9A-Z]{15})(-B)?$/);
   if (!m) return null;
   const seed = parseInt(m[1], 36); const ids = m[2].match(/.{3}/g).map(x => parseInt(x, 36));
   if (!(seed >= 0 && seed < 4294967296) || ids.some(i => !(i >= 0 && i < D.rows.length))) return null;
   if (new Set(ids.map(i => D.rows[i].key)).size !== 5) return null;
-  return {seed, ids};
+  return {seed, ids, blind: !!m[3]};
 }
 
 // ---------- mode catalogue ----------
@@ -748,7 +779,7 @@ const MODES = {
   gauntlet:  {title: "Champions gauntlet", tag: "Solo · 18 matches", desc: "Your five play every Masters and Champions winner since 2021, one map each. The Valorant 82–0: can you go 18–0?"},
   bot:       {title: "Versus bot", tag: "You vs bot · Bo3", desc: "You and a bot take turns picking from the same rosters, then play a best-of-three on maps shown up front."},
   local:     {title: "Pass & play", tag: "2 players · one device", desc: "Two people share one phone or laptop, take turns drafting, then play a best-of-three."},
-  online:    {title: "Online room", tag: "2 players · live", desc: "Make a room and send the code. You both draft the same spins at the same time, then your teams play a best-of-three."},
+  online:    {title: "Online room", tag: "2 players · live", desc: "Make a room and send the code. You both draft the same spins at the same time, then your teams play a best-of-three. The room uses its creator's blind draft and timer settings."},
   challenge: {title: "Challenge code", tag: "2 players · any time", desc: "Draft a team and get a code. Your friend drafts the same spins later and plays your hidden five."},
   battle:    {title: "Bot battle", tag: "Watch · Bo1 to Bo5", desc: "Pit any two real rosters, or two bot drafts, against each other. Sentinels 2021 vs LOUD 2026?"}
 };
@@ -814,6 +845,35 @@ function renderPlay(){
     }, 750);
   }
 }
+
+// Redraft tokens: win a match, earn one. Spend it on an extra skip or to release a drafted player.
+const TOK = store.get("thirteen-tokens", {});
+const TOK_MAX = 3;
+const tok = d => !d || d.bot ? 0 : Math.max(0, Math.min(TOK_MAX, TOK[d.name] | 0));
+function spendTok(d){ TOK[d.name] = Math.max(0, tok(d) - 1); store.set("thirteen-tokens", TOK); }
+function awardTok(name){
+  if (!name) return;
+  const before = TOK[name] | 0; if (before >= TOK_MAX){ toast(`${name} already holds ${TOK_MAX} redraft tokens`); return; }
+  TOK[name] = before + 1; store.set("thirteen-tokens", TOK);
+  setTimeout(() => toast(`+1 redraft token for ${name} (${TOK[name]}/${TOK_MAX})`), 1600);
+}
+function canRedraft(di){
+  if (!S || S.result) return false;
+  const d = S.drafters[di]; if (!d || d.bot || !tok(d)) return false;
+  if (S.phase === "draft") return S.drafters.length === 1 || curD(S) === d;
+  return S.phase === "ready" && S.mode !== "challenge" || (S.mode === "challenge" && S.opts.role === "taker");
+}
+function redraft(di, sl){
+  const d = S.drafters[di]; const r = d.lineup[sl]; if (!r || !canRedraft(di)) return;
+  delete d.lineup[sl]; spendTok(d);
+  if (S.phase === "draft"){ S.order.splice(S.turn, 0, di); if (!fitsIn(S, curD(S), S.deal)) nextDeal(S); }
+  else { S.order.push(di); S.phase = "draft"; nextDeal(S); }
+  S.tkey = "";
+  if (S.mode === "online") pushPresence();
+  toast(`${r.p} released. Pick a new ${sl === "Flex" ? "flex player" : sl}`);
+  renderPlay();
+}
+const tokChip = d => tok(d) ? `<span class="chip tokc" title="Redraft tokens: use for an extra skip or to release a drafted player">${tok(d)} token${tok(d) > 1 ? "s" : ""}</span>` : "";
 
 function autoPick(){
   if (!S || S.phase !== "draft" || !S.deal) return;
@@ -881,10 +941,12 @@ function celebrate(kind, label){
 function maybeCelebrate(){
   const R = S && S.result; if (!R || R.fx || R.type === "single") return;
   R.fx = 1; let kind, label, delay = 250;
-  if (R.type === "gauntlet"){ kind = R.w > R.l ? "win" : "loss"; label = R.l === 0 ? "Flawless" : null; delay = 1300; }
-  else if (R.type === "forfeit"){ kind = R.meWon === false ? "loss" : R.meWon === true ? "win" : "neutral"; if (kind === "neutral") label = `${R.winner} ${winsWord(R.winner)}`; }
+  let winner = null;
+  if (R.type === "gauntlet"){ kind = R.w > R.l ? "win" : "loss"; label = R.l === 0 ? "Flawless" : null; delay = 1300; if (kind === "win") winner = S.drafters[0].name; }
+  else if (R.type === "forfeit"){ kind = R.meWon === false ? "loss" : R.meWon === true ? "win" : "neutral"; if (kind === "neutral"){ label = `${R.winner} ${winsWord(R.winner)}`; winner = R.winner; } else if (kind === "win") winner = S.drafters[0].name; }
   else { const aw = R.sr.wa > R.sr.wb; delay = R.sr.games.length * 350 + 350;
-    if (S.mode === "local"){ kind = "neutral"; label = `${aw ? R.nameA : R.nameB} ${winsWord(aw ? R.nameA : R.nameB)}`; } else kind = aw ? "win" : "loss"; }
+    if (S.mode === "local"){ kind = "neutral"; winner = aw ? R.nameA : R.nameB; label = `${winner} ${winsWord(winner)}`; } else { kind = aw ? "win" : "loss"; if (aw) winner = S.drafters[0].name; } }
+  if (winner) awardTok(winner);
   setTimeout(() => celebrate(kind, label), delay);
 }
 function soundBtn(){
@@ -922,6 +984,8 @@ function hubHTML(){
       <div style="min-width:0;flex:1 1 260px"><div class="eyebrow">Pick timer</div><div class="small muted">${PICK_SECONDS} seconds per pick. If time runs out you get a random player who fits an open slot.</div></div>
       <div class="seg" role="group" aria-label="Pick timer"><button data-timer="0" aria-pressed="${!G.timer}">Off</button><button data-timer="1" aria-pressed="${G.timer}">${PICK_SECONDS}s</button></div>
     </div>
+
+    <div class="panel pad row tokbox" style="justify-content:space-between"><div style="min-width:0;flex:1 1 260px"><div class="eyebrow">Redraft tokens</div><div class="small muted">Win a match to earn one (hold up to ${TOK_MAX}). Spend it on an extra skip, or tap ↺ on a drafted player to release them and pick again.</div></div><div class="row">${(() => { const e = Object.entries(TOK).filter(([, n]) => n > 0); return e.length ? e.map(([n, c]) => `<span class="chip tokc">${esc(n)} · ${c}</span>`).join("") : `<span class="small muted">No tokens yet</span>`; })()}</div></div>
 
     <div class="mgroup"><h3 class="gh">Solo</h3><div class="modes">
       ${card("classic", `${G.best ? `<span class="small muted">Best <b class="num" style="color:var(--text)">${G.best.w}–${G.best.l}</b></span>` : "<span></span>"}<button class="btn go sm" data-start="classic">Play</button>`)}
@@ -990,9 +1054,9 @@ function endBySurrender(loser, winner, meWon = null){
 const winsWord = n => n === "You" ? "win" : "wins";
 function needRow(d, active){
   return `<div class="needrow ${active ? "turn" : ""}" style="--c:${SIDE_COL[d.side]}">
-    <div class="who">${active ? `<i class="dot"></i>` : ""}<span>${esc(d.name)}</span>${active ? `<em>${d.bot ? "picking" : "your pick"}</em>` : ""}</div>
-    ${SLOTS.map(sl => { const r = d.lineup[sl];
-      return r ? `<div class="ns full" title="${esc(r.p)} · ${sl}">${agentImg(r.ag[0], "s")}<span class="nm">${esc(r.p)}</span></div>`
+    <div class="who">${active ? `<i class="dot"></i>` : ""}<span>${esc(d.name)}</span>${active ? `<em>${d.bot ? "picking" : "your pick"}</em>` : ""}${tokChip(d)}</div>
+    ${SLOTS.map(sl => { const r = d.lineup[sl]; const di = S.drafters.indexOf(d);
+      return r ? `<div class="ns full" title="${esc(r.p)} · ${sl}">${agentImg(r.ag[0], "s")}<span class="nm">${esc(r.p)}</span>${canRedraft(di) ? `<button class="rd" data-rd="${di}|${sl}" aria-label="Redraft ${esc(r.p)} (uses a token)" title="Redraft (uses a token)">↺</button>` : ""}</div>`
                : `<div class="ns open" style="--rc:${slotCol(sl)}" title="Need a ${sl}">${roleGlyph(sl, 18)}<span class="l">${sl}</span><span class="sh">${SHORT[sl]}</span></div>`; }).join("")}
   </div>`;
 }
@@ -1037,7 +1101,7 @@ function dealHTML(){
     ${rest.length ? `<details class="nofit"><summary>${rest.length} can't be picked (${[...new Set(rest.map(r => taken.has(r.key) ? "already drafted" : "no open slot"))].join(", ")})</summary>${rest.map(r => prowHTML(r, null, false, taken.has(r.key) ? "Taken" : "No slot")).join("")}</details>` : ""}
     <div class="deal-foot">
       <span class="small muted">${d.bot ? "The bot is choosing from this roster." : fits.length ? "Tap a player to draft them." : ""}</span>
-      ${!d.bot ? `<button class="btn" id="skip" ${d.skips ? "" : "disabled"}>Skip team (${d.skips} left)</button>` : ""}
+      ${!d.bot ? `<button class="btn" id="skip" ${d.skips + tok(d) ? "" : "disabled"}>Skip team (${d.skips + tok(d)} left)</button>` : ""}
     </div>`;
 }
 function prowHTML(r, slot, clickable, why = ""){
@@ -1100,7 +1164,7 @@ function slotHTML(d, slot){
   const r = d.lineup[slot];
   if (!r) return `<div class="slot"><div class="empty-ic">${roleGlyph(slot)}</div><div class="slabel">${slot}</div><span></span></div>`;
   const ev = EV[r.e];
-  return `<div class="slot filled">${agentImg(r.ag[0], "l")}<div style="min-width:0"><div class="sname"><button class="pp" style="background:none;padding:0;font-size:15px" data-player="${esc(r.key)}">${esc(r.p)}</button></div><div class="small muted"><span class="tag">${esc(r.t)}</span> · ${esc(evShort(ev))} · ${slot === "Flex" ? "Flex " + r.role.toLowerCase() : slot}</div></div><div class="rating num ${hide() ? "qm" : ""}" style="font-size:22px">${hide() ? "?" : fmt(r.r)}</div></div>`;
+  return `<div class="slot filled">${agentImg(r.ag[0], "l")}<div style="min-width:0"><div class="sname"><button class="pp" style="background:none;padding:0;font-size:15px" data-player="${esc(r.key)}">${esc(r.p)}</button></div><div class="small muted"><span class="tag">${esc(r.t)}</span> · ${esc(evShort(ev))} · ${slot === "Flex" ? "Flex " + r.role.toLowerCase() : slot}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="rating num ${hide() ? "qm" : ""}" style="font-size:22px">${hide() ? "?" : fmt(r.r)}</div>${canRedraft(S.drafters.indexOf(d)) ? `<button class="btn tiny" data-rd="${S.drafters.indexOf(d)}|${slot}">Redraft</button>` : ""}</div></div>`;
 }
 function readyHTML(){
   if (S.result && S.result.type === "forfeit"){
@@ -1162,7 +1226,7 @@ function runResult(){
     S.result = {type: "series", sr, nameA: S.drafters[0].name, nameB: S.drafters[1].name};
   } else if (S.mode === "challenge"){
     const them = S.opts.ids.map(i => D.rows[i]);
-    const sr = simSeries(rng(hashStr(challengeCode({seed: S.seed, drafters: [{lineup: Object.fromEntries(SLOTS.map((sl, i) => [sl, them[i]]))}]}) + ":" + rows.map(r => r.id).join(","))), rows, them, 3, S.maps);
+    const sr = simSeries(rng(hashStr(challengeCode({seed: S.seed, blind: false, drafters: [{lineup: Object.fromEntries(SLOTS.map((sl, i) => [sl, them[i]]))}]}) + ":" + rows.map(r => r.id).join(","))), rows, them, 3, S.maps);
     S.result = {type: "series", sr, nameA: S.drafters[0].name, nameB: "Challenger"};
   }
   renderPlay();
@@ -1192,6 +1256,7 @@ function resultHTML(){
       <div class="verdict" id="verdict" style="min-height:1.1em"></div>
       <div class="timeline" id="tl" aria-label="Round by round">${R.seq.map((_, i) => `<i class="${i === 12 ? "half" : ""}"></i>`).join("")}</div>
       ${boxTable(R.box)}
+      ${mvpHTML([{...R.box[0], side: 0, label: R.w > R.l ? "Match MVP" : "Team MVP"}], R.seq.length * 0.09 + 0.2)}
       <div class="row" style="justify-content:center"><button class="btn" id="share">Copy result</button></div>
     </div></div>`;
   if (R.type === "gauntlet") return `<div class="panel pad" id="match">
@@ -1208,9 +1273,6 @@ function boxTable(box){
 }
 function seriesHTML(sr, nameA, nameB){
   const aw = sr.wa > sr.wb;
-  const all = sr.games.flatMap(g => g.boxA).concat(sr.games.flatMap(g => g.boxB));
-  const tot = {}; all.forEach(b => { const k = b.r.id; tot[k] = tot[k] || {r: b.r, acs: 0, n: 0}; tot[k].acs += b.acs; tot[k].n++; });
-  const mvp = Object.values(tot).sort((a, b) => b.acs / b.n - a.acs / a.n)[0];
   return `<div class="panel series" id="match">
     <div class="series-head">
       <div class="sside" style="--c:var(--teal)"><div class="sname2">${esc(nameA)}</div><div class="big num">${sr.wa}</div></div>
@@ -1225,9 +1287,35 @@ function seriesHTML(sr, nameA, nameB){
           <div class="mini">${g.seq.map(x => `<i class="${x ? "a" : "b"}"></i>`).join("")}</div>
           <div class="small muted">Map MVP ${esc(top.r.p)} · ${top.k}/${top.d}/${top.a}</div>
         </div></div>`; }).join("")}</div>
-    ${mvp ? `<div class="small" style="text-align:center">Series MVP <b>${esc(mvp.r.p)}</b> <span class="muted">(${Math.round(mvp.acs / mvp.n)} ACS)</span></div>` : ""}
+    ${seriesMvpHTML(sr, aw, sr.games.length * 0.35 + 0.3)}
     <div class="row" style="justify-content:center"><button class="btn" id="share">Copy result</button></div>
   </div>`;
+}
+function seriesTotals(sr, key){
+  const tot = {};
+  sr.games.forEach(g => g[key].forEach(b => { const t = tot[b.r.id] || (tot[b.r.id] = {r: b.r, k: 0, d: 0, a: 0, acs: 0, n: 0}); t.k += b.k; t.d += b.d; t.a += b.a; t.acs += b.acs; t.n++; }));
+  return Object.values(tot).map(t => ({...t, acs: Math.round(t.acs / t.n)})).sort((a, b) => b.acs - a.acs);
+}
+function seriesMvpHTML(sr, aw, delay){
+  const A = seriesTotals(sr, "boxA")[0], B = seriesTotals(sr, "boxB")[0];
+  if (!A || !B) return "";
+  const win = aw ? {...A, side: 0} : {...B, side: 1}, lose = aw ? {...B, side: 1} : {...A, side: 0};
+  return mvpHTML([{...win, label: "Match MVP"}, {...lose, label: "Team MVP"}], delay);
+}
+function mvpHTML(list, delay = 0){
+  return `<div class="mvpwrap" style="--d:${delay.toFixed(2)}s">${list.map((m, i) => { const ev = EV[m.r.e]; return `
+    <div class="mvpcard ${i ? "second" : "first"}" style="--c:${SIDE_COL[m.side]}">
+      <div class="mvpart">${agentImg(m.r.ag[0], "mvpimg")}<span class="mvpbadge">${esc(m.label)}</span></div>
+      <div class="mvpbody">
+        <div class="mvpname">${esc(m.r.p)}</div>
+        <div class="small muted"><span class="tag">${esc(m.r.t)}</span> · ${esc(ev.name)} ${ev.year} · ${esc(m.r.ag[0])}</div>
+        <div class="mvpstats">
+          <div><b class="num">${m.acs}</b><span>ACS</span></div>
+          <div><b class="num">${m.k}/${m.d}/${m.a}</b><span>K / D / A</span></div>
+          <div><b class="num">${fmt(m.r.r)}</b><span>Event rating</span></div>
+        </div>
+      </div>
+    </div>`; }).join("")}</div>`;
 }
 function updateMatch(){
   const m = S && S.result; if (!m || m.type !== "single" || !document.getElementById("tl")) return;
@@ -1235,7 +1323,7 @@ function updateMatch(){
   document.getElementById("sw").textContent = w; document.getElementById("sl").textContent = l;
   [...document.getElementById("tl").children].forEach((el, i) => { el.classList.toggle("w", i < m.shown && m.seq[i]); el.classList.toggle("l", i < m.shown && !m.seq[i]); });
   if (m.shown >= m.seq.length){ const [t, c] = verdict(m.w, m.l); const v = document.getElementById("verdict"); v.textContent = t; v.style.color = c;
-    if (!m.fx){ m.fx = 1; celebrate(m.w > m.l ? "win" : "loss", m.w === 13 && m.l === 0 ? "Flawless" : null); } }
+    if (!m.fx){ m.fx = 1; celebrate(m.w > m.l ? "win" : "loss", m.w === 13 && m.l === 0 ? "Flawless" : null); if (m.w > m.l) awardTok(S.drafters[0].name); } }
 }
 function shareText(){
   const R = S ? S.result : null; const line = r => `${r.p} (${r.t}, ${EV[r.e].name} ${EV[r.e].year})`;
@@ -1311,17 +1399,18 @@ function bindPlay(){
   on("[data-level]", e => { G.level = e.currentTarget.dataset.level; store.set("thirteen-level", G.level); document.querySelectorAll("[data-level]").forEach(b => b.setAttribute("aria-pressed", b.dataset.level === G.level)); });
   ["fy", "ft", "fr"].forEach((id, i) => { const el = document.getElementById(id); if (el) el.addEventListener("change", ev => { G.filt[["year", "type", "region"][i]] = ev.target.value; store.set("thirteen-filt", G.filt); }); });
   [["p1", "p1"], ["p2", "p2"], ["nick", "nick"]].forEach(([id, k]) => { const el = document.getElementById(id); if (el) el.addEventListener("input", () => { G[k] = el.value.trim().slice(0, 16); store.set("thirteen-" + k, G[k]); }); });
-  on("#mkroom", () => { if (!G.nick){ document.getElementById("nick").focus(); toast("Add your name first"); return; } enterRoom(Math.random().toString(36).replace(/[^a-z0-9]/g, "").slice(2, 7)); });
+  on("#mkroom", () => { if (!G.nick){ document.getElementById("nick").focus(); toast("Add your name first"); return; } enterRoom(Math.random().toString(36).replace(/[^a-z0-9]/g, "").slice(2, 7), true); });
   on("#joinroom", () => { if (!G.nick){ document.getElementById("nick").focus(); toast("Add your name first"); return; } enterRoom(document.getElementById("jcode").value); });
   on("#jcode", e => { if (e.key === "Enter") document.getElementById("joinroom").click(); }, "keydown");
-  on("#takech", () => { const c = parseChallenge(document.getElementById("ccode").value); if (!c){ toast("That code doesn't look right. It's 7 characters, a dash, then 15."); return; } startMode("challenge", {seed: c.seed, ids: c.ids, role: "taker", allEvents: true}); });
+  on("#takech", () => { const c = parseChallenge(document.getElementById("ccode").value); if (!c){ toast("That code doesn't look right. Copy the whole code your friend sent."); return; } startMode("challenge", {seed: c.seed, ids: c.ids, role: "taker", allEvents: true, blind: c.blind}); if (c.blind) toast("Your friend drafted blind, so you will too"); });
   on("#ccode", e => { if (e.key === "Enter") document.getElementById("takech").click(); }, "keydown");
   // session
   on("#tohub", () => { PLAYUI = "hub"; clearInterval(simTimer); showPlay(); });
   on("#newdraft", () => startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : {}));
   on("#copyroom", () => copyText(NET.code, "Room code copied"));
   on("[data-pick]", e => { const r = D.rows[+e.currentTarget.dataset.pick]; if (!S || curD(S).bot) return; if (doPick(S, r)){ if (S.mode === "online"){ pushPresence(); maybeOnlineResult(); } renderPlay(); } });
-  on("#skip", () => { const d = curD(S); if (!d.skips) return; d.skips--; nextDeal(S); renderPlay(); });
+  on("#skip", () => { const d = curD(S); if (d.skips) d.skips--; else if (tok(d)) spendTok(d); else return; nextDeal(S); renderPlay(); });
+  on("[data-rd]", e => { e.stopPropagation(); const [di, sl] = e.currentTarget.dataset.rd.split("|"); redraft(+di, sl); });
   on("#playgo", runResult);
   on("#newdraft2", () => startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : {}));
   on("#ggask", () => { S.askGG = true; renderPlay(); });
