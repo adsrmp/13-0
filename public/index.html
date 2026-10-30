@@ -232,6 +232,13 @@ footer a{color:var(--mute)}
 .dealfrom>div:first-child{flex:1 1 260px}
 .resume{border-color:var(--gold)}
 .chip.ok{border-color:var(--teal);color:var(--teal)}
+.pick-timer{display:grid;grid-template-columns:auto auto;align-items:baseline;column-gap:4px;row-gap:4px;min-width:84px;color:var(--teal)}
+.pick-timer .num{font-family:var(--f-display);font-weight:900;font-size:34px;line-height:.9}
+.pick-timer .eyebrow{color:inherit}
+.ptrack{grid-column:1/-1;height:4px;border-radius:2px;background:var(--panel2);overflow:hidden}
+.ptrack i{display:block;height:100%;width:100%;background:currentColor;transition:width .2s linear}
+.pick-timer.low{color:var(--red)}
+.pick-timer.low .num{animation:pulse .8s ease-in-out infinite}
 .chip.blindc{border-color:var(--controller);color:var(--controller)}
 .rating.qm{color:var(--dim)}
 .blindbox{border-color:color-mix(in srgb,var(--controller) 45%,var(--line))}
@@ -520,9 +527,10 @@ const G = {
   filt: store.get("thirteen-filt", {year:"", type:"", region:""}),
   best: store.get("thirteen-best", null), gbest: store.get("thirteen-gbest", null),
   level: store.get("thirteen-level", "Pro"), nick: store.get("thirteen-nick", ""),
-  p1: store.get("thirteen-p1", ""), p2: store.get("thirteen-p2", ""), blind: !!store.get("thirteen-blind", false)
+  p1: store.get("thirteen-p1", ""), p2: store.get("thirteen-p2", ""), blind: !!store.get("thirteen-blind", false), timer: store.get("thirteen-timer", true) !== false
 };
-let S = null, BT = null, PLAYUI = "hub", botTimer = null, simTimer = null;
+let S = null, BT = null, PLAYUI = "hub", botTimer = null, simTimer = null, pickTick = null;
+const PICK_SECONDS = 30;
 
 function eligibleKeys(filt){
   const out = [];
@@ -552,7 +560,7 @@ function makeSession(mode, o = {}){
   else if (mode === "local"){ drafters = [mk(G.p1 || "Player 1", 0, null), mk(G.p2 || "Player 2", 1, null)]; order = [0,1,1,0,0,1,1,0,0,1]; }
   else if (mode === "autobot") drafters = [mk("Bot", 0, o.level || "Pro")];
   else drafters = [mk(me, 0, null)];
-  const s = {mode, seed, filt, deck, pos:0, maps, drafters, order, turn:0, deal:null, dealPicks:0, phase:"draft", result:null, opts:o, blind: !!G.blind && mode !== "autobot"};
+  const s = {mode, seed, filt, deck, pos:0, maps, drafters, order, turn:0, deal:null, dealPicks:0, phase:"draft", result:null, opts:o, blind: !!G.blind && mode !== "autobot", timer: !!G.timer && mode !== "autobot", tkey: "", deadline: 0};
   nextDeal(s);
   return s;
 }
@@ -758,13 +766,30 @@ function showPlay(){ if (curView() !== "play") location.hash = "play"; else rend
 
 // =====================================================================
 function renderPlay(){
-  clearTimeout(botTimer);
+  clearTimeout(botTimer); clearInterval(pickTick);
+  if (S && S.timer && S.phase === "draft" && S.deal && !curD(S).bot){
+    const key = S.turn + "|" + S.deal;
+    if (S.tkey !== key){ S.tkey = key; S.deadline = Date.now() + PICK_SECONDS * 1000; }
+  }
   if (PLAYUI === "battle" && BT) app.innerHTML = battleHTML();
   else if (PLAYUI === "session" && S) app.innerHTML = sessionHTML();
   else { PLAYUI = "hub"; app.innerHTML = hubHTML(); }
   bindPlay();
   bindTeamLinks();
   if (PLAYUI === "session" && S && S.result && S.result.type === "single") updateMatch();
+  if (PLAYUI === "session" && S && S.timer && S.phase === "draft" && S.deal && !curD(S).bot){
+    const tick = () => {
+      if (!S || PLAYUI !== "session" || curView() !== "play"){ clearInterval(pickTick); return; }
+      const left = Math.max(0, S.deadline - Date.now());
+      const sec = Math.ceil(left / 1000);
+      const el = document.getElementById("ptsec"), bar = document.getElementById("ptbar"), box = document.getElementById("ptimer");
+      if (el) el.textContent = sec;
+      if (bar) bar.style.width = (left / (PICK_SECONDS * 10)).toFixed(1) + "%";
+      if (box) box.classList.toggle("low", sec <= 10);
+      if (left <= 0){ clearInterval(pickTick); autoPick(); }
+    };
+    tick(); pickTick = setInterval(tick, 200);
+  }
   if (PLAYUI === "session" && S && S.phase === "draft" && S.deal && curD(S).bot){
     botTimer = setTimeout(() => {
       if (!S || S.phase !== "draft" || !curD(S).bot) return;
@@ -773,6 +798,19 @@ function renderPlay(){
     }, 750);
   }
 }
+
+function autoPick(){
+  if (!S || S.phase !== "draft" || !S.deal) return;
+  const d = curD(S); if (d.bot) return;
+  const c = TE.get(S.deal).filter(r => slotFor(S, d, r));
+  if (!c.length){ nextDeal(S); renderPlay(); return; }
+  const r = c[Math.floor(Math.random() * c.length)];
+  doPick(S, r);
+  toast(`Time's up. ${S.drafters.length > 1 ? d.name + " got" : "You got"} ${r.p} (${slotOf(d, r)})`);
+  if (S.mode === "online"){ pushPresence(); maybeOnlineResult(); }
+  renderPlay();
+}
+const slotOf = (d, r) => SLOTS.find(sl => d.lineup[sl] === r) || r.role;
 
 // ---------- hub ----------
 function hubHTML(){
@@ -796,6 +834,10 @@ function hubHTML(){
     <div class="panel pad row blindbox" style="justify-content:space-between">
       <div style="min-width:0;flex:1 1 260px"><div class="eyebrow">Blind draft</div><div class="small muted">Hide ratings, ACS, K/D and win chances while drafting, so you pick from memory. Everything is revealed after the match. Works in every draft mode.</div></div>
       <div class="seg" role="group" aria-label="Blind draft"><button data-blind="0" aria-pressed="${!G.blind}">Off</button><button data-blind="1" aria-pressed="${G.blind}">On</button></div>
+    </div>
+    <div class="panel pad row" style="justify-content:space-between">
+      <div style="min-width:0;flex:1 1 260px"><div class="eyebrow">Pick timer</div><div class="small muted">${PICK_SECONDS} seconds per pick. If time runs out you get a random player who fits an open slot.</div></div>
+      <div class="seg" role="group" aria-label="Pick timer"><button data-timer="0" aria-pressed="${!G.timer}">Off</button><button data-timer="1" aria-pressed="${G.timer}">${PICK_SECONDS}s</button></div>
     </div>
 
     <div class="mgroup"><h3 class="gh">Solo</h3><div class="modes">
@@ -888,6 +930,7 @@ function dealHTML(){
         <div class="deal-team">${esc(teName(t))}</div>
         <div class="deal-ev">${esc(ev.name)} ${ev.year} ${isWin(e, t) ? `<span class="chip win">★ Event winner</span>` : ""} ${ev.id === "sha24" ? `<span class="chip est">ratings est.</span>` : ""}</div>
       </div>
+      ${S.timer && !d.bot ? `<div class="pick-timer" id="ptimer" role="timer" aria-label="Seconds left to pick"><span class="num" id="ptsec">${PICK_SECONDS}</span><span class="eyebrow">sec</span><div class="ptrack"><i id="ptbar"></i></div></div>` : ""}
       <div class="needline"><span class="eyebrow">Needs</span>${need.map(sl => `<span class="chip needc" style="--rc:${slotCol(sl)}">${sl}</span>`).join("")}</div>
     </div>
     <div class="plist">${fits.map(r => prowHTML(r, slotFor(S, d, r), !d.bot)).join("") || `<div class="pad muted small">Nobody here fits.</div>`}</div>
@@ -1151,6 +1194,7 @@ function bindPlay(){
   const on = (sel, fn, ev = "click") => document.querySelectorAll(sel).forEach(el => el.addEventListener(ev, fn));
   on("[data-start]", e => startMode(e.currentTarget.dataset.start, e.currentTarget.dataset.start === "challenge" ? {role: "maker", allEvents: true} : {}));
   on("[data-blind]", e => { G.blind = e.currentTarget.dataset.blind === "1"; store.set("thirteen-blind", G.blind); document.querySelectorAll("[data-blind]").forEach(b => b.setAttribute("aria-pressed", (b.dataset.blind === "1") === G.blind)); });
+  on("[data-timer]", e => { G.timer = e.currentTarget.dataset.timer === "1"; store.set("thirteen-timer", G.timer); document.querySelectorAll("[data-timer]").forEach(b => b.setAttribute("aria-pressed", (b.dataset.timer === "1") === G.timer)); });
   on("[data-resume]", () => { PLAYUI = "session"; renderPlay(); });
   on("[data-battle]", openBattle);
   on("[data-level]", e => { G.level = e.currentTarget.dataset.level; store.set("thirteen-level", G.level); document.querySelectorAll("[data-level]").forEach(b => b.setAttribute("aria-pressed", b.dataset.level === G.level)); });
