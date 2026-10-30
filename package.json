@@ -1,0 +1,13 @@
+{
+  "name": "thirteen-0",
+  "version": "1.0.0",
+  "private": true,
+  "description": "13–0: an unofficial VCT draft game (fan project)",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.40.0"
+  }
+}
