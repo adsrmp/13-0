@@ -315,6 +315,14 @@ footer a{color:var(--mute)}
 .qlog{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;width:100%;text-align:left}
 .qlog div{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;padding:6px 10px;border-radius:5px;background:var(--panel2);font-size:13px;align-items:center}
 .qlog div span{color:var(--mute)}.qlog div.ok b{color:var(--teal)}.qlog div.no b{color:var(--red)}
+.catbar{display:flex;gap:10px;align-items:baseline;padding:10px 16px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--orange) 12%,transparent);border-radius:8px 8px 0 0}
+.catbar b{font-family:var(--f-display);font-weight:900;font-size:20px;text-transform:uppercase;color:var(--orange)}
+.catinfo b{font-family:var(--f-display);font-weight:900;font-size:24px;text-transform:uppercase;color:var(--orange)}
+.tboxes summary{cursor:pointer;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);font-weight:600;padding:4px 0}
+.tbgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:8px}
+@media (max-width:760px){.tbgrid{grid-template-columns:1fr}}
+.tbox{background:var(--panel2);border-radius:6px;padding:10px;min-width:0}
+.tbox table{font-size:13px}.tbox td,.tbox th{padding:6px 8px}
 .chip.blindc{border-color:var(--controller);color:var(--controller)}
 .rating.qm{color:var(--dim)}
 .blindbox{border-color:color-mix(in srgb,var(--controller) 45%,var(--line))}
@@ -625,7 +633,8 @@ function eligibleKeys(filt){
 function makeSession(mode, o = {}){
   const seed = o.seed != null ? o.seed >>> 0 : randSeed();
   const filt = o.allEvents ? {year:"", type:"", region:""} : {...G.filt};
-  let keys = eligibleKeys(filt); if (!keys.length) keys = eligibleKeys({year:"", type:"", region:""});
+  const cat = mode === "cat" ? (o.cat || CATS[Math.floor(Math.random() * CATS.length)]) : null;
+  let keys = cat ? cat.deck() : eligibleKeys(filt); if (!keys.length) keys = eligibleKeys({year:"", type:"", region:""});
   const deck = shuffle(keys, rng(seed));
   const mr = rng(seed ^ 0x5bd1e995);
   let maps = null;
@@ -639,7 +648,7 @@ function makeSession(mode, o = {}){
   else if (mode === "online"){ drafters = [mk(o.names[0], 0, null), mk(o.names[1], 1, null)]; order = [0,1,1,0,0,1,1,0,0,1]; }
   else if (mode === "autobot") drafters = [mk("Bot", 0, o.level || "Pro")];
   else drafters = [mk(me, 0, null)];
-  const s = {mode, seed, filt, deck, pos:0, maps, drafters, order, turn:0, deal:null, dealPicks:0, phase:"draft", result:null, opts:o, blind: (o.blind != null ? !!o.blind : !!G.blind) && mode !== "autobot", timer: (o.timer != null ? !!o.timer : !!G.timer) && mode !== "autobot", tkey: "", deadline: 0};
+  const s = {mode, seed, filt, deck, pos:0, maps, drafters, order, turn:0, deal:null, dealPicks:0, phase:"draft", result:null, opts:o, cat, anySlot: !!(cat && cat.anySlot), blind: (o.blind != null ? !!o.blind : !!G.blind) && mode !== "autobot", timer: (o.timer != null ? !!o.timer : !!G.timer) && mode !== "autobot", tkey: "", deadline: 0};
   nextDeal(s);
   return s;
 }
@@ -650,11 +659,13 @@ const lineupRows = d => SLOTS.map(sl => d.lineup[sl]).filter(Boolean);
 function takenKeys(s){ const t = new Set(); s.drafters.forEach(d => Object.values(d.lineup).forEach(r => t.add(r.key))); return t; }
 function slotFor(s, d, r){
   if (takenKeys(s).has(r.key)) return null;
+  if (s.cat && !s.cat.ok(r)) return null;
+  if (s.anySlot) return SLOTS.find(sl => !d.lineup[sl]) || null;
   if (!d.lineup[r.role]) return r.role;
   if (!d.lineup.Flex) return "Flex";
   return null;
 }
-const fitsIn = (s, d, k) => !!k && TE.get(k).some(r => slotFor(s, d, r));
+const fitsIn = (s, d, k) => !!k && rosterOf(k).some(r => slotFor(s, d, r));
 function nextDeal(s){
   const d = curD(s);
   for (let i = 0; i < s.deck.length; i++){
@@ -672,7 +683,7 @@ function doPick(s, r){
   return true;
 }
 function botChoice(s, rand = Math.random){
-  const d = curD(s); const c = s.deal ? TE.get(s.deal).filter(r => slotFor(s, d, r)) : [];
+  const d = curD(s); const c = s.deal ? rosterOf(s.deal).filter(r => slotFor(s, d, r)) : [];
   if (!c.length) return null;
   const noise = {Rookie: 0.45, Pro: 0.07, Radiant: 0}[d.bot] ?? 0.07;
   let best = null, bs = -1e9;
@@ -687,6 +698,52 @@ function autoDraft(rand, level = "Pro", filt){
   }
   return lineupRows(s.drafters[0]);
 }
+// ---------- all-time franchise rosters (every international, 2021–2026) ----------
+EV.all = {id: "all", name: "All-time", year: "", type: "All-time", city: "", i: -1, winner: null};
+const ATR = [], ATE = new Map(), ATEREG = {};
+(() => {
+  const byTeam = new Map();
+  D.rows.forEach(r => { if (!byTeam.has(r.t)) byTeam.set(r.t, new Map()); const m = byTeam.get(r.t); if (!m.has(r.key)) m.set(r.key, []); m.get(r.key).push(r); });
+  byTeam.forEach((players, t) => {
+    const roster = []; let latest = null;
+    players.forEach(rows => {
+      rows.sort((a, b) => EV[a.e].i - EV[b.e].i);
+      const rnd = rows.reduce((x, r) => x + r.rnd, 0);
+      const w = k => { const v = rows.filter(r => r[k] != null); const n = v.reduce((x, r) => x + r.rnd, 0); return n ? v.reduce((x, r) => x + r[k] * r.rnd, 0) / n : null; };
+      const ac = {}; rows.forEach(r => r.ag.forEach((a, i) => ac[a] = (ac[a] || 0) + (3 - i) * r.rnd));
+      const rc = {}; rows.forEach(r => rc[r.role] = (rc[r.role] || 0) + r.rnd);
+      const last = rows[rows.length - 1]; if (!latest || EV[last.e].i > EV[latest.e].i) latest = last;
+      const y0 = EV[rows[0].e].year, y1 = EV[last.e].year;
+      const o = {id: 100000 + ATR.length, p: last.p, key: last.key, t, e: "all", reg: last.reg, rnd,
+        r: Math.round(w("r") * 100) / 100, acs: w("acs"), kd: w("kd"), kast: w("kast") != null ? Math.round(w("kast")) : null, adr: w("adr"),
+        kpr: w("kpr"), apr: w("apr"), fk: w("fk"), fd: w("fd"), hs: w("hs"),
+        ag: Object.entries(ac).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]),
+        role: Object.entries(rc).sort((a, b) => b[1] - a[1])[0][0],
+        span: y0 === y1 ? String(y0) : `${y0}–${String(y1).slice(2)}`, nEv: rows.length, titles: rows.filter(r => isWin(r.e, r.t)).length, at: true};
+      o.adj = (o.r * o.rnd + 100) / (o.rnd + 100);
+      ATR.push(o); roster.push(o);
+    });
+    roster.sort((a, b) => b.rnd - a.rnd);
+    ATE.set("all|" + t, roster); ATEREG[t] = latest.reg;
+  });
+})();
+const rosterOf = k => k && k.startsWith("all|") ? ATE.get(k) : TE.get(k);
+const getRow = id => id >= 100000 ? ATR[id - 100000] : D.rows[id];
+const career = key => PLAYERS.get(key);
+const roleCat = role => ({id: role.toLowerCase(), title: role + "s only", desc: `Five ${role.toLowerCase()}s. Every slot takes a ${role.toLowerCase()}.`, anySlot: true, min: 1, ok: r => r.role === role});
+const regCat = (reg, title) => ({id: reg.toLowerCase(), title, desc: `Only teams from ${reg}.`, team: t => ATEREG[t] === reg, ok: r => ATEREG[r.t] === reg});
+const CATS = [
+  roleCat("Duelist"), roleCat("Initiator"), roleCat("Controller"), roleCat("Sentinel"),
+  regCat("Americas", "Americas only"), regCat("EMEA", "EMEA only"), regCat("Pacific", "Pacific only"), regCat("China", "China only"),
+  {id: "champs", title: "Trophy holders", desc: "Only players who won a Masters or Champions.", ok: r => career(r.key).titles > 0},
+  {id: "underdogs", title: "Underdogs", desc: "Only players who never won an international.", ok: r => career(r.key).titles === 0},
+  {id: "rookies", title: "New blood", desc: "Only players whose first international was in 2024 or later.", ok: r => career(r.key).first >= 2024},
+  {id: "og", title: "Class of 2021", desc: "Only players who played an international in 2021.", ok: r => career(r.key).first === 2021},
+  {id: "vets", title: "Veterans", desc: "Only players with 6 or more international events.", ok: r => career(r.key).rows.length >= 6},
+  {id: "onedone", title: "One and done", desc: "Only players who played exactly one international.", ok: r => career(r.key).rows.length === 1}
+].map(c => ({...c, deck(){ return [...ATE.keys()].filter(k => { const t = k.slice(4); if (c.team && !c.team(t)) return false; return ATE.get(k).filter(c.ok).length >= (c.min || 2); }).sort(); }}));
+const CBEST = store.get("thirteen-cbest", null);
+
 const CHAMPS = D.events.map(e => ({e, rows: (TE.get(e.id + "|" + e.winner) || []).slice(0, 5)})).filter(c => c.rows.length === 5);
 
 // ---------- multiplayer (live room + challenge code) ----------
@@ -843,6 +900,7 @@ function parseChallenge(raw){
 const MODES = {
   classic:   {title: "Classic 13–0", tag: "Solo · 1 map", desc: "Draft five from real international rosters, then play one map against an average pro side. Chase the flawless 13–0."},
   map:       {title: "Map draft", tag: "Solo · map known", desc: "The map is revealed before you draft. Players whose agents suit that map get a boost, so draft for the map."},
+  cat:       {title: "All-time category", tag: "Solo · 18-match season", desc: "A random category, like Duelists only or Americas only. Every spin deals a team's all-time international roster, then your five play every Masters and Champions winner."},
   gauntlet:  {title: "Champions gauntlet", tag: "Solo · 18 matches", desc: "Your five play every Masters and Champions winner since 2021, one map each. The Valorant 82–0: can you go 18–0?"},
   bot:       {title: "Versus bot", tag: "You vs bot · Bo3", desc: "You and a bot take turns picking from the same rosters, then play a best-of-three on maps shown up front."},
   local:     {title: "Pass & play", tag: "2 players · one device", desc: "Two people share one phone or laptop, take turns drafting, then play a best-of-three."},
@@ -949,7 +1007,7 @@ const tokChip = d => tok(d) ? `<span class="chip tokc" title="Redraft tokens: us
 function autoPick(){
   if (!S || S.phase !== "draft" || !S.deal) return;
   const d = curD(S); if (!canAct(d)) return;
-  const c = TE.get(S.deal).filter(r => slotFor(S, d, r));
+  const c = rosterOf(S.deal).filter(r => slotFor(S, d, r));
   if (S.mode === "online"){ if (c.length){ const r = c[Math.floor(Math.random() * c.length)]; toast(`Time's up. You got ${r.p}`); onlineAct("p" + r.id); } else onlineAct("s"); return; }
   if (!c.length){ nextDeal(S); renderPlay(); return; }
   const r = c[Math.floor(Math.random() * c.length)];
@@ -1356,6 +1414,7 @@ function hubHTML(){
     <div class="mgroup"><h3 class="gh">Solo</h3><div class="modes">
       ${card("classic", `${G.best ? `<span class="small muted">Best <b class="num" style="color:var(--text)">${G.best.w}–${G.best.l}</b></span>` : "<span></span>"}<button class="btn go sm" data-start="classic">Play</button>`)}
       ${card("map", `<span></span><button class="btn go sm" data-start="map">Play</button>`)}
+      ${card("cat", `${CBEST ? `<span class="small muted">Best <b class="num" style="color:var(--text)">${CBEST.w}–${CBEST.l}</b></span>` : "<span></span>"}<button class="btn go sm" data-start="cat">Spin a category</button>`)}
       ${card("gauntlet", `${G.gbest ? `<span class="small muted">Best <b class="num" style="color:var(--text)">${G.gbest.w}–${G.gbest.l}</b></span>` : "<span></span>"}<button class="btn go sm" data-start="gauntlet">Play</button>`)}
     </div></div>
 
@@ -1379,8 +1438,8 @@ function hubHTML(){
   </section>`;
 }
 function modeGlyph(id){
-  const c = {classic:"var(--red)", map:"var(--initiator)", gauntlet:"var(--gold)", bot:"var(--controller)", local:"var(--duelist)", online:"var(--teal)", challenge:"var(--orange)", battle:"var(--sentinel)"}[id];
-  const t = {classic:"13", map:"M", gauntlet:"18", bot:"B", local:"2P", online:"ON", challenge:"CH", battle:"VS"}[id];
+  const c = {cat:"var(--orange)", classic:"var(--red)", map:"var(--initiator)", gauntlet:"var(--gold)", bot:"var(--controller)", local:"var(--duelist)", online:"var(--teal)", challenge:"var(--orange)", battle:"var(--sentinel)"}[id];
+  const t = {cat:"AT", classic:"13", map:"M", gauntlet:"18", bot:"B", local:"2P", online:"ON", challenge:"CH", battle:"VS"}[id];
   return `<span style="background:${c}">${t}</span>`;
 }
 
@@ -1427,6 +1486,7 @@ function needRow(d, active){
     <div class="who">${active ? `<i class="dot"></i>` : ""}<span>${esc(d.name)}</span>${active ? `<em>${canAct(d) ? "your pick" : "picking"}</em>` : ""}${tokChip(d)}</div>
     ${SLOTS.map(sl => { const r = d.lineup[sl]; const di = S.drafters.indexOf(d);
       return r ? `<div class="ns full" title="${esc(r.p)} · ${sl}">${agentImg(r.ag[0], "s")}<span class="nm">${esc(r.p)}</span>${canRedraft(di) ? `<button class="rd" data-rd="${di}|${sl}" aria-label="Redraft ${esc(r.p)} (uses a token)" title="Redraft (uses a token)">↺</button>` : ""}</div>`
+               : S.anySlot ? `<div class="ns open" style="--rc:var(--mute)" title="Open slot">${roleGlyph("Flex", 18)}<span class="l">Open</span><span class="sh">OPEN</span></div>`
                : `<div class="ns open" style="--rc:${slotCol(sl)}" title="Need a ${sl}">${roleGlyph(sl, 18)}<span class="l">${sl}</span><span class="sh">${SHORT[sl]}</span></div>`; }).join("")}
   </div>`;
 }
@@ -1441,7 +1501,7 @@ function needbarHTML(){
 }
 function dealHTML(){
   if (!S.deal) return `<div class="pad"><h3>No rosters left to deal</h3><p class="muted">Go back to Modes and widen the era, event or region.</p></div>`;
-  const d = curD(S); const [e, t] = S.deal.split("|"); const ev = EV[e]; const rows = TE.get(S.deal);
+  const d = curD(S); const [e, t] = S.deal.split("|"); const ev = EV[e]; const rows = rosterOf(S.deal);
   const val = r => r.adj + fitBonus(mapFit(r, S.maps));
   const fits = rows.filter(r => slotFor(S, d, r)).sort((a, b) => hide() ? (SLOTS.indexOf(slotFor(S, d, a)) - SLOTS.indexOf(slotFor(S, d, b)) || a.p.localeCompare(b.p)) : val(b) - val(a));
   const rest = rows.filter(r => !slotFor(S, d, r));
@@ -1449,18 +1509,19 @@ function dealHTML(){
   const multi = S.drafters.length > 1;
   const taken = takenKeys(S);
   return `
+    ${S.cat ? `<div class="catbar"><span class="eyebrow">Category</span><b>${esc(S.cat.title)}</b></div>` : ""}
     ${multi ? `<div class="turnbar" style="--c:${SIDE_COL[d.side]}"><b>${esc(d.name)}</b> ${canAct(d) ? "to pick" : "is picking…"}${S.dealPicks === 1 ? `<span class="small"> · second pick from this roster</span>` : ""}</div>` : ""}
     <div class="deal-head">
       <div style="min-width:0">
-        <div class="eyebrow">${ev.type} · ${ev.year} · ${esc(rows[0].reg)}</div>
+        <div class="eyebrow">${e === "all" ? `All-time roster · ${esc(ATEREG[t] || "")}` : `${ev.type} · ${ev.year} · ${esc(rows[0].reg)}`}</div>
         <div class="deal-team">${esc(teName(t))}</div>
-        <div class="deal-ev">${esc(ev.name)} ${ev.year} ${isWin(e, t) ? `<span class="chip win">★ Event winner</span>` : ""} ${ev.id === "sha24" ? `<span class="chip est">ratings est.</span>` : ""}</div>
+        <div class="deal-ev">${e === "all" ? `Everyone who played for them at a VCT international` : `${esc(ev.name)} ${ev.year}`} ${isWin(e, t) ? `<span class="chip win">★ Event winner</span>` : ""} ${ev.id === "sha24" ? `<span class="chip est">ratings est.</span>` : ""}</div>
       </div>
       ${S.timer && !d.bot ? `<div class="pick-timer" id="ptimer" role="timer" aria-label="Seconds left to pick"><span class="num" id="ptsec">${PICK_SECONDS}</span><span class="eyebrow">sec</span><div class="ptrack"><i id="ptbar"></i></div></div>` : ""}
-      <div class="needline"><span class="eyebrow">Needs</span>${need.map(sl => `<span class="chip needc" style="--rc:${slotCol(sl)}">${sl}</span>`).join("")}</div>
+      <div class="needline"><span class="eyebrow">Needs</span>${S.anySlot ? `<span class="chip needc" style="--rc:var(--text)">${need.length} more</span>` : need.map(sl => `<span class="chip needc" style="--rc:${slotCol(sl)}">${sl}</span>`).join("")}</div>
     </div>
     <div class="plist">${fits.map(r => prowHTML(r, slotFor(S, d, r), canAct(d))).join("") || `<div class="pad muted small">Nobody here fits.</div>`}</div>
-    ${rest.length ? `<details class="nofit"><summary>${rest.length} can't be picked (${[...new Set(rest.map(r => taken.has(r.key) ? "already drafted" : "no open slot"))].join(", ")})</summary>${rest.map(r => prowHTML(r, null, false, taken.has(r.key) ? "Taken" : "No slot")).join("")}</details>` : ""}
+    ${rest.length ? `<details class="nofit"><summary>${rest.length} can't be picked (${[...new Set(rest.map(r => taken.has(r.key) ? "already drafted" : S.cat && !S.cat.ok(r) ? "not in this category" : "no open slot"))].join(", ")})</summary>${rest.map(r => prowHTML(r, null, false, taken.has(r.key) ? "Taken" : S.cat && !S.cat.ok(r) ? "Not eligible" : "No slot")).join("")}</details>` : ""}
     <div class="deal-foot">
       <span class="small muted">${d.bot ? "The bot is choosing from this roster." : !canAct(d) ? `Waiting for ${esc(d.name)} to pick.` : fits.length ? "Tap a player to draft them." : ""}</span>
       ${canAct(d) ? `<button class="btn" id="skip" ${d.skips + tok(d) ? "" : "disabled"}>Skip team (${d.skips + tok(d)} left)</button>` : ""}
@@ -1471,9 +1532,9 @@ function prowHTML(r, slot, clickable, why = ""){
     ${agentImg(r.ag[0], "l")}
     <div style="min-width:0">
       <div class="pname">${esc(r.p)} ${roleChip(r.role)} ${hide() ? "" : fitChip(mapFit(r, S.maps))}</div>
-      <div class="pstats">${hide() ? `<span>Played</span>` : `<span>ACS <b class="num">${fmt(r.acs, 0)}</b></span><span>K/D <b class="num">${fmt(r.kd)}</b></span><span>Rnds <b class="num">${r.rnd}</b></span>`}<span class="agents ${hide() ? "blind-ag" : ""}">${r.ag.map(a => agentImg(a, "s")).join("")}</span></div>
+      <div class="pstats">${hide() ? `<span>Played</span>` : `<span>ACS <b class="num">${fmt(r.acs, 0)}</b></span><span>K/D <b class="num">${fmt(r.kd)}</b></span><span>Rnds <b class="num">${r.rnd}</b></span>${r.at ? `<span>${r.span} · ${r.nEv} event${r.nEv > 1 ? "s" : ""}${r.titles ? ` · ${"★".repeat(r.titles)}` : ""}</span>` : ""}`}<span class="agents ${hide() ? "blind-ag" : ""}">${r.ag.map(a => agentImg(a, "s")).join("")}</span></div>
     </div>
-    <div class="pright"><div class="rating num ${hide() ? "qm" : ""}">${hide() ? "?" : fmt(r.r)}</div>${slot ? `<span class="target" style="--rc:${slotCol(slot)}">→ ${slot}</span>` : `<span class="slot-hint no">${why}</span>`}</div>
+    <div class="pright"><div class="rating num ${hide() ? "qm" : ""}">${hide() ? "?" : fmt(r.r)}</div>${slot ? `<span class="target" style="--rc:${S.anySlot ? ROLE_COL[r.role] : slotCol(slot)}">→ ${S.anySlot ? "Draft" : slot}</span>` : `<span class="slot-hint no">${why}</span>`}</div>
   </button>`;
 }
 function mapsStrip(){
@@ -1486,6 +1547,7 @@ function topPicks(m){
 }
 function infoHTML(){
   const parts = [];
+  if (S.cat) parts.push(`<div class="pad bline catinfo"><div class="eyebrow">Category</div><b>${esc(S.cat.title)}</b><p class="small muted" style="margin:4px 0 0">${esc(S.cat.desc)} Ratings are each player's all-time international numbers for that team.</p>${!lineupRows(S.drafters[0]).length && S.phase === "draft" ? `<button class="btn tiny" id="recat" style="margin-top:8px">Spin a different category</button>` : ""}</div>`);
   parts.push(mapsStrip());
   if (hide()) parts.push(`<div class="pad bline"><span class="chip blindc">Blind draft</span><p class="small muted" style="margin:8px 0 0">Ratings, stats, map fit and win chances are hidden. Pick from memory. Everything is revealed after the ${S.mode === "gauntlet" ? "gauntlet" : S.drafters.length > 1 || VS_MODES.has(S.mode) ? "series" : "map"}.</p></div>`);
   if ((S.mode === "classic" || S.mode === "map") && !hide()){
@@ -1496,7 +1558,7 @@ function infoHTML(){
       <div class="bar"><i style="width:${p ? Math.round((p - .1) / .8 * 100) : 0}%"></i></div>
       <div class="small muted">${st ? `Avg rating ${fmt(st.avg)}${st.bonus ? ` · same-roster bonus +${fmt(st.bonus * 100, 1)}` : ""}. Small samples shrink toward 1.00.` : "Draft players to see your odds against an average pro side."}</div></div>`);
   }
-  if (S.mode === "gauntlet"){
+  if (S.mode === "gauntlet" || S.mode === "cat"){
     const st = teamStrength(lineupRows(S.drafters[0]), null);
     parts.push(`<div class="pad bline"><div class="eyebrow" style="margin-bottom:8px">You'll face</div><div class="champs">${CHAMPS.map(c => `<span class="chip" title="${esc(c.e.name)} ${c.e.year}">${esc(c.e.winner)} ${String(c.e.year).slice(2)}</span>`).join("")}</div>
       <div class="small muted" style="margin-top:8px">${hide() ? "" : st ? `Your strength ${fmt(st.s)} vs champions ${fmt(CHAMPS.reduce((s, c) => s + teamStrength(c.rows, null).s, 0) / CHAMPS.length)} on average.` : "Every event winner, with their real five."}</div></div>`);
@@ -1526,7 +1588,7 @@ function slotHTML(d, slot){
   const r = d.lineup[slot];
   if (!r) return `<div class="slot"><div class="empty-ic">${roleGlyph(slot)}</div><div class="slabel">${slot}</div><span></span></div>`;
   const ev = EV[r.e];
-  return `<div class="slot filled">${agentImg(r.ag[0], "l")}<div style="min-width:0"><div class="sname"><button class="pp" style="background:none;padding:0;font-size:15px" data-player="${esc(r.key)}">${esc(r.p)}</button></div><div class="small muted"><span class="tag">${esc(r.t)}</span> · ${esc(evShort(ev))} · ${slot === "Flex" ? "Flex " + r.role.toLowerCase() : slot}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="rating num ${hide() ? "qm" : ""}" style="font-size:22px">${hide() ? "?" : fmt(r.r)}</div>${canRedraft(S.drafters.indexOf(d)) ? `<button class="btn tiny" data-rd="${S.drafters.indexOf(d)}|${slot}">Redraft</button>` : ""}</div></div>`;
+  return `<div class="slot filled">${agentImg(r.ag[0], "l")}<div style="min-width:0"><div class="sname"><button class="pp" style="background:none;padding:0;font-size:15px" data-player="${esc(r.key)}">${esc(r.p)}</button></div><div class="small muted"><span class="tag">${esc(r.t)}</span> · ${r.at ? `all-time ${r.span}` : esc(evShort(ev))} · ${S.anySlot ? r.role : slot === "Flex" ? "Flex " + r.role.toLowerCase() : slot}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="rating num ${hide() ? "qm" : ""}" style="font-size:22px">${hide() ? "?" : fmt(r.r)}</div>${canRedraft(S.drafters.indexOf(d)) ? `<button class="btn tiny" data-rd="${S.drafters.indexOf(d)}|${slot}">Redraft</button>` : ""}</div></div>`;
 }
 function readyHTML(){
   if (S.result && S.result.type === "forfeit"){
@@ -1541,8 +1603,8 @@ function readyHTML(){
     body = `<p class="muted">Your five play ${S.maps ? esc(S.maps[0]) : "a random map"} against an average international side.</p>
       ${hide() ? `<p class="small muted">Blind draft: your odds stay hidden until the map is played.</p>` : `<div class="kv"><div><b class="num">${Math.round(p * 100)}%</b><span>Round win chance</span></div><div><b class="num" style="color:var(--gold)">${(Math.pow(p, 13) * 100).toFixed(p > .75 ? 1 : 2)}%</b><span>Chance of 13–0</span></div></div>`}`;
     btn = again ? "Play another map" : "Play the map";
-  } else if (S.mode === "gauntlet"){
-    body = `<p class="muted">One map against each of the ${CHAMPS.length} event winners, using their real lineups.</p>`;
+  } else if (S.mode === "gauntlet" || S.mode === "cat"){
+    body = `<p class="muted">${S.cat ? `${esc(S.cat.title)}. ` : ""}One map against each of the ${CHAMPS.length} event winners, using their real lineups.</p>`;
     btn = again ? "Run it again" : "Start the gauntlet";
   } else if (S.mode === "bot" || S.mode === "local"){
     body = `<p class="muted">Best of three on ${S.maps.map(esc).join(", ")}.</p>`;
@@ -1599,12 +1661,13 @@ function runResult(){
     const g = simMap(Math.random, p); const won = g.w > g.l;
     S.result = {type: "single", map, w: g.w, l: g.l, seq: g.seq, p, box: boxScore(Math.random, rows, g.w + g.l, won), shown: 0};
     if (!G.best || g.w - g.l > G.best.w - G.best.l){ G.best = {w: g.w, l: g.l}; store.set("thirteen-best", G.best); }
-  } else if (S.mode === "gauntlet"){
+  } else if (S.mode === "gauntlet" || S.mode === "cat"){
     const me = teamStrength(rows, null).s;
     const list = CHAMPS.map(c => { const map = MAP_LIST[Math.floor(Math.random() * MAP_LIST.length)]; const g = simMap(Math.random, roundP(me, teamStrength(c.rows, null).s)); return {c, map, w: g.w, l: g.l}; });
     const w = list.filter(x => x.w > x.l).length;
     S.result = {type: "gauntlet", list, w, l: list.length - w};
-    if (!G.gbest || w > G.gbest.w){ G.gbest = {w, l: list.length - w}; store.set("thirteen-gbest", G.gbest); }
+    if (S.mode === "cat"){ const b = store.get("thirteen-cbest", null); if (!b || w > b.w) store.set("thirteen-cbest", {w, l: list.length - w}); }
+    else if (!G.gbest || w > G.gbest.w){ G.gbest = {w, l: list.length - w}; store.set("thirteen-gbest", G.gbest); }
   } else if (S.mode === "bot" || S.mode === "local"){
     const sr = simSeries(Math.random, rows, lineupRows(S.drafters[1]), 3, S.maps);
     S.result = {type: "series", sr, nameA: S.drafters[0].name, nameB: S.drafters[1].name};
@@ -1650,9 +1713,9 @@ function resultHTML(){
     <div class="row" style="justify-content:center;margin-top:14px"><button class="btn" id="share">Copy result</button></div></div>`;
   return seriesHTML(R.sr, R.nameA, R.nameB);
 }
-function boxTable(box){
+function boxTable(box, mvp = true){
   return `<div class="scroll"><table><thead><tr><th>Player</th><th class="r">ACS</th><th class="r">K</th><th class="r">D</th><th class="r">A</th></tr></thead><tbody>
-    ${box.map((b, i) => `<tr><td><div class="row" style="gap:8px;flex-wrap:nowrap">${agentImg(b.r.ag[0], "s")}<b>${esc(b.r.p)}</b> <span class="tag">${esc(b.r.t)} ${String(EV[b.r.e].year).slice(2)}</span>${i === 0 ? ` <span class="mvp">MVP</span>` : ""}</div></td><td class="r num">${b.acs}</td><td class="r num">${b.k}</td><td class="r num">${b.d}</td><td class="r num">${b.a}</td></tr>`).join("")}
+    ${box.map((b, i) => `<tr><td><div class="row" style="gap:8px;flex-wrap:nowrap">${agentImg(b.r.ag[0], "s")}<b>${esc(b.r.p)}</b> <span class="tag">${esc(b.r.t)} ${b.r.at ? "AT" : String(EV[b.r.e].year).slice(2)}</span>${i === 0 && mvp ? ` <span class="mvp">MVP</span>` : ""}</div></td><td class="r num">${b.acs}</td><td class="r num">${b.k}</td><td class="r num">${b.d}</td><td class="r num">${b.a}</td></tr>`).join("")}
   </tbody></table></div>`;
 }
 function seriesHTML(sr, nameA, nameB){
@@ -1672,6 +1735,7 @@ function seriesHTML(sr, nameA, nameB){
           <div class="small muted">Map MVP ${esc(top.r.p)} · ${top.k}/${top.d}/${top.a}</div>
         </div></div>`; }).join("")}</div>
     ${seriesMvpHTML(sr, aw, sr.games.length * 0.35 + 0.3)}
+    ${seriesBoxHTML(sr, nameA, nameB)}
     <div class="row" style="justify-content:center"><button class="btn" id="share">Copy result</button></div>
   </div>`;
 }
@@ -1686,13 +1750,17 @@ function seriesMvpHTML(sr, aw, delay){
   const win = aw ? {...A, side: 0} : {...B, side: 1}, lose = aw ? {...B, side: 1} : {...A, side: 0};
   return mvpHTML([{...win, label: "Match MVP"}, {...lose, label: "Team MVP"}], delay);
 }
+function seriesBoxHTML(sr, nameA, nameB){
+  const t = (key, name, col) => `<div class="tbox"><div class="eyebrow" style="color:${col};margin-bottom:4px">${esc(name)} · series totals</div>${boxTable(seriesTotals(sr, key), false)}</div>`;
+  return `<details class="tboxes" open><summary>Full scoreboard</summary><div class="tbgrid">${t("boxA", nameA, "var(--teal)")}${t("boxB", nameB, "var(--orange)")}</div></details>`;
+}
 function mvpHTML(list, delay = 0){
   return `<div class="mvpwrap" style="--d:${delay.toFixed(2)}s">${list.map((m, i) => { const ev = EV[m.r.e]; return `
     <div class="mvpcard ${i ? "second" : "first"}" style="--c:${SIDE_COL[m.side]}">
       <div class="mvpart">${agentImg(m.r.ag[0], "mvpimg")}<span class="mvpbadge">${esc(m.label)}</span></div>
       <div class="mvpbody">
         <div class="mvpname">${esc(m.r.p)}</div>
-        <div class="small muted"><span class="tag">${esc(m.r.t)}</span> · ${esc(ev.name)} ${ev.year} · ${esc(m.r.ag[0])}</div>
+        <div class="small muted"><span class="tag">${esc(m.r.t)}</span> · ${m.r.at ? `all-time ${m.r.span}` : `${esc(ev.name)} ${ev.year}`} · ${esc(m.r.ag[0])}</div>
         <div class="mvpstats">
           <div><b class="num">${m.acs}</b><span>ACS</span></div>
           <div><b class="num">${m.k}/${m.d}/${m.a}</b><span>K / D / A</span></div>
@@ -1710,11 +1778,11 @@ function updateMatch(){
     if (!m.fx){ m.fx = 1; celebrate(m.w > m.l ? "win" : "loss", m.w === 13 && m.l === 0 ? "Flawless" : null); if (m.w > m.l) awardTok(S.drafters[0].name); } }
 }
 function shareText(){
-  const R = S ? S.result : null; const line = r => `${r.p} (${r.t}, ${EV[r.e].name} ${EV[r.e].year})`;
+  const R = S ? S.result : null; const line = r => r.at ? `${r.p} (${r.t}, all-time ${r.span})` : `${r.p} (${r.t}, ${EV[r.e].name} ${EV[r.e].year})`;
   const team = d => SLOTS.map(sl => `${sl}: ${line(d.lineup[sl])}`).join("\n");
   if (!R) return "";
   if (R.type === "single") return `13–0 VCT draft (${MODES[S.mode].title}): ${R.w}–${R.l} on ${R.map}\n${team(S.drafters[0])}`;
-  if (R.type === "gauntlet") return `13–0 VCT draft, Champions gauntlet: ${R.w}–${R.l} against every international winner\n${team(S.drafters[0])}`;
+  if (R.type === "gauntlet") return `13–0 VCT draft, ${S.cat ? `All-time category (${S.cat.title})` : "Champions gauntlet"}: ${R.w}–${R.l} against every international winner\n${team(S.drafters[0])}`;
   return `13–0 VCT draft (${MODES[S.mode].title}): ${R.nameA} ${R.sr.wa}–${R.sr.wb} ${R.nameB}\n` + R.sr.games.map((g, i) => `Map ${i + 1} ${g.map}: ${g.w}–${g.l}`).join("\n");
 }
 
@@ -1791,9 +1859,10 @@ function bindPlay(){
   on("#ccode", e => { if (e.key === "Enter") document.getElementById("takech").click(); }, "keydown");
   // session
   on("#tohub", () => { PLAYUI = "hub"; clearInterval(simTimer); showPlay(); });
+  on("#recat", () => startMode("cat", {}));
   on("#newdraft", () => startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : {}));
   on("#copyroom", () => copyText(NET.code, "Room code copied"));
-  on("[data-pick]", e => { const r = D.rows[+e.currentTarget.dataset.pick]; if (!S || !canAct(curD(S))) return; if (S.mode === "online"){ if (slotFor(S, curD(S), r)) onlineAct("p" + r.id); return; } if (doPick(S, r)) renderPlay(); });
+  on("[data-pick]", e => { const r = getRow(+e.currentTarget.dataset.pick); if (!S || !canAct(curD(S))) return; if (S.mode === "online"){ if (slotFor(S, curD(S), r)) onlineAct("p" + r.id); return; } if (doPick(S, r)) renderPlay(); });
   on("#skip", () => { const d = curD(S); if (!canAct(d)) return; if (S.mode === "online"){ if (!d.skips){ if (!tok(d)) return; spendTok(d); } onlineAct("s"); return; } if (d.skips) d.skips--; else if (tok(d)) spendTok(d); else return; nextDeal(S); renderPlay(); });
   on("[data-rd]", e => { e.stopPropagation(); const [di, sl] = e.currentTarget.dataset.rd.split("|"); redraft(+di, sl); });
   on("#playgo", runResult);
