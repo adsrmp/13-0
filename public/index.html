@@ -633,7 +633,7 @@ function eligibleKeys(filt){
 function makeSession(mode, o = {}){
   const seed = o.seed != null ? o.seed >>> 0 : randSeed();
   const filt = o.allEvents ? {year:"", type:"", region:""} : {...G.filt};
-  const cat = mode === "cat" ? (o.cat || CATS[Math.floor(Math.random() * CATS.length)]) : null;
+  const cat = mode === "cat" || o.catVs ? (o.cat || CATS[Math.floor(Math.random() * CATS.length)]) : null;
   let keys = cat ? cat.deck() : eligibleKeys(filt); if (!keys.length) keys = eligibleKeys({year:"", type:"", region:""});
   const deck = shuffle(keys, rng(seed));
   const mr = rng(seed ^ 0x5bd1e995);
@@ -807,7 +807,7 @@ async function enterRoom(raw, host = false){
   let room;
   try { room = await NET.lobby.join("g13-" + code); } catch(e){ toast("Couldn't open that room. Try again."); return; }
   leaveRoom(room);
-  NET.room = room; NET.code = code; NET.round = 0; NET.sig = ""; NET.host = host; NET.rules = host ? {blind: !!G.blind, timer: !!G.timer} : null;
+  NET.room = room; NET.code = code; NET.round = 0; NET.sig = ""; NET.host = host; NET.rules = host ? {blind: !!G.blind, timer: !!G.timer, cat: false} : null;
   NET.unsub = room.onPeers(ch => { NET.peers = ch.peers; onNet(); }, () => toast("Lost the room connection"));
   startOnlineRound();
 }
@@ -821,7 +821,7 @@ function startOnlineRound(){ NET.acts = []; NET.gg = false; NET.started = false;
 function pushPresence(){
   if (!NET.room) return;
   NET.room.presence({v: 2, nick: (G.nick || "Player").slice(0, 16), host: NET.host, round: NET.round, started: !!NET.started,
-    blind: !!NET.rules.blind, timer: !!NET.rules.timer, acts: NET.acts.slice(0, 40), gg: !!NET.gg}).catch(() => {});
+    blind: !!NET.rules.blind, timer: !!NET.rules.timer, cat: !!NET.rules.cat, acts: NET.acts.slice(0, 40), gg: !!NET.gg}).catch(() => {});
 }
 const roomPeers = () => { try { return NET.room ? NET.room.peers() : []; } catch(e){ return []; } };
 const opponent = () => roomPeers().find(p => !p.sameTab && p.kind === "viewer" && p.presence && p.presence.v === 2) || null;
@@ -835,11 +835,12 @@ function onlineStarted(){
 }
 function buildOnline(){
   const o = opponent();
-  if (!NET.host && o && o.presence.host === true) NET.rules = {blind: o.presence.blind === true, timer: o.presence.timer === true};
-  if (!NET.rules) NET.rules = {blind: false, timer: true};
+  if (!NET.host && o && o.presence.host === true) NET.rules = {blind: o.presence.blind === true, timer: o.presence.timer === true, cat: o.presence.cat === true};
+  if (!NET.rules) NET.rules = {blind: false, timer: true, cat: false};
   const names = NET.host ? [myName(), o ? oppName(o) : "Waiting…"] : [o ? oppName(o) : "Host", myName()];
   if (names[0] === names[1]) names[1] += " 2";
-  const s = makeSession("online", {seed: hashStr(NET.code + ":" + NET.round), allEvents: true, blind: NET.rules.blind, timer: NET.rules.timer, names});
+  const s = makeSession("online", {seed: hashStr(NET.code + ":" + NET.round), allEvents: true, blind: NET.rules.blind, timer: NET.rules.timer, names,
+    catVs: !!NET.rules.cat, cat: NET.rules.cat ? CATS[hashStr(NET.code + ":" + NET.round + ":cat") % CATS.length] : null});
   s.me = NET.host ? 0 : 1;
   s.started = onlineStarted();
   const oActs = o && o.presence.round === NET.round ? oppActs(o) : [];
@@ -849,7 +850,7 @@ function buildOnline(){
     const di = s.order[s.turn]; const a = acts[di][ptr[di]]; if (a == null) break; ptr[di]++;
     const d = s.drafters[di];
     if (a === "s"){ if (d.skips) d.skips--; nextDeal(s); continue; }
-    if (a[0] === "p"){ const r = D.rows[+a.slice(1)]; if (r) doPick(s, r); continue; }
+    if (a[0] === "p"){ const r = getRow(+a.slice(1)); if (r) doPick(s, r); continue; }
     if (a.startsWith("r:")){ const sl = a.slice(2); if (d.lineup[sl]){ delete d.lineup[sl]; s.order.splice(s.turn, 0, di); if (!fitsIn(s, curD(s), s.deal)) nextDeal(s); } continue; }
   }
   // finished draft -> series, or a surrender
@@ -873,7 +874,7 @@ function onNet(){
   if (o && !NET.host && o.presence.host === true && Number.isInteger(o.presence.round) && o.presence.round > NET.round){
     NET.round = o.presence.round; NET.acts = []; NET.gg = false; NET.cache = null; NET.tk = {key: "", deadline: 0}; pushPresence();
   }
-  const sig = o ? JSON.stringify([o.peer, o.presence.nick, o.presence.host, o.presence.round, o.presence.started, o.presence.blind, o.presence.timer, o.presence.acts, o.presence.gg]) : "none";
+  const sig = o ? JSON.stringify([o.peer, o.presence.nick, o.presence.host, o.presence.round, o.presence.started, o.presence.blind, o.presence.timer, o.presence.cat, o.presence.acts, o.presence.gg]) : "none";
   if (sig === NET.sig) return;
   NET.sig = sig;
   if (!S || S.mode !== "online") return;
@@ -900,6 +901,7 @@ function parseChallenge(raw){
 const MODES = {
   classic:   {title: "Classic 13–0", tag: "Solo · 1 map", desc: "Draft five from real international rosters, then play one map against an average pro side. Chase the flawless 13–0."},
   map:       {title: "Map draft", tag: "Solo · map known", desc: "The map is revealed before you draft. Players whose agents suit that map get a boost, so draft for the map."},
+  clash:     {title: "Category clash", tag: "Head to head · Bo3", desc: "A random category and all-time rosters, like the solo category mode, but two teams draft head to head and play a best-of-three. Online: turn on Random category in the room."},
   cat:       {title: "All-time category", tag: "Solo · 18-match season", desc: "A random category, like Duelists only or Americas only. Every spin deals a team's all-time international roster, then your five play every Masters and Champions winner."},
   gauntlet:  {title: "Champions gauntlet", tag: "Solo · 18 matches", desc: "Your five play every Masters and Champions winner since 2021, one map each. The Valorant 82–0: can you go 18–0?"},
   bot:       {title: "Versus bot", tag: "You vs bot · Bo3", desc: "You and a bot take turns picking from the same rosters, then play a best-of-three on maps shown up front."},
@@ -1424,6 +1426,7 @@ function hubHTML(){
       ${card("online", `<div class="stack"><div id="net-status">${netStatusHTML()}</div>
         <label class="f" for="nick">Your name<input id="nick" maxlength="16" placeholder="e.g. Ads" value="${esc(G.nick)}"></label>
         <div class="row"><button class="btn go sm" id="mkroom">Create room</button><span class="muted small">or</span><input id="jcode" maxlength="8" placeholder="Room code" aria-label="Room code" style="width:7.5em;text-transform:lowercase"><button class="btn" id="joinroom">Join</button></div></div>`)}
+      ${card("clash", `<span></span><div class="row"><button class="btn go sm" data-start="bot" data-catvs="1">vs Bot</button><button class="btn go sm" data-start="local" data-catvs="1">Pass & play</button></div>`)}
       ${card("challenge", `<div class="stack"><button class="btn go sm" data-start="challenge">Make a challenge</button>
         <div class="row"><input id="ccode" placeholder="Friend's code" aria-label="Challenge code" style="flex:1;min-width:0;text-transform:uppercase"><button class="btn" id="takech">Accept</button></div></div>`)}
     </div></div>
@@ -1438,8 +1441,8 @@ function hubHTML(){
   </section>`;
 }
 function modeGlyph(id){
-  const c = {cat:"var(--orange)", classic:"var(--red)", map:"var(--initiator)", gauntlet:"var(--gold)", bot:"var(--controller)", local:"var(--duelist)", online:"var(--teal)", challenge:"var(--orange)", battle:"var(--sentinel)"}[id];
-  const t = {cat:"AT", classic:"13", map:"M", gauntlet:"18", bot:"B", local:"2P", online:"ON", challenge:"CH", battle:"VS"}[id];
+  const c = {clash:"var(--gold)", cat:"var(--orange)", classic:"var(--red)", map:"var(--initiator)", gauntlet:"var(--gold)", bot:"var(--controller)", local:"var(--duelist)", online:"var(--teal)", challenge:"var(--orange)", battle:"var(--sentinel)"}[id];
+  const t = {clash:"CC", cat:"AT", classic:"13", map:"M", gauntlet:"18", bot:"B", local:"2P", online:"ON", challenge:"CH", battle:"VS"}[id];
   return `<span style="background:${c}">${t}</span>`;
 }
 
@@ -1450,7 +1453,7 @@ function sessionHTML(){
   <section class="view">
     <div class="modebar">
       <button class="btn" id="tohub">← Modes</button>
-      <div style="min-width:0"><div class="eyebrow">${m.tag}</div><h2>${m.title}</h2></div>
+      <div style="min-width:0"><div class="eyebrow">${S.cat && S.mode !== "cat" ? `${m.title} · all-time rosters` : m.tag}</div><h2>${S.cat && S.mode !== "cat" ? "Category clash" : m.title}</h2></div>
       <span style="flex:1"></span>
       ${S.blind ? `<span class="chip blindc">Blind draft</span>` : ""}
       ${S.mode === "online" && S.started ? `<span class="chip">Room <b class="num" style="color:var(--text);margin-left:4px">${esc(NET.code)}</b></span>` : ""}
@@ -1547,7 +1550,7 @@ function topPicks(m){
 }
 function infoHTML(){
   const parts = [];
-  if (S.cat) parts.push(`<div class="pad bline catinfo"><div class="eyebrow">Category</div><b>${esc(S.cat.title)}</b><p class="small muted" style="margin:4px 0 0">${esc(S.cat.desc)} Ratings are each player's all-time international numbers for that team.</p>${!lineupRows(S.drafters[0]).length && S.phase === "draft" ? `<button class="btn tiny" id="recat" style="margin-top:8px">Spin a different category</button>` : ""}</div>`);
+  if (S.cat) parts.push(`<div class="pad bline catinfo"><div class="eyebrow">Category</div><b>${esc(S.cat.title)}</b><p class="small muted" style="margin:4px 0 0">${esc(S.cat.desc)} Ratings are each player's all-time international numbers for that team.</p>${S.mode !== "online" && S.drafters.every(d => !lineupRows(d).length) && S.phase === "draft" ? `<button class="btn tiny" id="recat" style="margin-top:8px">Spin a different category</button>` : ""}</div>`);
   parts.push(mapsStrip());
   if (hide()) parts.push(`<div class="pad bline"><span class="chip blindc">Blind draft</span><p class="small muted" style="margin:8px 0 0">Ratings, stats, map fit and win chances are hidden. Pick from memory. Everything is revealed after the ${S.mode === "gauntlet" ? "gauntlet" : S.drafters.length > 1 || VS_MODES.has(S.mode) ? "series" : "map"}.</p></div>`);
   if ((S.mode === "classic" || S.mode === "map") && !hide()){
@@ -1645,6 +1648,7 @@ function lobbyHTML(){
       <div class="eyebrow" style="margin-top:14px">Room settings ${NET.host ? "" : "(set by the host)"}</div>
       <div class="lrules">
         <div class="lrule"><div><b>Blind draft</b><div class="small muted">Hide ratings and stats for both players</div></div>${seg("blind", R.blind, "Blind draft")}</div>
+        <div class="lrule"><div><b>Random category</b><div class="small muted">Category clash: all-time rosters, one random category. Revealed when the draft starts</div></div>${seg("cat", !!R.cat, "Random category")}</div>
         <div class="lrule"><div><b>Pick timer</b><div class="small muted">${PICK_SECONDS} seconds per pick, random pick at zero</div></div>${seg("timer", R.timer, "Pick timer")}</div>
       </div>
       <div class="row" style="margin-top:16px">${NET.host ? `<button class="btn go" id="startgame" ${o ? "" : "disabled"}>${o ? "Start draft" : "Waiting for a friend"}</button>` : `<span class="muted">${o ? `Waiting for ${esc(hostName)} to start…` : "Connecting to the host…"}</span>`}</div>
@@ -1843,7 +1847,7 @@ function startMode(mode, o = {}){
 }
 function bindPlay(){
   const on = (sel, fn, ev = "click") => document.querySelectorAll(sel).forEach(el => el.addEventListener(ev, fn));
-  on("[data-start]", e => startMode(e.currentTarget.dataset.start, e.currentTarget.dataset.start === "challenge" ? {role: "maker", allEvents: true} : {}));
+  on("[data-start]", e => { const b = e.currentTarget; startMode(b.dataset.start, b.dataset.start === "challenge" ? {role: "maker", allEvents: true} : b.dataset.catvs ? {catVs: true} : {}); });
   on("[data-blind]", e => { G.blind = e.currentTarget.dataset.blind === "1"; store.set("thirteen-blind", G.blind); document.querySelectorAll("[data-blind]").forEach(b => b.setAttribute("aria-pressed", (b.dataset.blind === "1") === G.blind)); });
   on("[data-timer]", e => { G.timer = e.currentTarget.dataset.timer === "1"; store.set("thirteen-timer", G.timer); document.querySelectorAll("[data-timer]").forEach(b => b.setAttribute("aria-pressed", (b.dataset.timer === "1") === G.timer)); });
   on("[data-resume]", () => { PLAYUI = "session"; renderPlay(); });
@@ -1859,14 +1863,14 @@ function bindPlay(){
   on("#ccode", e => { if (e.key === "Enter") document.getElementById("takech").click(); }, "keydown");
   // session
   on("#tohub", () => { PLAYUI = "hub"; clearInterval(simTimer); showPlay(); });
-  on("#recat", () => startMode("cat", {}));
-  on("#newdraft", () => startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : {}));
+  on("#recat", () => startMode(S.mode, S.mode === "cat" ? {} : {catVs: true}));
+  on("#newdraft", () => startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : S.cat && S.mode !== "cat" ? {catVs: true} : {}));
   on("#copyroom", () => copyText(NET.code, "Room code copied"));
   on("[data-pick]", e => { const r = getRow(+e.currentTarget.dataset.pick); if (!S || !canAct(curD(S))) return; if (S.mode === "online"){ if (slotFor(S, curD(S), r)) onlineAct("p" + r.id); return; } if (doPick(S, r)) renderPlay(); });
   on("#skip", () => { const d = curD(S); if (!canAct(d)) return; if (S.mode === "online"){ if (!d.skips){ if (!tok(d)) return; spendTok(d); } onlineAct("s"); return; } if (d.skips) d.skips--; else if (tok(d)) spendTok(d); else return; nextDeal(S); renderPlay(); });
   on("[data-rd]", e => { e.stopPropagation(); const [di, sl] = e.currentTarget.dataset.rd.split("|"); redraft(+di, sl); });
   on("#playgo", runResult);
-  on("#newdraft2", () => startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : {}));
+  on("#newdraft2", () => startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : S.cat && S.mode !== "cat" ? {catVs: true} : {}));
   on("#ggask", () => { S.askGG = true; renderPlay(); });
   on("#ggback", () => { S.askGG = false; renderPlay(); });
   on("[data-gg]", e => { const i = +e.currentTarget.dataset.gg; endBySurrender(S.drafters[i].name, S.drafters[1 - i].name); renderPlay(); });
@@ -1887,7 +1891,7 @@ function bindPlay(){
   on("#copymsg", () => copyText(`I drafted a VCT super team. Beat it: open 13–0, go to Challenge code and paste ${challengeCode(S)}`, "Message copied"));
   on("#nextgame", () => { if (!NET.host) return; NET.round++; NET.sig = ""; startOnlineRound(); });
   on("#startgame", () => { if (!NET.host || !opponent()) return; NET.started = true; NET.tk = {key: "", deadline: 0}; pushPresence(); S = buildOnline(); renderPlay(); });
-  on("[data-rule]", e => { if (!NET.host) return; const [k, v] = e.currentTarget.dataset.rule.split("|"); NET.rules[k] = v === "1"; if (k === "blind"){ G.blind = NET.rules.blind; store.set("thirteen-blind", G.blind); } else { G.timer = NET.rules.timer; store.set("thirteen-timer", G.timer); } pushPresence(); S = buildOnline(); renderPlay(); });
+  on("[data-rule]", e => { if (!NET.host) return; const [k, v] = e.currentTarget.dataset.rule.split("|"); NET.rules[k] = v === "1"; if (k === "cat"){} else if (k === "blind"){ G.blind = NET.rules.blind; store.set("thirteen-blind", G.blind); } else { G.timer = NET.rules.timer; store.set("thirteen-timer", G.timer); } pushPresence(); S = buildOnline(); renderPlay(); });
   // battle
   ["a", "b"].forEach(k => {
     const ev = document.getElementById("b" + k + "ev"); if (ev) ev.addEventListener("change", () => { BT[k] = {ev: ev.value, t: ev.value === "bot" ? "" : eventTeams(ev.value)[0]}; BT.result = null; renderPlay(); });
