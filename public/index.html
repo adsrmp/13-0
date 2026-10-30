@@ -1152,13 +1152,22 @@ const ABILITIES = [
 ].map(([agent, name, desc], i) => ({id: i, agent, name, desc, icon: QIMG.abil[name.toLowerCase().replace(/'/g, "").replace(/[^a-z0-9]+/g, "-")] || null}));
 
 const QUIZ = {
-  map:     {title: "Guess the map", tag: "Guess · 10 rounds", desc: "A tiny zoomed-in piece of a map's layout. Name the map. Zoom out for a hint, but it costs points."},
-  agent:   {title: "Guess the agent", tag: "Guess · 10 rounds", desc: "Clues about an agent's kit, one at a time. Name the agent. Every extra clue costs a point."},
+  map:     {title: "Guess the map", tag: "Guess · 10 rounds", desc: "A tiny zoomed-in piece of a map: a real in-game screenshot where we have one, otherwise its layout. Zoom out for a hint, but it costs points."},
+  agent:   {title: "Guess the agent", tag: "Guess · 10 rounds", desc: "Up to three clues: the pros who played them most, what one of their abilities does, then an ability's name. Every extra clue costs a point."},
   ability: {title: "Guess the ability", tag: "Guess · 10 rounds", desc: "An ability icon or a short description. Name the ability and whose it is."}
 };
 const QROUNDS = 10;
 const ZOOMS = {map: [0.13, 0.27, 0.5]};
 const KIT_AGENTS = [...new Set(ABILITIES.map(a => a.agent))];
+// who played each agent most (as their first agent) at internationals, from our stats
+const PRO_MAINS = (() => { const m = {}; D.rows.forEach(r => { const a = r.ag[0]; if (!a) return; (m[a] = m[a] || {})[r.p] = (m[a][r.p] || 0) + r.rnd; });
+  const out = {}; Object.entries(m).forEach(([a, ps]) => out[a] = Object.entries(ps).sort((x, y) => y[1] - x[1]).slice(0, 3).map(x => x[0])); return out; })();
+const listNames = n => n.length > 2 ? `${n.slice(0, -1).join(", ")} and ${n[n.length - 1]}` : n.join(" and ");
+// real in-game screenshots, when the website has them (public/maps/manifest.json)
+let MAP_PHOTOS = {};
+(async () => { if (!/^https?:$/.test(location.protocol)) return;
+  try { const r = await fetch("/maps/manifest.json", {cache: "no-store"}); if (r.ok){ const j = await r.json(); if (j && typeof j === "object" && !Array.isArray(j)) MAP_PHOTOS = Object.fromEntries(Object.entries(j).filter(([, v]) => Array.isArray(v) && v.length).map(([k, v]) => [k, v.filter(x => typeof x === "string" && /^maps\/[\w.-]+$/.test(x))])); } } catch(e){} })();
+const quizMaps = () => [...new Set([...Object.keys(QIMG.maps), ...Object.keys(MAP_PHOTOS).filter(k => MAP_PHOTOS[k].length)])];
 const agentLabel = a => a === "Kayo" ? "KAY/O" : a;
 let QZ = null;
 const qbest = store.get("thirteen-qbest", {});
@@ -1169,7 +1178,7 @@ const pickN = (arr, n, rand = Math.random) => shuffle(arr.slice(), rand).slice(0
 function startQuiz(kind){
   if (S && S.mode === "online") leaveRoom();
   let items;
-  if (kind === "map") items = pickN(Object.keys(QIMG.maps), QROUNDS);
+  if (kind === "map"){ const all = quizMaps(); const ph = all.filter(m => MAP_PHOTOS[m] && MAP_PHOTOS[m].length); items = shuffle(pickN(ph, QROUNDS).concat(pickN(all.filter(m => !ph.includes(m)), Math.max(0, QROUNDS - ph.length))), Math.random).slice(0, QROUNDS); while (items.length < QROUNDS) items.push(all[Math.floor(Math.random() * all.length)]); }
   else if (kind === "agent") items = pickN(KIT_AGENTS, QROUNDS);
   else {
     const withIcon = ABILITIES.filter(a => a.icon), rest = ABILITIES.filter(a => !a.icon);
@@ -1182,7 +1191,7 @@ function startQuiz(kind){
 function nextQuestion(){
   const ans = QZ.items[QZ.i];
   let options;
-  if (QZ.kind === "map") options = shuffle([ans, ...pickN(Object.keys(QIMG.maps).filter(m => m !== ans), 3)], Math.random);
+  if (QZ.kind === "map") options = shuffle([ans, ...pickN(quizMaps().filter(m => m !== ans), 3)], Math.random);
   else if (QZ.kind === "agent"){
     const all = KIT_AGENTS.filter(a => a !== ans);
     const same = all.filter(a => D.roles[a] === D.roles[ans]);
@@ -1195,9 +1204,11 @@ function nextQuestion(){
   let clues = null;
   if (QZ.kind === "agent"){
     const kit = pickN(ABILITIES.filter(a => a.agent === ans), 3);
-    clues = [kit[0].desc, `${D.roles[ans] || "Agent"}. ${kit[1].desc}`, `One of their abilities is called ${kit[2].name}.`];
+    const pros = PRO_MAINS[ans] || [];
+    clues = [pros.length >= 2 ? `At VCT internationals, ${listNames(pros)} played this agent the most.` : kit[0].desc, `${D.roles[ans] || "Agent"}. ${pros.length >= 2 ? kit[0].desc : kit[1].desc}`, `One of their abilities is called ${kit[2].name}.`];
   }
-  QZ.cur = {ans, options, zoom: 0, chosen: null, focus: null, clues};
+  const ph = QZ.kind === "map" && MAP_PHOTOS[ans] && MAP_PHOTOS[ans].length ? MAP_PHOTOS[ans][Math.floor(Math.random() * MAP_PHOTOS[ans].length)] : null;
+  QZ.cur = {ans, options, zoom: 0, chosen: null, focus: ph ? {x: .25 + Math.random() * .5, y: .25 + Math.random() * .5} : null, clues, photo: ph};
 }
 const qPoints = () => QZ.kind === "ability" ? 3 : 3 - QZ.cur.zoom;
 const qLabel = o => QZ.kind === "ability" ? `${o.name} · ${agentLabel(o.agent)}` : agentLabel(o);
@@ -1226,7 +1237,7 @@ function quizRoundHTML(){
     <div class="panel qstage">
       <div class="qtop"><span class="eyebrow">Round ${QZ.i + 1} of ${QROUNDS}</span><span class="chip ${QZ.kind === "ability" ? "" : "tokc"}">${answered ? (ok ? `+${qPoints()} points` : "0 points") : `Worth ${qPoints()}`}</span></div>
       ${stage}
-      ${QZ.kind === "map" ? `<div class="row" style="justify-content:space-between"><span class="small muted">${answered ? "Full map shown" : c.zoom === 0 ? "Tightest zoom" : `Zoomed out ${c.zoom} time${c.zoom > 1 ? "s" : ""}`}</span><button class="btn" id="qzoom" ${zoomLeft ? "" : "disabled"}>Zoom out (−1 point)</button></div>` : ""}
+      ${QZ.kind === "map" ? `<div class="row" style="justify-content:space-between"><span class="small muted">${c.photo ? "In-game shot · " : "Layout · "}${answered ? "full picture" : c.zoom === 0 ? "tightest zoom" : `zoomed out ${c.zoom} time${c.zoom > 1 ? "s" : ""}`}</span><button class="btn" id="qzoom" ${zoomLeft ? "" : "disabled"}>Zoom out (−1 point)</button></div>` : ""}
       ${QZ.kind === "agent" ? `<div class="row" style="justify-content:space-between"><span class="small muted">${answered ? "All clues shown" : `${c.zoom + 1} of 3 clues`}</span><button class="btn" id="qzoom" ${zoomLeft ? "" : "disabled"}>Next clue (−1 point)</button></div>` : ""}
     </div>
     <div class="panel pad qside">
@@ -1258,13 +1269,14 @@ function quizEndHTML(){
 async function drawQuiz(){
   const cv = document.getElementById("qcanvas"); if (!cv || !QZ || !QZ.cur) return;
   if (QZ.kind !== "map") return;
-  const c = QZ.cur; const src = QIMG.maps[c.ans];
+  const c = QZ.cur; const src = c.photo ? "/" + c.photo : QIMG.maps[c.ans];
+  if (!src) return;
   const im = await loadImg(src); if (!im || !document.body.contains(cv)) return;
   const x = cv.getContext("2d"); const W = cv.width, H = cv.height, iw = im.naturalWidth, ih = im.naturalHeight;
   x.fillStyle = getComputedStyle(document.body).getPropertyValue("--panel2") || "#1b2533"; x.fillRect(0, 0, W, H);
-  if (c.chosen != null){ x.imageSmoothingEnabled = true; x.drawImage(im, 0, 0, W, H); return; }
-  if (QZ.kind === "map" && !c.focus) c.focus = findMapFocus(im);
-  const f = ZOOMS[QZ.kind][c.zoom]; const sw = iw * f, sh = ih * f;
+  if (c.chosen != null){ x.imageSmoothingEnabled = true; const k = Math.min(W / iw, H / ih); x.drawImage(im, (W - iw * k) / 2, (H - ih * k) / 2, iw * k, ih * k); return; }
+  if (!c.focus) c.focus = findMapFocus(im);
+  const f = (c.photo ? [0.16, 0.32, 0.6] : ZOOMS.map)[c.zoom]; const side = Math.min(iw, ih) * f; const sw = side, sh = side;
   const sx = Math.min(iw - sw, Math.max(0, c.focus.x * iw - sw / 2)), sy = Math.min(ih - sh, Math.max(0, c.focus.y * ih - sh / 2));
   x.imageSmoothingEnabled = true; x.imageSmoothingQuality = "high";
   x.drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
