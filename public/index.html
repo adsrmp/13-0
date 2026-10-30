@@ -323,6 +323,7 @@ footer a{color:var(--mute)}
 @media (max-width:760px){.tbgrid{grid-template-columns:1fr}}
 .tbox{background:var(--panel2);border-radius:6px;padding:10px;min-width:0}
 .tbox table{font-size:13px}.tbox td,.tbox th{padding:6px 8px}
+.btn.sm2{font-size:14px;padding:7px 14px}
 .chip.blindc{border-color:var(--controller);color:var(--controller)}
 .rating.qm{color:var(--dim)}
 .blindbox{border-color:color-mix(in srgb,var(--controller) 45%,var(--line))}
@@ -742,6 +743,7 @@ const CATS = [
   {id: "vets", title: "Veterans", desc: "Only players with 6 or more international events.", ok: r => career(r.key).rows.length >= 6},
   {id: "onedone", title: "One and done", desc: "Only players who played exactly one international.", ok: r => career(r.key).rows.length === 1}
 ].map(c => ({...c, deck(){ return [...ATE.keys()].filter(k => { const t = k.slice(4); if (c.team && !c.team(t)) return false; return ATE.get(k).filter(c.ok).length >= (c.min || 2); }).sort(); }}));
+const ANYCAT = {id: "any", title: "All-time rosters", desc: "Every team's full international roster, no restrictions.", ok: () => true, deck(){ return [...ATE.keys()].filter(k => ATE.get(k).length >= 5).sort(); }};
 const CBEST = store.get("thirteen-cbest", null);
 
 const CHAMPS = D.events.map(e => ({e, rows: (TE.get(e.id + "|" + e.winner) || []).slice(0, 5)})).filter(c => c.rows.length === 5);
@@ -800,14 +802,14 @@ function netStatusHTML(){
   return NET.lobby ? `<span class="chip ok">● Live rooms on</span>`
     : `<span class="chip">Live rooms off here</span> <span class="small muted">They work on the game's website or when the page is open in Claude. Challenge codes work anywhere.</span>`;
 }
-async function enterRoom(raw, host = false){
+async function enterRoom(raw, host = false, preset = null){
   if (!NET.lobby){ toast("Live rooms aren't available in this view"); return; }
   const code = String(raw || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 8);
   if (code.length < 4){ toast("Room codes are 4 to 8 letters or numbers"); return; }
   let room;
   try { room = await NET.lobby.join("g13-" + code); } catch(e){ toast("Couldn't open that room. Try again."); return; }
   leaveRoom(room);
-  NET.room = room; NET.code = code; NET.round = 0; NET.sig = ""; NET.host = host; NET.rules = host ? {blind: !!G.blind, timer: !!G.timer, cat: false} : null;
+  NET.room = room; NET.code = code; NET.round = 0; NET.sig = ""; NET.host = host; NET.rules = host ? {blind: !!G.blind, timer: !!G.timer, cat: false, alltime: false, ...(preset || {})} : null;
   NET.unsub = room.onPeers(ch => { NET.peers = ch.peers; onNet(); }, () => toast("Lost the room connection"));
   startOnlineRound();
 }
@@ -821,7 +823,7 @@ function startOnlineRound(){ NET.acts = []; NET.gg = false; NET.started = false;
 function pushPresence(){
   if (!NET.room) return;
   NET.room.presence({v: 2, nick: (G.nick || "Player").slice(0, 16), host: NET.host, round: NET.round, started: !!NET.started,
-    blind: !!NET.rules.blind, timer: !!NET.rules.timer, cat: !!NET.rules.cat, acts: NET.acts.slice(0, 40), gg: !!NET.gg}).catch(() => {});
+    blind: !!NET.rules.blind, timer: !!NET.rules.timer, cat: !!NET.rules.cat, alltime: !!NET.rules.alltime, acts: NET.acts.slice(0, 40), gg: !!NET.gg}).catch(() => {});
 }
 const roomPeers = () => { try { return NET.room ? NET.room.peers() : []; } catch(e){ return []; } };
 const opponent = () => roomPeers().find(p => !p.sameTab && p.kind === "viewer" && p.presence && p.presence.v === 2) || null;
@@ -835,12 +837,12 @@ function onlineStarted(){
 }
 function buildOnline(){
   const o = opponent();
-  if (!NET.host && o && o.presence.host === true) NET.rules = {blind: o.presence.blind === true, timer: o.presence.timer === true, cat: o.presence.cat === true};
-  if (!NET.rules) NET.rules = {blind: false, timer: true, cat: false};
+  if (!NET.host && o && o.presence.host === true) NET.rules = {blind: o.presence.blind === true, timer: o.presence.timer === true, cat: o.presence.cat === true, alltime: o.presence.alltime === true};
+  if (!NET.rules) NET.rules = {blind: false, timer: true, cat: false, alltime: false};
   const names = NET.host ? [myName(), o ? oppName(o) : "Waiting…"] : [o ? oppName(o) : "Host", myName()];
   if (names[0] === names[1]) names[1] += " 2";
   const s = makeSession("online", {seed: hashStr(NET.code + ":" + NET.round), allEvents: true, blind: NET.rules.blind, timer: NET.rules.timer, names,
-    catVs: !!NET.rules.cat, cat: NET.rules.cat ? CATS[hashStr(NET.code + ":" + NET.round + ":cat") % CATS.length] : null});
+    catVs: !!(NET.rules.cat || NET.rules.alltime), cat: NET.rules.cat ? CATS[hashStr(NET.code + ":" + NET.round + ":cat") % CATS.length] : NET.rules.alltime ? ANYCAT : null});
   s.me = NET.host ? 0 : 1;
   s.started = onlineStarted();
   const oActs = o && o.presence.round === NET.round ? oppActs(o) : [];
@@ -874,7 +876,7 @@ function onNet(){
   if (o && !NET.host && o.presence.host === true && Number.isInteger(o.presence.round) && o.presence.round > NET.round){
     NET.round = o.presence.round; NET.acts = []; NET.gg = false; NET.cache = null; NET.tk = {key: "", deadline: 0}; pushPresence();
   }
-  const sig = o ? JSON.stringify([o.peer, o.presence.nick, o.presence.host, o.presence.round, o.presence.started, o.presence.blind, o.presence.timer, o.presence.cat, o.presence.acts, o.presence.gg]) : "none";
+  const sig = o ? JSON.stringify([o.peer, o.presence.nick, o.presence.host, o.presence.round, o.presence.started, o.presence.blind, o.presence.timer, o.presence.cat, o.presence.alltime, o.presence.acts, o.presence.gg]) : "none";
   if (sig === NET.sig) return;
   NET.sig = sig;
   if (!S || S.mode !== "online") return;
@@ -1416,7 +1418,7 @@ function hubHTML(){
     <div class="mgroup"><h3 class="gh">Solo</h3><div class="modes">
       ${card("classic", `${G.best ? `<span class="small muted">Best <b class="num" style="color:var(--text)">${G.best.w}–${G.best.l}</b></span>` : "<span></span>"}<button class="btn go sm" data-start="classic">Play</button>`)}
       ${card("map", `<span></span><button class="btn go sm" data-start="map">Play</button>`)}
-      ${card("cat", `${CBEST ? `<span class="small muted">Best <b class="num" style="color:var(--text)">${CBEST.w}–${CBEST.l}</b></span>` : "<span></span>"}<button class="btn go sm" data-start="cat">Spin a category</button>`)}
+      ${card("cat", `${CBEST ? `<span class="small muted">Best <b class="num" style="color:var(--text)">${CBEST.w}–${CBEST.l}</b></span>` : "<span></span>"}<div class="row"><button class="btn go sm" data-start="cat">Spin a category</button><button class="btn sm2" data-online-cat="1" title="Head to head with a friend">Online</button></div>`)}
       ${card("gauntlet", `${G.gbest ? `<span class="small muted">Best <b class="num" style="color:var(--text)">${G.gbest.w}–${G.gbest.l}</b></span>` : "<span></span>"}<button class="btn go sm" data-start="gauntlet">Play</button>`)}
     </div></div>
 
@@ -1426,7 +1428,7 @@ function hubHTML(){
       ${card("online", `<div class="stack"><div id="net-status">${netStatusHTML()}</div>
         <label class="f" for="nick">Your name<input id="nick" maxlength="16" placeholder="e.g. Ads" value="${esc(G.nick)}"></label>
         <div class="row"><button class="btn go sm" id="mkroom">Create room</button><span class="muted small">or</span><input id="jcode" maxlength="8" placeholder="Room code" aria-label="Room code" style="width:7.5em;text-transform:lowercase"><button class="btn" id="joinroom">Join</button></div></div>`)}
-      ${card("clash", `<span></span><div class="row"><button class="btn go sm" data-start="bot" data-catvs="1">vs Bot</button><button class="btn go sm" data-start="local" data-catvs="1">Pass & play</button></div>`)}
+      ${card("clash", `<span></span><div class="row"><button class="btn go sm" data-start="bot" data-catvs="1">vs Bot</button><button class="btn go sm" data-start="local" data-catvs="1">Pass & play</button><button class="btn go sm" data-online-cat="1">Online</button></div>`)}
       ${card("challenge", `<div class="stack"><button class="btn go sm" data-start="challenge">Make a challenge</button>
         <div class="row"><input id="ccode" placeholder="Friend's code" aria-label="Challenge code" style="flex:1;min-width:0;text-transform:uppercase"><button class="btn" id="takech">Accept</button></div></div>`)}
     </div></div>
@@ -1453,7 +1455,7 @@ function sessionHTML(){
   <section class="view">
     <div class="modebar">
       <button class="btn" id="tohub">← Modes</button>
-      <div style="min-width:0"><div class="eyebrow">${S.cat && S.mode !== "cat" ? `${m.title} · all-time rosters` : m.tag}</div><h2>${S.cat && S.mode !== "cat" ? "Category clash" : m.title}</h2></div>
+      <div style="min-width:0"><div class="eyebrow">${S.cat && S.mode !== "cat" ? `${m.title} · all-time rosters` : m.tag}</div><h2>${S.cat && S.mode !== "cat" ? (S.cat === ANYCAT ? "All-time draft" : "Category clash") : m.title}</h2></div>
       <span style="flex:1"></span>
       ${S.blind ? `<span class="chip blindc">Blind draft</span>` : ""}
       ${S.mode === "online" && S.started ? `<span class="chip">Room <b class="num" style="color:var(--text);margin-left:4px">${esc(NET.code)}</b></span>` : ""}
@@ -1648,6 +1650,7 @@ function lobbyHTML(){
       <div class="eyebrow" style="margin-top:14px">Room settings ${NET.host ? "" : "(set by the host)"}</div>
       <div class="lrules">
         <div class="lrule"><div><b>Blind draft</b><div class="small muted">Hide ratings and stats for both players</div></div>${seg("blind", R.blind, "Blind draft")}</div>
+        <div class="lrule"><div><b>All-time rosters</b><div class="small muted">Each spin deals a team's full 2021–2026 international roster instead of one event${R.cat ? " (on with Random category)" : ""}</div></div>${seg("alltime", !!(R.alltime || R.cat), "All-time rosters")}</div>
         <div class="lrule"><div><b>Random category</b><div class="small muted">Category clash: all-time rosters, one random category. Revealed when the draft starts</div></div>${seg("cat", !!R.cat, "Random category")}</div>
         <div class="lrule"><div><b>Pick timer</b><div class="small muted">${PICK_SECONDS} seconds per pick, random pick at zero</div></div>${seg("timer", R.timer, "Pick timer")}</div>
       </div>
@@ -1857,6 +1860,7 @@ function bindPlay(){
   ["fy", "ft", "fr"].forEach((id, i) => { const el = document.getElementById(id); if (el) el.addEventListener("change", ev => { G.filt[["year", "type", "region"][i]] = ev.target.value; store.set("thirteen-filt", G.filt); }); });
   [["p1", "p1"], ["p2", "p2"], ["nick", "nick"]].forEach(([id, k]) => { const el = document.getElementById(id); if (el) el.addEventListener("input", () => { G[k] = el.value.trim().slice(0, 16); store.set("thirteen-" + k, G[k]); }); });
   on("#mkroom", () => { if (!G.nick){ document.getElementById("nick").focus(); toast("Add your name first"); return; } enterRoom(Math.random().toString(36).replace(/[^a-z0-9]/g, "").slice(2, 7), true); });
+  on("[data-online-cat]", () => { if (!G.nick){ const n = document.getElementById("nick"); if (n){ n.scrollIntoView({block: "center"}); n.focus(); } toast("Add your name in the Online room card first"); return; } enterRoom(Math.random().toString(36).replace(/[^a-z0-9]/g, "").slice(2, 7), true, {cat: true, alltime: true}); });
   on("#joinroom", () => { if (!G.nick){ document.getElementById("nick").focus(); toast("Add your name first"); return; } enterRoom(document.getElementById("jcode").value); });
   on("#jcode", e => { if (e.key === "Enter") document.getElementById("joinroom").click(); }, "keydown");
   on("#takech", () => { const c = parseChallenge(document.getElementById("ccode").value); if (!c){ toast("That code doesn't look right. Copy the whole code your friend sent."); return; } startMode("challenge", {seed: c.seed, ids: c.ids, role: "taker", allEvents: true, blind: c.blind}); if (c.blind) toast("Your friend drafted blind, so you will too"); });
@@ -1891,7 +1895,7 @@ function bindPlay(){
   on("#copymsg", () => copyText(`I drafted a VCT super team. Beat it: open 13–0, go to Challenge code and paste ${challengeCode(S)}`, "Message copied"));
   on("#nextgame", () => { if (!NET.host) return; NET.round++; NET.sig = ""; startOnlineRound(); });
   on("#startgame", () => { if (!NET.host || !opponent()) return; NET.started = true; NET.tk = {key: "", deadline: 0}; pushPresence(); S = buildOnline(); renderPlay(); });
-  on("[data-rule]", e => { if (!NET.host) return; const [k, v] = e.currentTarget.dataset.rule.split("|"); NET.rules[k] = v === "1"; if (k === "cat"){} else if (k === "blind"){ G.blind = NET.rules.blind; store.set("thirteen-blind", G.blind); } else { G.timer = NET.rules.timer; store.set("thirteen-timer", G.timer); } pushPresence(); S = buildOnline(); renderPlay(); });
+  on("[data-rule]", e => { if (!NET.host) return; const [k, v] = e.currentTarget.dataset.rule.split("|"); NET.rules[k] = v === "1"; if (k === "cat"){ if (NET.rules.cat) NET.rules.alltime = true; } else if (k === "alltime"){ if (!NET.rules.alltime) NET.rules.cat = false; } else if (k === "blind"){ G.blind = NET.rules.blind; store.set("thirteen-blind", G.blind); } else { G.timer = NET.rules.timer; store.set("thirteen-timer", G.timer); } pushPresence(); S = buildOnline(); renderPlay(); });
   // battle
   ["a", "b"].forEach(k => {
     const ev = document.getElementById("b" + k + "ev"); if (ev) ev.addEventListener("change", () => { BT[k] = {ev: ev.value, t: ev.value === "bot" ? "" : eventTeams(ev.value)[0]}; BT.result = null; renderPlay(); });
