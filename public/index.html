@@ -273,6 +273,16 @@ footer a{color:var(--mute)}
 .mvpstats div{display:flex;flex-direction:column}
 .mvpstats b{font-family:var(--f-display);font-size:22px;font-weight:800;line-height:1.1}
 .mvpstats span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.lobby{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:14px;align-items:start}
+@media (max-width:760px){.lobby{grid-template-columns:1fr}}
+.lobby-code{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.lobby-code .code{font-size:44px;text-transform:uppercase;letter-spacing:.12em}
+.lplayers{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.lp{display:flex;gap:12px;align-items:center;padding:10px;border-radius:6px;background:var(--panel2);border-left:3px solid var(--c)}
+.lp.waiting{border-left-color:var(--line)}
+.lp.waiting b{color:var(--mute)}
+.lrules{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.lrule{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px;border-radius:6px;background:var(--panel2);flex-wrap:wrap}
 .chip.blindc{border-color:var(--controller);color:var(--controller)}
 .rating.qm{color:var(--dim)}
 .blindbox{border-color:color-mix(in srgb,var(--controller) 45%,var(--line))}
@@ -593,12 +603,14 @@ function makeSession(mode, o = {}){
   let drafters, order = [0,0,0,0,0];
   if (mode === "bot"){ drafters = [mk(me, 0, null), mk(`Bot (${G.level})`, 1, G.level)]; order = [0,1,1,0,0,1,1,0,0,1]; }
   else if (mode === "local"){ drafters = [mk(G.p1 || "Player 1", 0, null), mk(G.p2 || "Player 2", 1, null)]; order = [0,1,1,0,0,1,1,0,0,1]; }
+  else if (mode === "online"){ drafters = [mk(o.names[0], 0, null), mk(o.names[1], 1, null)]; order = [0,1,1,0,0,1,1,0,0,1]; }
   else if (mode === "autobot") drafters = [mk("Bot", 0, o.level || "Pro")];
   else drafters = [mk(me, 0, null)];
   const s = {mode, seed, filt, deck, pos:0, maps, drafters, order, turn:0, deal:null, dealPicks:0, phase:"draft", result:null, opts:o, blind: (o.blind != null ? !!o.blind : !!G.blind) && mode !== "autobot", timer: (o.timer != null ? !!o.timer : !!G.timer) && mode !== "autobot", tkey: "", deadline: 0};
   nextDeal(s);
   return s;
 }
+const canAct = d => !!d && (S && S.mode === "online" ? S.started && S.drafters.indexOf(d) === S.me : !d.bot);
 const hide = () => !!(S && S.blind && !S.result);
 const curD = s => s.drafters[s.order[Math.min(s.turn, s.order.length - 1)]];
 const lineupRows = d => SLOTS.map(sl => d.lineup[sl]).filter(Boolean);
@@ -645,7 +657,7 @@ function autoDraft(rand, level = "Pro", filt){
 const CHAMPS = D.events.map(e => ({e, rows: (TE.get(e.id + "|" + e.winner) || []).slice(0, 5)})).filter(c => c.rows.length === 5);
 
 // ---------- multiplayer (live room + challenge code) ----------
-const NET = {lobby: undefined, room: null, code: "", round: 0, peers: [], sig: "", unsub: null, host: false, rules: null};
+const NET = {lobby: undefined, room: null, code: "", round: 0, peers: [], sig: "", unsub: null, host: false, rules: null, acts: [], gg: false, started: false, cache: null, tk: {key: "", deadline: 0}};
 (async () => {
   let r = null;
   try { if (window.claude && typeof window.claude.use === "function") r = await window.claude.use("room"); } catch(e){ r = null; }
@@ -712,54 +724,76 @@ async function enterRoom(raw, host = false){
 function leaveRoom(keep){
   if (NET.room && NET.room !== keep){ try { NET.unsub && NET.unsub(); NET.room.leave().catch(() => {}); } catch(e){} NET.room = null; NET.unsub = null; }
 }
-function startOnlineRound(){
-  S = makeSession("online", {seed: hashStr(NET.code + ":" + NET.round), allEvents: true, ...(NET.rules || {})});
-  PLAYUI = "session"; pushPresence(); showPlay();
-}
+// Online room: a shared snake draft. Each player only publishes their OWN actions
+// (pick "p<id>", skip "s", redraft "r:<Slot>"); both pages replay host + guest actions
+// in turn order from the same seed, so they always show the same draft.
+function startOnlineRound(){ NET.acts = []; NET.gg = false; NET.started = false; NET.cache = null; NET.tk = {key: "", deadline: 0}; S = buildOnline(); PLAYUI = "session"; pushPresence(); showPlay(); }
 function pushPresence(){
-  if (!NET.room || !S || S.mode !== "online") return;
-  const d = S.drafters[0];
-  NET.room.presence({v: 1, nick: (G.nick || "Player").slice(0, 16), round: NET.round,
-    picks: SLOTS.map(sl => d.lineup[sl] ? d.lineup[sl].id : -1), done: S.phase !== "draft", gg: !!S.gg, host: NET.host, blind: !!S.blind, timer: !!S.timer}).catch(() => {});
+  if (!NET.room) return;
+  NET.room.presence({v: 2, nick: (G.nick || "Player").slice(0, 16), host: NET.host, round: NET.round, started: !!NET.started,
+    blind: !!NET.rules.blind, timer: !!NET.rules.timer, acts: NET.acts.slice(0, 40), gg: !!NET.gg}).catch(() => {});
 }
 const roomPeers = () => { try { return NET.room ? NET.room.peers() : []; } catch(e){ return []; } };
-const opponent = () => roomPeers().find(p => !p.sameTab && p.kind === "viewer" && p.presence && p.presence.v === 1) || null;
-const myPeer = () => (roomPeers().find(p => p.sameTab) || {}).peer || "";
-function oppRows(p){
-  const a = Array.isArray(p && p.presence && p.presence.picks) ? p.presence.picks.slice(0, 5) : [];
-  return a.map(x => Number.isInteger(x) && x >= 0 && x < D.rows.length ? D.rows[x] : null);
-}
+const opponent = () => roomPeers().find(p => !p.sameTab && p.kind === "viewer" && p.presence && p.presence.v === 2) || null;
 const oppName = p => String((p && p.presence && p.presence.nick) || "Friend").slice(0, 16);
-function onNet(){
-  if (!S || S.mode !== "online") return;
+const myName = () => (G.nick || "You").slice(0, 16);
+function oppActs(o){ const a = o && Array.isArray(o.presence.acts) ? o.presence.acts : []; return a.filter(x => typeof x === "string" && x.length < 16).slice(0, 40); }
+function onlineStarted(){
+  const o = opponent(); if (!o) return false;
+  if (NET.host) return !!NET.started;
+  return o.presence.host === true && o.presence.started === true && o.presence.round === NET.round;
+}
+function buildOnline(){
   const o = opponent();
-  const sig = o ? JSON.stringify([o.peer, o.presence.nick, o.presence.round, o.presence.picks, o.presence.done, o.presence.gg, o.presence.host, o.presence.blind, o.presence.timer]) : "none";
+  if (!NET.host && o && o.presence.host === true) NET.rules = {blind: o.presence.blind === true, timer: o.presence.timer === true};
+  if (!NET.rules) NET.rules = {blind: false, timer: true};
+  const names = NET.host ? [myName(), o ? oppName(o) : "Waiting…"] : [o ? oppName(o) : "Host", myName()];
+  if (names[0] === names[1]) names[1] += " 2";
+  const s = makeSession("online", {seed: hashStr(NET.code + ":" + NET.round), allEvents: true, blind: NET.rules.blind, timer: NET.rules.timer, names});
+  s.me = NET.host ? 0 : 1;
+  s.started = onlineStarted();
+  const oActs = o && o.presence.round === NET.round ? oppActs(o) : [];
+  const acts = NET.host ? [NET.acts, oActs] : [oActs, NET.acts];
+  const ptr = [0, 0];
+  for (let g = 0; g < 120 && s.phase === "draft" && s.deal; g++){
+    const di = s.order[s.turn]; const a = acts[di][ptr[di]]; if (a == null) break; ptr[di]++;
+    const d = s.drafters[di];
+    if (a === "s"){ if (d.skips) d.skips--; nextDeal(s); continue; }
+    if (a[0] === "p"){ const r = D.rows[+a.slice(1)]; if (r) doPick(s, r); continue; }
+    if (a.startsWith("r:")){ const sl = a.slice(2); if (d.lineup[sl]){ delete d.lineup[sl]; s.order.splice(s.turn, 0, di); if (!fitsIn(s, curD(s), s.deal)) nextDeal(s); } continue; }
+  }
+  // finished draft -> series, or a surrender
+  const oGG = o && o.presence.round === NET.round && o.presence.gg === true;
+  if (NET.cache && NET.cache.round === NET.round) s.result = NET.cache.result;
+  else if (NET.gg || oGG){
+    const loser = NET.gg ? s.drafters[s.me].name : s.drafters[1 - s.me].name, winner = NET.gg ? s.drafters[1 - s.me].name : s.drafters[s.me].name;
+    s.result = {type: "forfeit", loser, winner, meWon: !NET.gg};
+  } else if (s.phase === "ready"){
+    const A = lineupRows(s.drafters[0]), B = lineupRows(s.drafters[1]);
+    const sr = simSeries(rng(hashStr(NET.code + ":" + NET.round + ":" + A.map(r => r.id).join(",") + "|" + B.map(r => r.id).join(","))), A, B, 3, s.maps);
+    s.result = {type: "series", sr, nameA: s.drafters[0].name, nameB: s.drafters[1].name};
+  }
+  if (s.result){ s.phase = "ready"; s.deal = null; NET.cache = {round: NET.round, result: s.result}; }
+  return s;
+}
+function onNet(){
+  if (!NET.room) return;
+  const o = opponent();
+  // the guest follows the host's game number
+  if (o && !NET.host && o.presence.host === true && Number.isInteger(o.presence.round) && o.presence.round > NET.round){
+    NET.round = o.presence.round; NET.acts = []; NET.gg = false; NET.cache = null; NET.tk = {key: "", deadline: 0}; pushPresence();
+  }
+  const sig = o ? JSON.stringify([o.peer, o.presence.nick, o.presence.host, o.presence.round, o.presence.started, o.presence.blind, o.presence.timer, o.presence.acts, o.presence.gg]) : "none";
   if (sig === NET.sig) return;
   NET.sig = sig;
-  if (o && !NET.host && o.presence.host === true){
-    const rules = {blind: o.presence.blind === true, timer: o.presence.timer === true};
-    const changed = !NET.rules || NET.rules.blind !== rules.blind || NET.rules.timer !== rules.timer;
-    NET.rules = rules;
-    if (changed && !S.result && (S.blind !== rules.blind || S.timer !== rules.timer)){
-      S.blind = rules.blind; S.timer = rules.timer; S.tkey = ""; pushPresence();
-      toast(`Room settings from ${oppName(o)}: blind draft ${rules.blind ? "on" : "off"}, timer ${rules.timer ? "on" : "off"}`);
-    }
-  }
-  maybeOnlineResult();
+  if (!S || S.mode !== "online") return;
+  const wasStarted = S.started;
+  S = buildOnline();
+  if (!wasStarted && S.started) toast("Draft started");
   if (curView() === "play" && PLAYUI === "session") renderPlay();
 }
-function maybeOnlineResult(){
-  const g = opponent();
-  if (g && S && !S.result && g.presence.gg === true && g.presence.round === NET.round){ endBySurrender(oppName(g), S.drafters[0].name, true); toast(`${oppName(g)} surrendered`); return; }
-  const o = opponent(); if (!o || !S || S.result || S.phase === "draft") return;
-  const op = o.presence; if (!op.done || op.round !== NET.round) return;
-  const them = oppRows(o); if (them.length !== 5 || them.some(x => !x) || new Set(them.map(r => r.key)).size !== 5) return;
-  const mine = lineupRows(S.drafters[0]);
-  const meFirst = myPeer() <= o.peer;
-  const A = meFirst ? mine : them, B = meFirst ? them : mine;
-  const sr = simSeries(rng(hashStr(NET.code + ":" + NET.round + ":" + A.map(r => r.id).join(",") + "|" + B.map(r => r.id).join(","))), A, B, 3, S.maps);
-  S.result = {type: "series", sr: meFirst ? sr : flipSeries(sr), nameA: S.drafters[0].name, nameB: oppName(o), oppRows: them};
-}
+function onlineAct(a){ NET.acts.push(a); pushPresence(); S = buildOnline(); renderPlay(); }
+function maybeOnlineResult(){}
 function challengeCode(s){
   return s.seed.toString(36).toUpperCase().padStart(7, "0") + "-" + SLOTS.map(sl => s.drafters[0].lineup[sl].id.toString(36).padStart(3, "0")).join("").toUpperCase() + (s.blind ? "-B" : "");
 }
@@ -779,7 +813,7 @@ const MODES = {
   gauntlet:  {title: "Champions gauntlet", tag: "Solo · 18 matches", desc: "Your five play every Masters and Champions winner since 2021, one map each. The Valorant 82–0: can you go 18–0?"},
   bot:       {title: "Versus bot", tag: "You vs bot · Bo3", desc: "You and a bot take turns picking from the same rosters, then play a best-of-three on maps shown up front."},
   local:     {title: "Pass & play", tag: "2 players · one device", desc: "Two people share one phone or laptop, take turns drafting, then play a best-of-three."},
-  online:    {title: "Online room", tag: "2 players · live", desc: "Make a room and send the code. You both draft the same spins at the same time, then your teams play a best-of-three. The room uses its creator's blind draft and timer settings."},
+  online:    {title: "Online room", tag: "2 players · live", desc: "Make a room and send the code. Once your friend joins, the host starts the draft and you take turns picking from the same rosters, then play a best-of-three. The host sets blind draft and the timer."},
   challenge: {title: "Challenge code", tag: "2 players · any time", desc: "Draft a team and get a code. Your friend drafts the same spins later and plays your hidden five."},
   battle:    {title: "Bot battle", tag: "Watch · Bo1 to Bo5", desc: "Pit any two real rosters, or two bot drafts, against each other. Sentinels 2021 vs LOUD 2026?"}
 };
@@ -813,9 +847,10 @@ function showPlay(){ if (curView() !== "play") location.hash = "play"; else rend
 // =====================================================================
 function renderPlay(){
   clearTimeout(botTimer); clearInterval(pickTick);
-  if (S && S.timer && S.phase === "draft" && S.deal && !curD(S).bot){
-    const key = S.turn + "|" + S.deal;
-    if (S.tkey !== key){ S.tkey = key; S.deadline = Date.now() + PICK_SECONDS * 1000; }
+  const TK = S && S.mode === "online" ? NET.tk : S;
+  if (S && S.timer && S.phase === "draft" && S.deal && !curD(S).bot && (S.mode !== "online" || S.started)){
+    const key = NET.round + "|" + S.turn + "|" + S.deal + "|" + S.order.length;
+    if (TK.tkey !== key){ TK.tkey = key; TK.deadline = Date.now() + PICK_SECONDS * 1000; }
   }
   if (PLAYUI === "battle" && BT) app.innerHTML = battleHTML();
   else if (PLAYUI === "session" && S) app.innerHTML = sessionHTML();
@@ -824,16 +859,16 @@ function renderPlay(){
   bindTeamLinks();
   if (PLAYUI === "session" && S && S.result && S.result.type === "single") updateMatch();
   if (PLAYUI === "session") maybeCelebrate();
-  if (PLAYUI === "session" && S && S.timer && S.phase === "draft" && S.deal && !curD(S).bot){
+  if (PLAYUI === "session" && S && S.timer && S.phase === "draft" && S.deal && !curD(S).bot && (S.mode !== "online" || S.started)){
     const tick = () => {
       if (!S || PLAYUI !== "session" || curView() !== "play"){ clearInterval(pickTick); return; }
-      const left = Math.max(0, S.deadline - Date.now());
+      const left = Math.max(0, (S.mode === "online" ? NET.tk : S).deadline - Date.now());
       const sec = Math.ceil(left / 1000);
       const el = document.getElementById("ptsec"), bar = document.getElementById("ptbar"), box = document.getElementById("ptimer");
       if (el) el.textContent = sec;
       if (bar) bar.style.width = (left / (PICK_SECONDS * 10)).toFixed(1) + "%";
       if (box) box.classList.toggle("low", sec <= 10);
-      if (left <= 0){ clearInterval(pickTick); autoPick(); }
+      if (left <= 0){ clearInterval(pickTick); if (canAct(curD(S))) autoPick(); }
     };
     tick(); pickTick = setInterval(tick, 200);
   }
@@ -860,16 +895,17 @@ function awardTok(name){
 function canRedraft(di){
   if (!S || S.result) return false;
   const d = S.drafters[di]; if (!d || d.bot || !tok(d)) return false;
+  if (S.mode === "online") return S.phase === "draft" && curD(S) === d && canAct(d);
   if (S.phase === "draft") return S.drafters.length === 1 || curD(S) === d;
   return S.phase === "ready" && S.mode !== "challenge" || (S.mode === "challenge" && S.opts.role === "taker");
 }
 function redraft(di, sl){
   const d = S.drafters[di]; const r = d.lineup[sl]; if (!r || !canRedraft(di)) return;
+  if (S.mode === "online"){ spendTok(d); toast(`${r.p} released. Pick a new ${sl === "Flex" ? "flex player" : sl}`); onlineAct("r:" + sl); return; }
   delete d.lineup[sl]; spendTok(d);
   if (S.phase === "draft"){ S.order.splice(S.turn, 0, di); if (!fitsIn(S, curD(S), S.deal)) nextDeal(S); }
   else { S.order.push(di); S.phase = "draft"; nextDeal(S); }
   S.tkey = "";
-  if (S.mode === "online") pushPresence();
   toast(`${r.p} released. Pick a new ${sl === "Flex" ? "flex player" : sl}`);
   renderPlay();
 }
@@ -877,13 +913,13 @@ const tokChip = d => tok(d) ? `<span class="chip tokc" title="Redraft tokens: us
 
 function autoPick(){
   if (!S || S.phase !== "draft" || !S.deal) return;
-  const d = curD(S); if (d.bot) return;
+  const d = curD(S); if (!canAct(d)) return;
   const c = TE.get(S.deal).filter(r => slotFor(S, d, r));
+  if (S.mode === "online"){ if (c.length){ const r = c[Math.floor(Math.random() * c.length)]; toast(`Time's up. You got ${r.p}`); onlineAct("p" + r.id); } else onlineAct("s"); return; }
   if (!c.length){ nextDeal(S); renderPlay(); return; }
   const r = c[Math.floor(Math.random() * c.length)];
   doPick(S, r);
   toast(`Time's up. ${S.drafters.length > 1 ? d.name + " got" : "You got"} ${r.p} (${slotOf(d, r)})`);
-  if (S.mode === "online"){ pushPresence(); maybeOnlineResult(); }
   renderPlay();
 }
 const slotOf = (d, r) => SLOTS.find(sl => d.lineup[sl] === r) || r.role;
@@ -943,9 +979,9 @@ function maybeCelebrate(){
   R.fx = 1; let kind, label, delay = 250;
   let winner = null;
   if (R.type === "gauntlet"){ kind = R.w > R.l ? "win" : "loss"; label = R.l === 0 ? "Flawless" : null; delay = 1300; if (kind === "win") winner = S.drafters[0].name; }
-  else if (R.type === "forfeit"){ kind = R.meWon === false ? "loss" : R.meWon === true ? "win" : "neutral"; if (kind === "neutral"){ label = `${R.winner} ${winsWord(R.winner)}`; winner = R.winner; } else if (kind === "win") winner = S.drafters[0].name; }
+  else if (R.type === "forfeit"){ kind = R.meWon === false ? "loss" : R.meWon === true ? "win" : "neutral"; if (kind === "neutral"){ label = `${R.winner} ${winsWord(R.winner)}`; winner = R.winner; } else if (kind === "win") winner = S.drafters[S.mode === "online" ? S.me : 0].name; }
   else { const aw = R.sr.wa > R.sr.wb; delay = R.sr.games.length * 350 + 350;
-    if (S.mode === "local"){ kind = "neutral"; winner = aw ? R.nameA : R.nameB; label = `${winner} ${winsWord(winner)}`; } else { kind = aw ? "win" : "loss"; if (aw) winner = S.drafters[0].name; } }
+    if (S.mode === "local"){ kind = "neutral"; winner = aw ? R.nameA : R.nameB; label = `${winner} ${winsWord(winner)}`; } else { const iWon = S.mode === "online" ? (aw === (S.me === 0)) : aw; kind = iWon ? "win" : "loss"; if (iWon) winner = S.drafters[S.mode === "online" ? S.me : 0].name; } }
   if (winner) awardTok(winner);
   setTimeout(() => celebrate(kind, label), delay);
 }
@@ -1024,15 +1060,15 @@ function sessionHTML(){
       <div style="min-width:0"><div class="eyebrow">${m.tag}</div><h2>${m.title}</h2></div>
       <span style="flex:1"></span>
       ${S.blind ? `<span class="chip blindc">Blind draft</span>` : ""}
-      ${S.mode === "online" ? `<span class="chip">Room <b class="num" style="color:var(--text);margin-left:4px">${esc(NET.code)}</b></span><button class="btn" id="copyroom">Copy code</button>` : ""}
+      ${S.mode === "online" && S.started ? `<span class="chip">Room <b class="num" style="color:var(--text);margin-left:4px">${esc(NET.code)}</b></span>` : ""}
       ${matchControls()}
     </div>
-    ${needbarHTML()}
+    ${S.mode === "online" && !S.started && !S.result ? lobbyHTML() : `${needbarHTML()}
     ${S.result ? resultHTML() : ""}
     <div class="board">
       <div class="panel" id="deal">${S.phase === "draft" ? dealHTML() : readyHTML()}</div>
       <div class="panel info">${infoHTML()}</div>
-    </div>
+    </div>`}
   </section>`;
 }
 function matchControls(){
@@ -1043,7 +1079,7 @@ function matchControls(){
   if (live && S.mode === "local") h += S.askGG
     ? `<span class="small muted">Who gives up?</span>${S.drafters.map((d, i) => `<button class="btn warn" data-gg="${i}">${esc(d.name)}</button>`).join("")}<button class="btn" id="ggback">Back</button>`
     : `<button class="btn warn" id="ggask">Surrender</button>`;
-  if (live && S.mode === "online") h += `<button class="btn warn" data-arm="surrender">Surrender</button>`;
+  if (live && S.mode === "online" && S.started) h += `<button class="btn warn" data-arm="surrender">Surrender</button>`;
   if (S.mode !== "online" && (!pvp || !live)) h += `<button class="btn" id="newdraft">New draft</button>`;
   return h;
 }
@@ -1054,7 +1090,7 @@ function endBySurrender(loser, winner, meWon = null){
 const winsWord = n => n === "You" ? "win" : "wins";
 function needRow(d, active){
   return `<div class="needrow ${active ? "turn" : ""}" style="--c:${SIDE_COL[d.side]}">
-    <div class="who">${active ? `<i class="dot"></i>` : ""}<span>${esc(d.name)}</span>${active ? `<em>${d.bot ? "picking" : "your pick"}</em>` : ""}${tokChip(d)}</div>
+    <div class="who">${active ? `<i class="dot"></i>` : ""}<span>${esc(d.name)}</span>${active ? `<em>${canAct(d) ? "your pick" : "picking"}</em>` : ""}${tokChip(d)}</div>
     ${SLOTS.map(sl => { const r = d.lineup[sl]; const di = S.drafters.indexOf(d);
       return r ? `<div class="ns full" title="${esc(r.p)} · ${sl}">${agentImg(r.ag[0], "s")}<span class="nm">${esc(r.p)}</span>${canRedraft(di) ? `<button class="rd" data-rd="${di}|${sl}" aria-label="Redraft ${esc(r.p)} (uses a token)" title="Redraft (uses a token)">↺</button>` : ""}</div>`
                : `<div class="ns open" style="--rc:${slotCol(sl)}" title="Need a ${sl}">${roleGlyph(sl, 18)}<span class="l">${sl}</span><span class="sh">${SHORT[sl]}</span></div>`; }).join("")}
@@ -1063,14 +1099,6 @@ function needRow(d, active){
 function needbarHTML(){
   const multi = S.drafters.length > 1;
   const rows = S.drafters.map(d => needRow(d, multi && S.phase === "draft" && curD(S) === d));
-  if (S.mode === "online"){
-    const o = opponent();
-    if (!o) rows.push(`<div class="needrow" style="--c:var(--orange)"><div class="who"><span>Waiting…</span></div><div class="ns open wide" style="--rc:var(--mute)">Send code <b class="num">${esc(NET.code)}</b> to a friend</div></div>`);
-    else {
-      const them = oppRows(o); const reveal = !!S.result;
-      rows.push(`<div class="needrow" style="--c:var(--orange)"><div class="who"><span>${esc(oppName(o))}</span>${o.presence.round !== NET.round ? `<em>other round</em>` : o.presence.done ? `<em>locked</em>` : ""}</div>${them.concat([null,null,null,null,null]).slice(0, 5).map((r, i) => r ? (reveal ? `<div class="ns full">${agentImg(r.ag[0], "s")}<span class="nm">${esc(r.p)}</span></div>` : `<div class="ns full hid"><span class="nm">Picked</span></div>`) : `<div class="ns open" style="--rc:var(--mute)"><span class="l">${SLOTS[i]}</span><span class="sh">${SHORT[SLOTS[i]]}</span></div>`).join("")}</div>`);
-    }
-  }
   if (S.mode === "challenge" && S.opts.role === "taker"){
     const them = S.opts.ids.map(i => D.rows[i]);
     rows.push(`<div class="needrow" style="--c:var(--orange)"><div class="who"><span>Challenger</span></div>${them.map(r => S.result ? `<div class="ns full">${agentImg(r.ag[0], "s")}<span class="nm">${esc(r.p)}</span></div>` : `<div class="ns full hid"><span class="nm">Hidden</span></div>`).join("")}</div>`);
@@ -1087,7 +1115,7 @@ function dealHTML(){
   const multi = S.drafters.length > 1;
   const taken = takenKeys(S);
   return `
-    ${multi ? `<div class="turnbar" style="--c:${SIDE_COL[d.side]}"><b>${esc(d.name)}</b> ${d.bot ? "is picking…" : "to pick"}${S.dealPicks === 1 ? `<span class="small"> · second pick from this roster</span>` : ""}</div>` : ""}
+    ${multi ? `<div class="turnbar" style="--c:${SIDE_COL[d.side]}"><b>${esc(d.name)}</b> ${canAct(d) ? "to pick" : "is picking…"}${S.dealPicks === 1 ? `<span class="small"> · second pick from this roster</span>` : ""}</div>` : ""}
     <div class="deal-head">
       <div style="min-width:0">
         <div class="eyebrow">${ev.type} · ${ev.year} · ${esc(rows[0].reg)}</div>
@@ -1097,11 +1125,11 @@ function dealHTML(){
       ${S.timer && !d.bot ? `<div class="pick-timer" id="ptimer" role="timer" aria-label="Seconds left to pick"><span class="num" id="ptsec">${PICK_SECONDS}</span><span class="eyebrow">sec</span><div class="ptrack"><i id="ptbar"></i></div></div>` : ""}
       <div class="needline"><span class="eyebrow">Needs</span>${need.map(sl => `<span class="chip needc" style="--rc:${slotCol(sl)}">${sl}</span>`).join("")}</div>
     </div>
-    <div class="plist">${fits.map(r => prowHTML(r, slotFor(S, d, r), !d.bot)).join("") || `<div class="pad muted small">Nobody here fits.</div>`}</div>
+    <div class="plist">${fits.map(r => prowHTML(r, slotFor(S, d, r), canAct(d))).join("") || `<div class="pad muted small">Nobody here fits.</div>`}</div>
     ${rest.length ? `<details class="nofit"><summary>${rest.length} can't be picked (${[...new Set(rest.map(r => taken.has(r.key) ? "already drafted" : "no open slot"))].join(", ")})</summary>${rest.map(r => prowHTML(r, null, false, taken.has(r.key) ? "Taken" : "No slot")).join("")}</details>` : ""}
     <div class="deal-foot">
-      <span class="small muted">${d.bot ? "The bot is choosing from this roster." : fits.length ? "Tap a player to draft them." : ""}</span>
-      ${!d.bot ? `<button class="btn" id="skip" ${d.skips + tok(d) ? "" : "disabled"}>Skip team (${d.skips + tok(d)} left)</button>` : ""}
+      <span class="small muted">${d.bot ? "The bot is choosing from this roster." : !canAct(d) ? `Waiting for ${esc(d.name)} to pick.` : fits.length ? "Tap a player to draft them." : ""}</span>
+      ${canAct(d) ? `<button class="btn" id="skip" ${d.skips + tok(d) ? "" : "disabled"}>Skip team (${d.skips + tok(d)} left)</button>` : ""}
     </div>`;
 }
 function prowHTML(r, slot, clickable, why = ""){
@@ -1149,7 +1177,7 @@ function infoHTML(){
   }
   if (S.mode === "online"){
     const o = opponent();
-    parts.push(`<div class="pad bline"><div class="eyebrow">Room ${esc(NET.code)} · game ${NET.round + 1}</div><p class="small" style="margin:6px 0 0">${!o ? "Waiting for a friend. They open this page, choose Online room, and join with the code." : `${esc(oppName(o))} is here. You both get the same spins, in the same order. Picks stay hidden until both teams lock.`}</p></div>`);
+    parts.push(`<div class="pad bline"><div class="eyebrow">Room ${esc(NET.code)} · game ${NET.round + 1}</div><p class="small" style="margin:6px 0 0">${!o ? "Your friend left the room. The draft continues when they're back." : `You and ${esc(oppName(o))} take turns picking from the same rosters. ${S.blind ? "Blind draft is on for both of you." : ""}`}</p></div>`);
   }
   if (S.mode === "challenge"){
     parts.push(`<div class="pad bline"><p class="small" style="margin:0">${S.opts.role === "taker" ? "You're drafting the same spins your friend saw. Their five stay hidden until you play." : "When your five are locked you'll get a code. Your friend pastes it under Challenge code and drafts the same spins."}</p></div>`);
@@ -1168,10 +1196,7 @@ function slotHTML(d, slot){
 }
 function readyHTML(){
   if (S.result && S.result.type === "forfeit"){
-    if (S.mode === "online"){
-      const o = opponent();
-      return `<div class="pad readyp"><div class="eyebrow">Match over</div><h2>Go again?</h2>${o && o.presence.round > NET.round ? `<p class="muted">${esc(oppName(o))} wants a rematch.</p>` : ""}<div class="row">${o && o.presence.round > NET.round ? `<button class="btn go" id="acceptre">Accept rematch</button>` : `<button class="btn go" id="rematch">Rematch</button>`}</div></div>`;
-    }
+    if (S.mode === "online") return onlineNextHTML();
     return `<div class="pad readyp"><div class="eyebrow">Match over</div><h2>Start a new one?</h2><div class="row"><button class="btn go" id="newdraft2">New draft</button></div></div>`;
   }
   const rows = lineupRows(S.drafters[0]);
@@ -1196,14 +1221,39 @@ function readyHTML(){
   } else if (S.mode === "challenge"){
     body = `<p class="muted">Best of three against your friend's hidden five on ${S.maps.map(esc).join(", ")}.</p>`;
     btn = again ? "Replay" : "Play their team";
-  } else if (S.mode === "online"){
-    const o = opponent();
-    const waiting = !o ? "Waiting for a friend to join the room." : o.presence.round !== NET.round ? (o.presence.round > NET.round ? `${esc(oppName(o))} wants a rematch.` : `Waiting for ${esc(oppName(o))} to accept the rematch.`) : !o.presence.done ? `Waiting for ${esc(oppName(o))} to lock their five.` : "";
-    return `<div class="pad readyp"><div class="eyebrow">Your five are locked</div><h2>${S.result ? "Series over" : "Waiting"}</h2>
-      ${waiting ? `<p class="muted">${waiting}</p>` : ""}
-      <div class="row">${o && o.presence.round > NET.round ? `<button class="btn go" id="acceptre">Accept rematch</button>` : S.result ? `<button class="btn go" id="rematch">Rematch</button>` : ""}</div></div>`;
-  }
+  } else if (S.mode === "online") return onlineNextHTML();
   return `<div class="pad readyp"><div class="eyebrow">${again ? "Done" : "Ready"}</div><h2>${title}</h2>${body}<div class="row"><button class="btn go" id="playgo">${btn}</button></div></div>`;
+}
+
+function onlineNextHTML(){
+  return `<div class="pad readyp"><div class="eyebrow">Game ${NET.round + 1} over</div><h2>Go again?</h2>
+    ${NET.host ? `<p class="muted">Back to the lobby with the same room. You can change blind draft or the timer before starting.</p><div class="row"><button class="btn go" id="nextgame">Next game</button></div>`
+               : `<p class="muted">Waiting for the host to start the next game.</p>`}</div>`;
+}
+function lobbyHTML(){
+  const o = opponent(); const R = NET.rules || {blind: false, timer: true};
+  const hostName = NET.host ? myName() : (o ? oppName(o) : "Host");
+  const seg = (k, on, label) => NET.host
+    ? `<div class="seg" role="group" aria-label="${label}"><button data-rule="${k}|0" aria-pressed="${!on}">Off</button><button data-rule="${k}|1" aria-pressed="${on}">${k === "timer" ? PICK_SECONDS + "s" : "On"}</button></div>`
+    : `<span class="chip ${on ? "ok" : ""}">${on ? (k === "timer" ? PICK_SECONDS + "s" : "On") : "Off"}</span>`;
+  return `<div class="lobby">
+    <div class="panel pad lobby-code"><div class="eyebrow">Room code</div><div class="code num">${esc(NET.code)}</div><button class="btn" id="copyroom">Copy code</button>
+      <p class="small muted" style="margin:0">Your friend opens 13–0, picks Online room, and joins with this code.</p></div>
+    <div class="panel pad lobby-main">
+      <div class="eyebrow">Players</div>
+      <div class="lplayers">
+        <div class="lp" style="--c:var(--teal)"><span class="avatar" style="background:var(--teal)">${esc(hostName.slice(0, 2).toUpperCase())}</span><div><b>${esc(hostName)}</b><div class="small muted">Host · picks first</div></div></div>
+        ${o ? `<div class="lp" style="--c:var(--orange)"><span class="avatar" style="background:var(--orange)">${esc((NET.host ? oppName(o) : myName()).slice(0, 2).toUpperCase())}</span><div><b>${esc(NET.host ? oppName(o) : myName())}</b><div class="small muted">Guest${NET.host ? "" : " · you"}</div></div></div>`
+            : `<div class="lp waiting"><span class="avatar" style="background:var(--panel2);color:var(--mute)">?</span><div><b>Waiting for a friend…</b><div class="small muted">Send them the code</div></div></div>`}
+      </div>
+      <div class="eyebrow" style="margin-top:14px">Room settings ${NET.host ? "" : "(set by the host)"}</div>
+      <div class="lrules">
+        <div class="lrule"><div><b>Blind draft</b><div class="small muted">Hide ratings and stats for both players</div></div>${seg("blind", R.blind, "Blind draft")}</div>
+        <div class="lrule"><div><b>Pick timer</b><div class="small muted">${PICK_SECONDS} seconds per pick, random pick at zero</div></div>${seg("timer", R.timer, "Pick timer")}</div>
+      </div>
+      <div class="row" style="margin-top:16px">${NET.host ? `<button class="btn go" id="startgame" ${o ? "" : "disabled"}>${o ? "Start draft" : "Waiting for a friend"}</button>` : `<span class="muted">${o ? `Waiting for ${esc(hostName)} to start…` : "Connecting to the host…"}</span>`}</div>
+    </div>
+  </div>`;
 }
 
 // ---------- running results ----------
@@ -1408,8 +1458,8 @@ function bindPlay(){
   on("#tohub", () => { PLAYUI = "hub"; clearInterval(simTimer); showPlay(); });
   on("#newdraft", () => startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : {}));
   on("#copyroom", () => copyText(NET.code, "Room code copied"));
-  on("[data-pick]", e => { const r = D.rows[+e.currentTarget.dataset.pick]; if (!S || curD(S).bot) return; if (doPick(S, r)){ if (S.mode === "online"){ pushPresence(); maybeOnlineResult(); } renderPlay(); } });
-  on("#skip", () => { const d = curD(S); if (d.skips) d.skips--; else if (tok(d)) spendTok(d); else return; nextDeal(S); renderPlay(); });
+  on("[data-pick]", e => { const r = D.rows[+e.currentTarget.dataset.pick]; if (!S || !canAct(curD(S))) return; if (S.mode === "online"){ if (slotFor(S, curD(S), r)) onlineAct("p" + r.id); return; } if (doPick(S, r)) renderPlay(); });
+  on("#skip", () => { const d = curD(S); if (!canAct(d)) return; if (S.mode === "online"){ if (!d.skips){ if (!tok(d)) return; spendTok(d); } onlineAct("s"); return; } if (d.skips) d.skips--; else if (tok(d)) spendTok(d); else return; nextDeal(S); renderPlay(); });
   on("[data-rd]", e => { e.stopPropagation(); const [di, sl] = e.currentTarget.dataset.rd.split("|"); redraft(+di, sl); });
   on("#playgo", runResult);
   on("#newdraft2", () => startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : {}));
@@ -1420,7 +1470,7 @@ function bindPlay(){
     const b = e.currentTarget; const what = b.dataset.arm;
     if (b.dataset.armed){
       if (what === "cancel"){ clearInterval(pickTick); clearTimeout(botTimer); clearInterval(simTimer); S = null; PLAYUI = "hub"; toast("Match cancelled"); showPlay(); }
-      else { const o = opponent(); S.gg = true; endBySurrender(S.drafters[0].name, o ? oppName(o) : "Your opponent", false); pushPresence(); renderPlay(); }
+      else { NET.gg = true; pushPresence(); S = buildOnline(); renderPlay(); }
       return;
     }
     const label = b.textContent; b.dataset.armed = "1"; b.classList.add("armed");
@@ -1430,8 +1480,9 @@ function bindPlay(){
   on("#share", () => copyText(PLAYUI === "battle" ? `13–0 VCT draft, Bot battle: ${BT.result.nameA} ${BT.result.sr.wa}–${BT.result.sr.wb} ${BT.result.nameB}\n` + BT.result.sr.games.map((g, i) => `Map ${i + 1} ${g.map}: ${g.w}–${g.l}`).join("\n") : shareText(), "Result copied"));
   on("#copych", () => copyText(challengeCode(S), "Challenge code copied"));
   on("#copymsg", () => copyText(`I drafted a VCT super team. Beat it: open 13–0, go to Challenge code and paste ${challengeCode(S)}`, "Message copied"));
-  on("#rematch", () => { const o = opponent(); NET.round = Math.max(NET.round, o ? o.presence.round || 0 : 0) + 1; NET.sig = ""; startOnlineRound(); });
-  on("#acceptre", () => { const o = opponent(); if (o) NET.round = o.presence.round; NET.sig = ""; startOnlineRound(); });
+  on("#nextgame", () => { if (!NET.host) return; NET.round++; NET.sig = ""; startOnlineRound(); });
+  on("#startgame", () => { if (!NET.host || !opponent()) return; NET.started = true; NET.tk = {key: "", deadline: 0}; pushPresence(); S = buildOnline(); renderPlay(); });
+  on("[data-rule]", e => { if (!NET.host) return; const [k, v] = e.currentTarget.dataset.rule.split("|"); NET.rules[k] = v === "1"; if (k === "blind"){ G.blind = NET.rules.blind; store.set("thirteen-blind", G.blind); } else { G.timer = NET.rules.timer; store.set("thirteen-timer", G.timer); } pushPresence(); S = buildOnline(); renderPlay(); });
   // battle
   ["a", "b"].forEach(k => {
     const ev = document.getElementById("b" + k + "ev"); if (ev) ev.addEventListener("change", () => { BT[k] = {ev: ev.value, t: ev.value === "bot" ? "" : eventTeams(ev.value)[0]}; BT.result = null; renderPlay(); });
