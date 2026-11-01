@@ -37,10 +37,16 @@ const { chromium } = require('playwright');
     }
     return !!await p.$('#playgo');
   };
+  // modes start from the hero (gauntlet) or from a tile's sheet (everything else)
+  const start = async mode => {
+    const direct = await p.$(`#app [data-start="${mode}"]`);
+    if (direct) await direct.click(); else { await p.click(`[data-mode="${mode}"]`); await p.waitForTimeout(150); await p.click(`#sheet [data-start="${mode}"]`); }
+    await p.waitForTimeout(200);
+  };
   for (const mode of ['classic', 'gauntlet']) {
     await p.goto(url + '#play'); await p.waitForTimeout(300);
     const hub = await p.$('#tohub'); if (hub) { await hub.click(); await p.waitForTimeout(200); }
-    await p.click(`[data-start="${mode}"]`); await p.waitForTimeout(200);
+    await start(mode);
     if (!await draft()) { fail(mode + ': could not finish the draft'); continue; }
     await p.click('#playgo'); await p.waitForTimeout(1500);
     const res = await p.$('#match');
@@ -54,13 +60,17 @@ const { chromium } = require('playwright');
   else console.log('daily: opens');
   // each regional/tier 2 deal filter deals something
   await p.click('#tohub'); await p.waitForTimeout(200);
-  const opts = await p.$$eval('#ft option', o => o.map(x => x.value));
+  await p.click('[data-opensettings]'); await p.waitForTimeout(150);
+  const opts = await p.$$eval('#sheet #ft option', o => o.map(x => x.value));
+  await p.click('#sheet [data-closesheet]'); await p.waitForTimeout(150);
   for (const v of opts) {
-    await p.selectOption('#ft', v); await p.click('[data-start="classic"]'); await p.waitForTimeout(200);
+    await p.click('[data-opensettings]'); await p.waitForTimeout(120);
+    await p.selectOption('#sheet #ft', v); await p.click('#sheet [data-closesheet]'); await p.waitForTimeout(120);
+    await start('classic');
     if (!await p.$('[data-pick]')) fail('deal filter "' + v + '" deals nothing');
     await p.click('#tohub'); await p.waitForTimeout(150);
   }
-  await p.selectOption('#ft', '');
+  await p.click('[data-opensettings]'); await p.waitForTimeout(120); await p.selectOption('#sheet #ft', ''); await p.click('#sheet [data-closesheet]');
   if (errs.length) fail('page errors: ' + errs.join(' | '));
   console.log(process.exitCode ? 'SMOKE TEST FAILED' : 'SMOKE TEST PASSED');
   await b.close();

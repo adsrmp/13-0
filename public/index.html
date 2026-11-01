@@ -470,8 +470,90 @@ body.noscroll{overflow:hidden}
 .msmvp{font-size:15px}.streakl{color:var(--gold);font-weight:700}
 .daily .streak{font-size:14px;margin:4px 0 2px}.daily .streak b{color:var(--gold)}.msact{gap:8px}.msact .btn.go.sm{font-size:16px;padding:8px 18px}
 @media (max-width:640px){.seasontbl th:nth-child(n+4):nth-child(-n+6),.seasontbl td:nth-child(n+4):nth-child(-n+6){display:none}}.mstabs{display:flex;flex-wrap:wrap;align-self:flex-start}
+/* ===== redesign: home, sheets, header chip, bottom tabs ===== */
+.mechip{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:4px 10px 4px 4px;font-size:12.5px;font-weight:600;color:var(--text);flex:none;max-width:56vw}
+.mechip .av{width:24px;height:24px;border-radius:50%;color:var(--bg);display:grid;place-items:center;font-weight:800;font-size:10.5px;flex:none}
+.mechip .mename{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:9em}.mechip .mest{color:var(--gold)}.mechip .metk{color:var(--mute);font-weight:500;white-space:nowrap}
+.av.big{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:var(--bg);flex:none}
+.hub2{gap:12px}
+.hero{position:relative;overflow:hidden;border-radius:14px;padding:18px 18px 14px;border:1px solid rgba(230,180,80,.55);background:radial-gradient(120% 90% at 100% 0%,rgba(230,180,80,.28),transparent 55%),linear-gradient(160deg,#2a1d12,var(--panel) 62%)}
+.hero .big18{position:absolute;right:-4px;top:-18px;font-family:var(--f-display);font-weight:900;font-size:150px;line-height:1;color:rgba(230,180,80,.13);pointer-events:none}
+.hero h2{font-size:clamp(32px,6vw,46px);line-height:.95;margin:4px 0 6px}
+.hero p{color:#cfc6b8;margin:0;max-width:34ch;font-size:14px}
+.hstats{display:flex;gap:22px;margin:12px 0}
+.hstats b{display:block;font-size:20px;color:var(--text)}.hstats span{font-size:10.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.btn.go.herogo{width:100%;max-width:420px;font-size:26px;padding:11px;border-radius:10px;display:block}
+.hface{display:none}
+@media (min-width:900px){.hero{padding-right:46%}.hface{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;position:absolute;right:18px;top:18px;bottom:18px;width:calc(46% - 36px);z-index:1}
+  .hface .eyebrow{width:100%;color:var(--gold)}.hface span{font-size:12px;color:var(--mute);border:1px solid rgba(230,180,80,.3);background:rgba(13,19,28,.55);border-radius:6px;padding:4px 8px}.hface b{color:var(--text);font-weight:600}
+  .hero .big18{right:auto;left:30%}}
+.hstrip{display:flex;gap:4px;margin-top:12px;max-width:420px}.hstrip i{flex:1;height:5px;border-radius:2px}.hstrip i.w{background:var(--teal)}.hstrip i.l{background:var(--red)}
+.daily{display:flex;gap:12px;align-items:center;flex-wrap:nowrap;padding:12px 14px;border-color:rgba(51,198,174,.6);background:linear-gradient(120deg,rgba(51,198,174,.12),transparent 70%),var(--panel)}
+.daily .dtext{flex:1;min-width:0}.daily h3{margin:1px 0 2px;font-size:20px;line-height:1}.daily .streak{font-size:12.5px;margin:0}.daily .streak b{color:var(--gold)}
+.daily .dact{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex:none}.daily .dres{display:flex;align-items:center;gap:8px}.daily .dres b{font-size:20px}
+.daily .btn.go{font-size:18px;padding:8px 16px}
+.hchips{display:flex;gap:6px;flex-wrap:wrap}
+.hchip{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--mute);white-space:nowrap}
+.hchip b{color:var(--text);font-weight:600}.hchip.on{border-color:var(--controller);color:var(--controller)}
+.hub2 .sect{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.tile{display:flex;gap:10px;align-items:center;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 11px;min-height:58px;color:var(--text)}
+.tile:hover{border-color:var(--mute)}.tile b{display:block;font-size:14px;line-height:1.15}.tile .tsub{font-size:11.5px;color:var(--mute)}
+.tile .mglyph span,.mshead .mglyph span{width:36px;height:36px;font-size:16px}
+.mglyph.big span{width:48px!important;height:48px!important;font-size:22px!important}
+.msheet{display:flex;flex-direction:column;gap:12px}
+.mshead{display:flex;gap:12px;align-items:center;padding-right:44px}.mshead h2{margin:0;font-size:30px;line-height:1}
+.optrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.optrow b{display:block;font-size:14px}.optrow span{font-size:12px;color:var(--mute)}
+.seg.wide{display:flex}.seg.wide button{flex:1}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:5px}
+.msplay{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.msplay .btn.go.big{flex:1;font-size:24px;padding:12px;border-radius:10px;min-width:200px}
+.resume{justify-content:space-between;padding:10px 12px;gap:10px}
+nav.tabbar{display:none}
+@media (max-width:640px){
+  nav.tabs{display:none}
+  .top .wrap{gap:10px;flex-wrap:nowrap}
+  .mechip{margin-left:auto;order:1}.sndbtn{order:2;margin-left:0}.instbtn{display:none!important}
+  nav.tabbar{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(11,16,24,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px))}
+  nav.tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;font-weight:600;color:var(--dim);text-decoration:none;padding:2px 0}
+  nav.tabbar a svg{width:21px;height:21px}nav.tabbar a[aria-current="page"]{color:var(--text)}
+  body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+  footer{padding-bottom:12px}
+  .againbar{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
+  .tiles{grid-template-columns:1fr 1fr}.tile{padding:8px 9px;gap:8px}.tile b{font-size:13px}.tile .mglyph span{width:32px;height:32px;font-size:14px}
+  .hero{padding:15px 15px 12px}.hstats{gap:16px;margin:9px 0}
+  .daily .dact .row{flex-wrap:nowrap}
+  .sheetwrap{z-index:60}
+}
+/* ===== redesign: draft screen ===== */
+.infob{width:20px;height:20px;padding:0;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;text-transform:none;letter-spacing:0;font-family:var(--f-mono)}
+.pstats .mainag{display:none}
+@media (max-width:640px){
+  .modebar{flex-wrap:nowrap;gap:8px;align-items:center}
+  .modebar .mlbl,.modebar .mhide{display:none}
+  .modebar #tohub,.modebar [data-arm]{padding:7px 11px;font-size:16px;line-height:1;flex:none}
+  .modebar h2{font-size:20px}.modebar .eyebrow{font-size:10px}
+  .modebar .chip{display:none}
+  .needbar{position:sticky;top:var(--hh);z-index:6;padding:8px;gap:6px;box-shadow:0 8px 18px rgba(0,0,0,.35)}
+  .needbar .mapchips{padding-bottom:6px}
+  .turnbar{padding:6px 12px;font-size:15px}
+  .prow{padding:9px 12px;gap:10px;align-items:center}
+  .prow .pname{font-size:15px;gap:5px;flex-wrap:wrap;line-height:1.25}
+  .prow .pname .chip{font-size:9.5px;padding:1px 5px}
+  .pstats{gap:8px;font-size:12px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden}
+  .pstats .rnds{display:none}.pstats .mainag{display:inline;color:var(--mute)}
+  .prow .rating{font-size:22px}.prow .target{font-size:10px;padding:2px 6px}
+  .deal-head{padding:10px 12px}.deal-team{font-size:26px}
+  .board .panel.info .lineup{display:none}
+  .board .panel.info .pad:has(.lineup){display:none}
+  .ns{height:36px}.ns svg{width:12px;height:12px}
+  .needrow .who{font-size:12px}.needrow.turn{padding:4px 6px}
+  .turnbar{font-size:14px;padding:5px 12px}
+  .deal-head .pick-timer .num{font-size:30px}
+}
+.needrow .who .winp{margin-left:auto;color:var(--teal)}
 .instbtn{flex:none}.instbtn[hidden]{display:none!important}
-@media (max-width:640px){.daily .mglyph{display:none}.daily .dact{align-items:stretch;width:100%}.rktable th:nth-child(4),.rktable td:nth-child(4){display:none}.instbtn{order:1;margin-left:auto;font-size:13px;padding:6px 10px}.instbtn:not([hidden])+.sndbtn{margin-left:8px}}
+@media (max-width:640px){.rktable th:nth-child(4),.rktable td:nth-child(4){display:none}.instbtn{order:1;margin-left:auto;font-size:13px;padding:6px 10px}.instbtn:not([hidden])+.sndbtn{margin-left:8px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -482,11 +564,20 @@ body.noscroll{overflow:hidden}
       <a href="#play">Play</a><a href="#players">Players</a><a href="#teams">Teams</a><a href="#meta">Agents &amp; maps</a><a href="#events">Events</a><a href="#ranks">Ranks</a>
     </nav>
     <button class="btn sm2 instbtn" id="instbtn" hidden>Install app</button>
+    <button class="mechip" id="mechip" aria-label="You: name, streak, tokens and skips"></button>
     <button class="sndbtn" id="sndbtn" aria-pressed="true" title="Sound"></button>
   </div>
 </header>
 
 <main class="wrap" id="app"></main>
+<nav class="tabbar" aria-label="Sections">
+  <a href="#play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Play</a>
+  <a href="#players"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6z" fill="currentColor"/></svg>Players</a>
+  <a href="#teams"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z" fill="currentColor"/></svg>Teams</a>
+  <a href="#meta"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>Meta</a>
+  <a href="#events"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v4a5 5 0 0 1-10 0z M5 4H3v2a4 4 0 0 0 4 4M19 4h2v2a4 4 0 0 1-4 4M10 13h4v4h3v3H7v-3h3z" fill="currentColor"/></svg>Events</a>
+  <a href="#ranks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V10h4v11zm6 0V3h4v18zm6 0v-7h4v7z" fill="currentColor"/></svg>Ranks</a>
+</nav>
 
 <footer class="wrap">
   <p><b>Unofficial fan project.</b> Not endorsed by or affiliated with Riot Games. VALORANT, its agents, maps and all related assets belong to Riot Games. Free, no ads.</p>
@@ -590,8 +681,9 @@ const UI = { player: null, team: null, event: null, mapEv: D.events[D.events.len
 function route(){
   const h = (location.hash || "#play").slice(1);
   const v = VIEWS[h] ? h : "play";
-  document.querySelectorAll("nav.tabs a").forEach(a => { if (a.getAttribute("href") === "#" + v) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  document.querySelectorAll("nav.tabs a, nav.tabbar a").forEach(a => { if (a.getAttribute("href") === "#" + v) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
   VIEWS[v]();
+  renderMe();
 }
 function setHH(){ const h = document.querySelector("header.top"); if (h) document.documentElement.style.setProperty("--hh", h.offsetHeight + "px"); }
 window.addEventListener("resize", setHH);
@@ -885,6 +977,7 @@ function bumpStreak(key){
   STREAK.best = Math.max(STREAK.best || 0, STREAK.cur); STREAK.last = key; store.set("thirteen-streak", STREAK);
   const r = streakReward(STREAK.cur), who = G.nick || "You";
   const got = {skips: giveSkips(who, r.skips), tokens: giveTokens(who, r.tokens)};
+  setTimeout(renderMe, 0);
   return {day: STREAK.cur, got, full: (r.skips && !got.skips) || (r.tokens && !got.tokens)};
 }
 const streakLine = st => !st ? "" : `🔥 Day ${st.day} streak${st.got.skips || st.got.tokens ? ` · ${rewardText(st.got)}` : ""}${st.full ? " (you're at the limit of 10)" : ""}`;
@@ -899,14 +992,14 @@ function dailyShare(d, practice, blind){
   return `13–0 Daily #${d.n} · ${d.cat}${blind || d.blind ? " · 🙈 blind" : ""}${!practice && d.streak > 1 ? ` · 🔥${d.streak}` : ""}\n🏆 ${d.w}–${d.l}${practice ? " (practice)" : ""}\n${rows.join("\n")}${siteURL() ? "\n" + siteURL().replace(/^https?:\/\//, "") : ""}`;
 }
 function dailyCardHTML(){
-  const di = dailyInfo(), done = dailyDone(di.key);
-  return `<div class="panel pad daily">
+  const di = dailyInfo(), done = dailyDone(di.key), cur = streakNow(), nx = nextStreakReward(cur);
+  return `<div class="panel daily">
     <span class="mglyph">${modeGlyph("daily")}</span>
-    <div class="dtext"><div class="eyebrow">Daily draft #${di.n} · new one at 12am PH time</div>
-      ${(() => { const cur = streakNow(), nx = nextStreakReward(cur); return `<div class="streak">${cur ? `🔥 <b>${cur}-day streak</b>` : STREAK.best ? `Streak lost. Play today to start a new one` : `🔥 Start a streak today`}${STREAK.best ? ` <span class="muted">· best ${STREAK.best}</span>` : ""}${nx ? ` <span class="muted">· day ${nx.day}: ${rewardText(nx.r)}</span>` : ""}</div>`; })()}<h3>${esc(di.cat.title)}</h3><p class="small muted">${esc(di.cat.desc)} Everyone gets the same spins today, then plays all ${CHAMPS.length} champions. Your first finished run counts.</p></div>
+    <div class="dtext"><div class="eyebrow">Daily #${di.n} · resets 12am PH</div><h3>${esc(di.cat.title)}</h3>
+      <div class="streak">${cur ? `<b>🔥 ${cur}-day streak</b>` : STREAK.best ? `Streak lost, play to restart` : `🔥 Start a streak`}${nx ? ` <span class="muted">· day ${nx.day}: ${rewardText(nx.r)}</span>` : ""}</div></div>
     <div class="dact">${done ? `<div class="dres"><b class="num">${done.w}–${done.l}</b><div class="dsq sm">${String(done.sq).split("").map(c => `<i class="${c === "1" ? "w" : "l"}"></i>`).join("")}</div></div>
-      <div class="row"><button class="btn go sm" data-dshare>Share</button><button class="btn" data-daily>Practice</button><a class="btn" href="#ranks" data-rkboard="daily|${done && done.blind ? 1 : 0}">Ranks</a></div>`
-      : `<div class="row"><button class="btn go" data-daily>Play today's draft</button><a class="btn" href="#ranks" data-rkboard="daily|${G.blind ? 1 : 0}">Ranks</a></div>`}</div>
+      <div class="row"><button class="btn go sm" data-dshare>Share</button><button class="btn sm2" data-daily>Practice</button></div>`
+      : `<button class="btn go" data-daily>Play</button>`}</div>
   </div>`;
 }
 
@@ -1132,6 +1225,7 @@ function netStatusHTML(){
     : `<span class="chip">Live rooms off here</span> <span class="small muted">They work on the game's website or when the page is open in Claude. Challenge codes work anywhere.</span>`;
 }
 async function enterRoom(raw, host = false, preset = null){
+  closeSheet();
   if (!NET.lobby){ toast("Live rooms aren't available in this view"); return; }
   const code = String(raw || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 8);
   if (code.length < 4){ toast("Room codes are 4 to 8 letters or numbers"); return; }
@@ -1283,6 +1377,8 @@ function renderPlay(){
   else { PLAYUI = "hub"; app.innerHTML = hubHTML(); }
   bindPlay();
   bindTeamLinks();
+  renderMe();
+  if (PLAYUI === "hub" && LB.ok) lbGet("gauntlet" + (G.blind ? "-blind" : "")).then(j => { const el = document.getElementById("grank"); if (el && j.mine) el.textContent = "#" + j.mine.rank; }).catch(() => {});
   if (PLAYUI === "quiz" && QZ) bindQuiz();
   if (PLAYUI === "session" && S && S.result && S.result.type === "single") updateMatch();
   if (PLAYUI === "session") maybeCelebrate();
@@ -1316,15 +1412,15 @@ const TOK_MAX = 10;
 const SKIP_MAX = 10;
 const SKB = store.get("thirteen-skipbank", {});
 const bankSkips = d => !d || d.bot || (S && S.mode === "daily") ? 0 : Math.max(0, Math.min(SKIP_MAX, SKB[d.name] | 0));
-function useBankSkip(d){ SKB[d.name] = Math.max(0, bankSkips(d) - 1); store.set("thirteen-skipbank", SKB); }
+function useBankSkip(d){ SKB[d.name] = Math.max(0, bankSkips(d) - 1); store.set("thirteen-skipbank", SKB); renderMe(); }
 function giveSkips(name, n){ if (!name || !n) return 0; const b = Math.min(SKIP_MAX, SKB[name] | 0); SKB[name] = Math.min(SKIP_MAX, b + n); store.set("thirteen-skipbank", SKB); return SKB[name] - b; }
 function giveTokens(name, n){ if (!name || !n) return 0; const b = Math.min(TOK_MAX, TOK[name] | 0); TOK[name] = Math.min(TOK_MAX, b + n); store.set("thirteen-tokens", TOK); return TOK[name] - b; }
 const tok = d => !d || d.bot || (S && S.mode === "daily") ? 0 : Math.max(0, Math.min(TOK_MAX, TOK[d.name] | 0));
-function spendTok(d){ TOK[d.name] = Math.max(0, tok(d) - 1); store.set("thirteen-tokens", TOK); }
+function spendTok(d){ TOK[d.name] = Math.max(0, tok(d) - 1); store.set("thirteen-tokens", TOK); renderMe(); }
 function awardTok(name){
   if (!name) return;
   const before = TOK[name] | 0; if (before >= TOK_MAX){ toast(`${name} already holds ${TOK_MAX} redraft tokens`); return; }
-  TOK[name] = before + 1; store.set("thirteen-tokens", TOK);
+  TOK[name] = before + 1; store.set("thirteen-tokens", TOK); renderMe();
   setTimeout(() => toast(`+1 redraft token for ${name} (${TOK[name]}/${TOK_MAX})`), 1600);
 }
 function canRedraft(di){
@@ -1577,6 +1673,7 @@ function loadImg(src){ return imgCache[src] || (imgCache[src] = new Promise(res 
 const pickN = (arr, n, rand = Math.random) => shuffle(arr.slice(), rand).slice(0, n);
 
 function startQuiz(kind){
+  closeSheet();
   if (S && S.mode === "online") leaveRoom();
   let items;
   if (kind === "map"){ const all = quizMaps(); const ph = all.filter(m => MAP_PHOTOS[m] && MAP_PHOTOS[m].length); items = shuffle(pickN(ph, QROUNDS).concat(pickN(all.filter(m => !ph.includes(m)), Math.max(0, QROUNDS - ph.length))), Math.random).slice(0, QROUNDS); while (items.length < QROUNDS) items.push(all[Math.floor(Math.random() * all.length)]); }
@@ -1726,66 +1823,100 @@ function bindQuiz(){
 }
 
 // ---------- hub ----------
+// Home: the Champions gauntlet is the main game; other modes are tiles that open a sheet with their options.
+const TILES = [
+  ["classic", "Classic 13–0", "1 map, solo"], ["cat", "All-time category", "Random rules, 18 games"], ["bot", "Versus bot", "Best of 3"], ["online", "Online room", "Play a friend live"],
+  ["local", "Pass & play", "2 players, 1 device"], ["guess", "Guess games", "Map · agent · ability"], ["map", "Map draft", "Draft for the map"], ["clash", "Category clash", "Head to head"],
+  ["challenge", "Challenge code", "Send a friend your five"], ["battle", "Bot battle", "Watch any two rosters"]];
+const dealSummary = () => `${G.filt.year || "All years"} · ${(typeOpts().find(o => o[0] === G.filt.type) || ["", "Masters + Champions"])[1]} · ${G.filt.region || "All regions"}`;
 function hubHTML(){
-  const card = (id, body) => { const m = MODES[id]; return `<div class="panel mcard"><div class="mtop"><span class="mglyph">${modeGlyph(id)}</span><div><div class="eyebrow">${m.tag}</div><h3>${m.title}</h3></div></div><p class="small muted">${m.desc}</p><div class="mfoot">${body}</div></div>`; };
-  const resume = S && (S.phase === "draft" || S.phase === "ready") && !S.result ? `<div class="panel pad row resume" style="justify-content:space-between"><div><div class="eyebrow">In progress</div><b>${esc(MODES[S.mode].title)}</b> <span class="muted small">· ${lineupRows(S.drafters[0]).length}/5 drafted</span></div><div class="row"><button class="btn go sm" data-resume>Resume</button>${S.mode === "online" ? "" : `<button class="btn warn xbtn" data-arm="cancel" aria-label="Cancel this match" title="Cancel this match">✕</button>`}</div></div>` : "";
+  const resume = S && (S.phase === "draft" || S.phase === "ready") && !S.result ? `<div class="panel row resume"><div style="min-width:0;flex:1"><div class="eyebrow">In progress</div><b>${esc(MODES[S.mode].title)}</b> <span class="muted small">· ${lineupRows(S.drafters[0]).length}/5 drafted</span></div><div class="row"><button class="btn go sm" data-resume>Resume</button>${S.mode === "online" ? "" : `<button class="btn warn xbtn" data-arm="cancel" aria-label="Cancel this match" title="Cancel this match">✕</button>`}</div></div>` : "";
+  const gb = G.gbest, last = store.get("thirteen-glast", ""), perfect = store.get("thirteen-perfect", 0) | 0;
   return `
-  <section class="view">
-    <div>
-      <div class="eyebrow">Game modes</div>
-      <h2>Pick how you want to play</h2>
-      <p class="lede">Every mode deals real rosters from VCT Masters and Champions, 2021 to 2026. Ratings are what each player posted at that event.</p>
-    </div>
+  <section class="view hub2">
     ${resume}
+    <div class="hero">
+      <div class="big18" aria-hidden="true">${CHAMPS.length}</div>
+      <div class="eyebrow" style="color:var(--gold)">The main event</div>
+      <h2>Champions<br>Gauntlet</h2>
+      <p>Draft five. Face every Masters &amp; Champions winner since 2021. Go ${CHAMPS.length}–0.</p>
+      <div class="hstats"><div><b class="num">${gb ? `${gb.w}–${gb.l}` : "–"}</b><span>Your best</span></div><div><b class="num" id="grank">–</b><span>Rank</span></div><div><b class="num">${perfect}</b><span>Perfect runs</span></div></div>
+      <button class="btn go herogo" data-start="gauntlet">Play</button>
+      <div class="hface" aria-label="Champions you'll face"><div class="eyebrow">You'll face</div>${CHAMPS.map(c => `<span title="${esc(c.e.name)} ${c.e.year}"><b>${esc(teName(c.e.winner))}</b> ${String(c.e.year).slice(2)}</span>`).join("")}</div>
+      ${last ? `<div class="hstrip" title="Your last run: ${[...last].filter(c => c === "1").length}–${[...last].filter(c => c !== "1").length}">${[...last].map(c => `<i class="${c === "1" ? "w" : "l"}"></i>`).join("")}</div>` : ""}
+    </div>
     ${dailyCardHTML()}
-    <div class="panel pad filters dealfrom" aria-label="Deal settings">
-      <div style="min-width:0"><div class="eyebrow">Deal rosters from</div><div class="small muted">Applies to solo, versus bot and pass & play. Online and challenge games use every event so both players see the same spins.</div></div>
-      ${selectHTML("fy", "Era", [["", "All years"], ...YEARS.map(y => [String(y), String(y)])], G.filt.year)}
-      ${selectHTML("ft", "Event", typeOpts(), G.filt.type)}
-      ${selectHTML("fr", "Region", [["", "All regions"], ...REGIONS.map(r => [r, r])], G.filt.region)}
+    <div class="hchips" role="group" aria-label="Draft settings">
+      <button class="hchip" data-opensettings>Era <b>${esc(G.filt.year || "All")}</b></button>
+      <button class="hchip" data-opensettings>Events <b>${esc(G.filt.type ? (typeOpts().find(o => o[0] === G.filt.type) || ["", G.filt.type])[1] : "Intl")}</b></button>
+      <button class="hchip" data-opensettings>Region <b>${esc(G.filt.region || "All")}</b></button>
+      <button class="hchip ${G.blind ? "on" : ""}" data-chipblind aria-pressed="${G.blind}">🙈 Blind ${G.blind ? "on" : "off"}</button>
+      <button class="hchip ${G.timer ? "on" : ""}" data-chiptimer aria-pressed="${G.timer}">⏱ ${G.timer ? PICK_SECONDS + "s" : "No timer"}</button>
     </div>
-
-    <div class="panel pad row blindbox" style="justify-content:space-between">
-      <div style="min-width:0;flex:1 1 260px"><div class="eyebrow">Blind draft</div><div class="small muted">Hide ratings, ACS, K/D and win chances while drafting, so you pick from memory. Everything is revealed after the match. Works in every draft mode.</div></div>
-      <div class="seg" role="group" aria-label="Blind draft"><button data-blind="0" aria-pressed="${!G.blind}">Off</button><button data-blind="1" aria-pressed="${G.blind}">On</button></div>
-    </div>
-    <div class="panel pad row" style="justify-content:space-between">
-      <div style="min-width:0;flex:1 1 260px"><div class="eyebrow">Pick timer</div><div class="small muted">${PICK_SECONDS} seconds per pick. If time runs out you get a random player who fits an open slot.</div></div>
-      <div class="seg" role="group" aria-label="Pick timer"><button data-timer="0" aria-pressed="${!G.timer}">Off</button><button data-timer="1" aria-pressed="${G.timer}">${PICK_SECONDS}s</button></div>
-    </div>
-
-    <div class="panel pad row tokbox" style="justify-content:space-between"><div style="min-width:0;flex:1 1 260px"><div class="eyebrow">Redraft tokens & free skips</div><div class="small muted">Win a match to earn a token. Keep a daily streak going to earn free skips and tokens. Hold up to ${TOK_MAX} of each. Tokens give an extra skip or let you tap ↺ to release a drafted player; free skips are used once a draft's own skip is gone. Neither works in the daily draft.</div></div><div class="row">${(() => { const names = [...new Set([...Object.keys(TOK), ...Object.keys(SKB)])].filter(n => (TOK[n] | 0) || (SKB[n] | 0)); return names.length ? names.map(n => `<span class="chip tokc">${esc(n)} · ${TOK[n] | 0} token${(TOK[n] | 0) === 1 ? "" : "s"} · ${SKB[n] | 0} skip${(SKB[n] | 0) === 1 ? "" : "s"}</span>`).join("") : `<span class="small muted">Nothing saved yet</span>`; })()}</div></div>
-
-    <div class="mgroup"><h3 class="gh">Solo</h3><div class="modes">
-      ${card("classic", `${G.best ? `<span class="small muted">Best <b class="num" style="color:var(--text)">${G.best.w}–${G.best.l}</b></span>` : "<span></span>"}<button class="btn go sm" data-start="classic">Play</button>`)}
-      ${card("map", `<span></span><button class="btn go sm" data-start="map">Play</button>`)}
-      ${card("cat", `${CBEST ? `<span class="small muted">Best <b class="num" style="color:var(--text)">${CBEST.w}–${CBEST.l}</b></span>` : "<span></span>"}<div class="row"><button class="btn go sm" data-start="cat">Spin a category</button><button class="btn sm2" data-online-cat="1" title="Head to head with a friend">Online</button></div>`)}
-      ${card("gauntlet", `${G.gbest ? `<span class="small muted">Best <b class="num" style="color:var(--text)">${G.gbest.w}–${G.gbest.l}</b></span>` : "<span></span>"}<button class="btn go sm" data-start="gauntlet">Play</button>`)}
-    </div></div>
-
-    <div class="mgroup"><h3 class="gh">Versus</h3><div class="modes">
-      ${card("bot", `<div class="seg" role="group" aria-label="Bot level">${["Rookie","Pro","Radiant"].map(l => `<button data-level="${l}" aria-pressed="${G.level === l}">${l}</button>`).join("")}</div><button class="btn go sm" data-start="bot">Play</button>`)}
-      ${card("local", `<div class="names"><label class="f" for="p1">Player 1<input id="p1" maxlength="16" placeholder="Player 1" value="${esc(G.p1)}"></label><label class="f" for="p2">Player 2<input id="p2" maxlength="16" placeholder="Player 2" value="${esc(G.p2)}"></label></div><button class="btn go sm" data-start="local">Play</button>`)}
-      ${card("online", `<div class="stack"><div id="net-status">${netStatusHTML()}</div>
-        <label class="f" for="nick">Your name<input id="nick" maxlength="16" placeholder="e.g. Ads" value="${esc(G.nick)}"></label>
-        <div class="row"><button class="btn go sm" id="mkroom">Create room</button><span class="muted small">or</span><input id="jcode" maxlength="8" placeholder="Room code" aria-label="Room code" style="width:7.5em;text-transform:lowercase"><button class="btn" id="joinroom">Join</button></div></div>`)}
-      ${card("clash", `<span></span><div class="row"><button class="btn go sm" data-start="bot" data-catvs="1">vs Bot</button><button class="btn go sm" data-start="local" data-catvs="1">Pass & play</button><button class="btn go sm" data-online-cat="1">Online</button></div>`)}
-      ${card("challenge", `<div class="stack"><button class="btn go sm" data-start="challenge">Make a challenge</button>
-        <div class="row"><input id="ccode" placeholder="Friend's code" aria-label="Challenge code" style="flex:1;min-width:0;text-transform:uppercase"><button class="btn" id="takech">Accept</button></div></div>`)}
-    </div></div>
-
-    <div class="mgroup"><h3 class="gh">Guess</h3><div class="modes">
-      ${["map", "agent", "ability"].map(k => `<div class="panel mcard"><div class="mtop"><span class="mglyph"><span style="background:${{map: "var(--initiator)", agent: "var(--duelist)", ability: "var(--controller)"}[k]}">?</span></span><div><div class="eyebrow">${QUIZ[k].tag}</div><h3>${QUIZ[k].title}</h3></div></div><p class="small muted">${QUIZ[k].desc}</p><div class="mfoot">${qbest[k] != null ? `<span class="small muted">Best <b class="num" style="color:var(--text)">${qbest[k]}/${QROUNDS * 3}</b></span>` : "<span></span>"}<button class="btn go sm" data-quiz="${k}">Play</button></div></div>`).join("")}
-    </div></div>
-
-    <div class="mgroup"><h3 class="gh">Watch</h3><div class="modes">
-      ${card("battle", `<span></span><button class="btn go sm" data-battle>Set up a battle</button>`)}
-    </div></div>
+    <div class="sect"><span class="eyebrow">More modes</span><span class="eyebrow" style="color:var(--dim)">Tap for options</span></div>
+    <div class="tiles">${TILES.map(([id, t, sub]) => `<button class="tile" data-mode="${id}"><span class="mglyph">${modeGlyph(id)}</span><span><b>${esc(t)}</b><span class="tsub">${esc(sub)}</span></span></button>`).join("")}</div>
   </section>`;
 }
+const segRow = (label, sub, html) => `<div class="optrow"><div><b>${label}</b><span>${sub}</span></div>${html}</div>`;
+const blindRow = () => segRow("Blind draft", "Hide ratings and stats while picking", `<div class="seg" role="group" aria-label="Blind draft"><button data-blind="0" aria-pressed="${!G.blind}">Off</button><button data-blind="1" aria-pressed="${G.blind}">On</button></div>`);
+const timerRow = () => segRow("Pick timer", `${PICK_SECONDS} seconds, then a random pick`, `<div class="seg" role="group" aria-label="Pick timer"><button data-timer="0" aria-pressed="${!G.timer}">Off</button><button data-timer="1" aria-pressed="${G.timer}">${PICK_SECONDS}s</button></div>`);
+const dealRow = () => segRow("Deal rosters from", esc(dealSummary()), `<button class="btn sm2" data-opensettings>Change</button>`);
+function modeSheetHTML(id){
+  const m = id === "guess" ? {title: "Guess games", tag: "Quiz · 10 rounds", desc: "Name the map from a close-up, the agent from clues, or the ability and whose it is."} : MODES[id];
+  const head = `<div class="mshead"><span class="mglyph big">${modeGlyph(id)}</span><div><div class="eyebrow">${esc(m.tag)}</div><h2>${esc(m.title)}</h2></div></div><p class="muted small" style="margin:0">${esc(m.desc)}</p>`;
+  const best = (b, label = "Best") => b ? `<span class="small muted">${label} <b class="num" style="color:var(--text)">${b.w}–${b.l}</b></span>` : "";
+  let body = "";
+  if (id === "classic" || id === "map") body = `${blindRow()}${timerRow()}${dealRow()}<div class="msplay">${id === "classic" ? best(G.best) : ""}<button class="btn go big" data-start="${id}">Play</button></div>`;
+  else if (id === "cat") body = `${blindRow()}${timerRow()}<div class="msplay">${best(CBEST)}<button class="btn go big" data-start="cat">Spin a category</button><button class="btn" data-online-cat="1">Play online</button></div>`;
+  else if (id === "bot") body = `<div><div class="lbl">Bot level</div><div class="seg wide" role="group" aria-label="Bot level">${["Rookie", "Pro", "Radiant"].map(l => `<button data-level="${l}" aria-pressed="${G.level === l}">${l}</button>`).join("")}</div></div>${blindRow()}${timerRow()}${dealRow()}<div class="msplay"><button class="btn go big" data-start="bot">Play</button></div>`;
+  else if (id === "local") body = `<div class="names"><label class="f" for="p1">Player 1<input id="p1" maxlength="16" placeholder="Player 1" value="${esc(G.p1)}"></label><label class="f" for="p2">Player 2<input id="p2" maxlength="16" placeholder="Player 2" value="${esc(G.p2)}"></label></div>${blindRow()}${timerRow()}${dealRow()}<div class="msplay"><button class="btn go big" data-start="local">Play</button></div>`;
+  else if (id === "online") body = `<div id="net-status">${netStatusHTML()}</div><label class="f" for="nick">Your name<input id="nick" maxlength="16" value="${esc(G.nick)}"></label><div class="msplay"><button class="btn go big" id="mkroom">Create room</button></div><div class="row"><input id="jcode" maxlength="8" placeholder="Friend's room code" aria-label="Room code" style="flex:1;min-width:0;text-transform:lowercase"><button class="btn" id="joinroom">Join</button></div><p class="small muted" style="margin:0">The host sets blind draft, the timer and the rules in the room.</p>`;
+  else if (id === "clash") body = `${blindRow()}${timerRow()}<div class="msplay"><button class="btn go" data-start="bot" data-catvs="1">vs Bot</button><button class="btn go" data-start="local" data-catvs="1">Pass &amp; play</button><button class="btn go" data-online-cat="1">Online</button></div>`;
+  else if (id === "challenge") body = `${blindRow()}${timerRow()}<div class="msplay"><button class="btn go big" data-start="challenge">Make a challenge</button></div><div class="row"><input id="ccode" placeholder="Friend's code" aria-label="Challenge code" style="flex:1;min-width:0;text-transform:uppercase"><button class="btn" id="takech">Accept</button></div>`;
+  else if (id === "guess") body = ["map", "agent", "ability"].map(k => `<div class="optrow"><div><b>${esc(QUIZ[k].title)}</b><span>${esc(QUIZ[k].desc)}${qbest[k] != null ? ` · best ${qbest[k]}/${QROUNDS * 3}` : ""}</span></div><button class="btn go sm" data-quiz="${k}">Play</button></div>`).join("");
+  else if (id === "battle") body = `<div class="msplay"><button class="btn go big" data-battle>Set up a battle</button></div>`;
+  return `<div class="pad msheet">${head}${body}</div>`;
+}
+function openMode(id){
+  openSheet(modeSheetHTML(id), MODES[id] ? MODES[id].title : "Guess games");
+  const sh = document.querySelector("#sheet .sheetbody"); if (sh) bindPlay(sh);
+}
+function openSettings(){
+  openSheet(`<div class="pad msheet"><div class="mshead"><div><div class="eyebrow">Applies to solo, versus bot and pass &amp; play</div><h2>Draft settings</h2></div></div>
+    <div class="filters">${selectHTML("fy", "Era", [["", "All years"], ...YEARS.map(y => [String(y), String(y)])], G.filt.year)}${selectHTML("ft", "Events", typeOpts(), G.filt.type)}${selectHTML("fr", "Region", [["", "All regions"], ...REGIONS.map(r => [r, r])], G.filt.region)}</div>
+    ${blindRow()}${timerRow()}
+    <p class="small muted" style="margin:0">Online rooms, challenge codes, the daily and category modes use their own rosters so everyone gets the same spins.</p>
+    <div class="msplay"><button class="btn go big" data-closesheet>Done</button></div></div>`, "Draft settings");
+  const sh = document.querySelector("#sheet .sheetbody"); if (sh) bindPlay(sh);
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest ? e.target : null; if (!t) return;
+  const md = t.closest("[data-mode]"); if (md){ openMode(md.dataset.mode); return; }
+  if (t.closest("[data-opensettings]")){ openSettings(); return; }
+  if (t.closest("[data-closesheet]")){ closeSheet(); if (PLAYUI === "hub" && curView() === "play") renderPlay(); return; }
+  if (t.closest("[data-chipblind]")){ G.blind = !G.blind; store.set("thirteen-blind", G.blind); toast(G.blind ? "Blind draft on" : "Blind draft off"); renderPlay(); return; }
+  if (t.closest("[data-chiptimer]")){ G.timer = !G.timer; store.set("thirteen-timer", G.timer); toast(G.timer ? `${PICK_SECONDS}s pick timer on` : "Pick timer off"); renderPlay(); return; }
+  if (t.closest("#mechip")) openMe();
+});
+// You: name, streak, tokens and skips
+function meChipHTML(){
+  const n = G.nick || "Set name", st = streakNow(), tk = Math.min(TOK_MAX, TOK[G.nick] | 0), sk = Math.min(SKIP_MAX, SKB[G.nick] | 0);
+  return `<span class="av" style="background:${teamCol(n)}">${esc(n.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase() || "?")}</span><span class="mename">${esc(n)}</span>${st ? `<span class="mest">🔥${st}</span>` : ""}<span class="metk">${tk} tk · ${sk} skip${sk === 1 ? "" : "s"}</span>`;
+}
+function renderMe(){ const el = document.getElementById("mechip"); if (el) el.innerHTML = meChipHTML(); }
+function openMe(){
+  const names = [...new Set([...Object.keys(TOK), ...Object.keys(SKB)])].filter(n => (TOK[n] | 0) || (SKB[n] | 0));
+  const st = streakNow(), nx = nextStreakReward(st);
+  openSheet(`<div class="pad msheet"><div class="mshead"><span class="av big" style="background:${teamCol(G.nick || "?")}">${esc((G.nick || "?").slice(0, 2).toUpperCase())}</span><div><div class="eyebrow">Playing as</div><h2>${esc(G.nick || "No name yet")}</h2></div></div>
+    <div class="optrow"><div><b>🔥 ${st}-day daily streak</b><span>Best ${STREAK.best || 0}${nx ? ` · day ${nx.day}: ${rewardText(nx.r)}` : ""}</span></div></div>
+    <div class="optrow"><div><b>Redraft tokens &amp; free skips</b><span>Win a match for a token; daily streaks give skips and tokens. Up to ${TOK_MAX} of each. Not usable in the daily.</span></div></div>
+    <div class="row">${names.length ? names.map(n => `<span class="chip tokc">${esc(n)} · ${TOK[n] | 0} token${(TOK[n] | 0) === 1 ? "" : "s"} · ${SKB[n] | 0} skip${(SKB[n] | 0) === 1 ? "" : "s"}</span>`).join("") : `<span class="small muted">Nothing saved yet</span>`}</div>
+    <div class="msplay"><button class="btn go" id="mename">Change name</button><a class="btn" href="#ranks" data-closesheet>See ranks</a></div></div>`, "You");
+  const b = document.getElementById("mename"); if (b) b.onclick = () => { closeSheet(); askName(true); };
+}
 function modeGlyph(id){
-  const c = {daily:"var(--teal)", clash:"var(--gold)", cat:"var(--orange)", classic:"var(--red)", map:"var(--initiator)", gauntlet:"var(--gold)", bot:"var(--controller)", local:"var(--duelist)", online:"var(--teal)", challenge:"var(--orange)", battle:"var(--sentinel)"}[id];
-  const t = {daily:"D", clash:"CC", cat:"AT", classic:"13", map:"M", gauntlet:"18", bot:"B", local:"2P", online:"ON", challenge:"CH", battle:"VS"}[id];
+  const c = {guess:"var(--initiator)", daily:"var(--teal)", clash:"var(--gold)", cat:"var(--orange)", classic:"var(--red)", map:"var(--initiator)", gauntlet:"var(--gold)", bot:"var(--controller)", local:"var(--duelist)", online:"var(--teal)", challenge:"var(--orange)", battle:"var(--sentinel)"}[id];
+  const t = {daily:"D", clash:"CC", cat:"AT", classic:"13", map:"M", gauntlet:"18", bot:"B", local:"2P", online:"ON", challenge:"CH", battle:"VS", guess:"?"}[id];
   return `<span style="background:${c}">${t}</span>`;
 }
 
@@ -1795,7 +1926,7 @@ function sessionHTML(){
   return `
   <section class="view">
     <div class="modebar">
-      <button class="btn" id="tohub">← Modes</button>
+      <button class="btn" id="tohub" aria-label="Back to modes">←<span class="mlbl"> Modes</span></button>
       <div style="min-width:0"><div class="eyebrow">${S.mode === "daily" ? `Daily #${S.opts.dn} · ${esc(S.cat.title)}${S.opts.practice ? " · practice" : ""}` : S.cat && S.mode !== "cat" ? `${m.title} · all-time rosters` : m.tag}</div><h2>${S.mode !== "daily" && S.cat && S.mode !== "cat" ? (S.cat === ANYCAT ? "All-time draft" : "Category clash") : m.title}</h2></div>
       <span style="flex:1"></span>
       ${S.blind ? `<span class="chip blindc">Blind draft</span>` : ""}
@@ -1888,12 +2019,12 @@ function matchControls(){
   const live = !S.result;
   const pvp = S.mode === "local" || S.mode === "online";
   let h = "";
-  if (live && !pvp) h += `<button class="btn warn" data-arm="cancel">Cancel match</button>`;
+  if (live && !pvp) h += `<button class="btn warn" data-arm="cancel" aria-label="Cancel match">✕<span class="mlbl"> Cancel match</span></button>`;
   if (live && S.mode === "local") h += S.askGG
     ? `<span class="small muted">Who gives up?</span>${S.drafters.map((d, i) => `<button class="btn warn" data-gg="${i}">${esc(d.name)}</button>`).join("")}<button class="btn" id="ggback">Back</button>`
     : `<button class="btn warn" id="ggask">Surrender</button>`;
   if (live && S.mode === "online" && S.started) h += `<button class="btn warn" data-arm="surrender">Surrender</button>`;
-  if (S.mode !== "online" && (!pvp || !live)) h += S.result ? "" : `<button class="btn" id="newdraft">New draft</button>`;
+  if (S.mode !== "online" && (!pvp || !live)) h += S.result ? "" : `<button class="btn mhide" id="newdraft">New draft</button>`;
   return h;
 }
 function endBySurrender(loser, winner, meWon = null){
@@ -1903,7 +2034,7 @@ function endBySurrender(loser, winner, meWon = null){
 const winsWord = n => n === "You" ? "win" : "wins";
 function needRow(d, active){
   return `<div class="needrow ${active ? "turn" : ""}" style="--c:${SIDE_COL[d.side]}">
-    <div class="who">${active ? `<i class="dot"></i>` : ""}<span>${esc(d.name)}</span>${active ? `<em>${canAct(d) ? "your pick" : "picking"}</em>` : ""}${tokChip(d)}</div>
+    <div class="who">${active ? `<i class="dot"></i>` : ""}<span>${esc(d.name)}</span>${active ? `<em>${canAct(d) ? "your pick" : "picking"}</em>` : ""}${tokChip(d)}${(() => { if (S.drafters.length !== 1 || hide() || !(S.mode === "classic" || S.mode === "map")) return ""; const st = teamStrength(lineupRows(d), S.maps); return st ? `<em class="winp">Win ${Math.round(roundP(st.s, 1.0) * 100)}% of rounds</em>` : ""; })()}</div>
     ${SLOTS.map(sl => { const r = d.lineup[sl]; const di = S.drafters.indexOf(d);
       return r ? `<div class="ns full" title="${esc(r.p)} · ${sl}">${agentImg(r.ag[0], "s")}<span class="nm">${esc(r.p)}</span>${canRedraft(di) ? `<button class="rd" data-rd="${di}|${sl}" aria-label="Redraft ${esc(r.p)} (uses a token)" title="Redraft (uses a token)">↺</button>` : ""}</div>`
                : S.anySlot ? `<div class="ns open" style="--rc:var(--mute)" title="Open slot">${roleGlyph("Flex", 18)}<span class="l">Open</span><span class="sh">OPEN</span></div>`
@@ -1959,8 +2090,8 @@ function prowHTML(r, slot, clickable, why = ""){
   return `<button class="prow" ${slot && clickable ? `data-pick="${r.id}"` : "disabled"} aria-label="${esc(r.p)}${slot ? ", drafts as " + slot : ""}">
     ${agentImg(r.ag[0], "l")}
     <div style="min-width:0">
-      <div class="pname">${esc(r.p)} ${hide() ? "" : `<span class="infob" role="button" tabindex="0" data-player="${esc(r.key)}" data-row="${r.id}" title="See ${esc(r.p)}'s stats">Stats</span>`} ${roleChip(r.role)}${isIGL(r) ? ` <span class="chip igl" title="In-game leader">IGL</span>` : ""}${!hide() && duoWith(r) ? ` <span class="chip duo" title="Played with ${esc(duoWith(r))}">Duo · ${esc(duoWith(r))}</span>` : ""} ${hide() ? "" : fitChip(mapFit(r, S.maps))}</div>
-      <div class="pstats">${hide() ? `<span>Played</span>` : `<span>ACS <b class="num">${fmt(r.acs, 0)}</b></span><span>K/D <b class="num">${fmt(r.kd)}</b></span><span>Rnds <b class="num">${r.rnd}</b></span>${r.at ? `<span>${r.span} · ${r.nEv} event${r.nEv > 1 ? "s" : ""}${r.titles ? ` · ${"★".repeat(r.titles)}` : ""}</span>` : ""}`}<span class="agents ${hide() ? "blind-ag" : ""}">${r.ag.map(a => agentImg(a, "s")).join("")}</span></div>
+      <div class="pname">${esc(r.p)} ${hide() ? "" : `<span class="infob" role="button" tabindex="0" data-player="${esc(r.key)}" data-row="${r.id}" title="See ${esc(r.p)}'s stats" aria-label="${esc(r.p)}'s stats">i</span>`} ${roleChip(r.role)}${isIGL(r) ? ` <span class="chip igl" title="In-game leader">IGL</span>` : ""}${!hide() && duoWith(r) ? ` <span class="chip duo" title="Played with ${esc(duoWith(r))}">Duo · ${esc(duoWith(r))}</span>` : ""} ${hide() ? "" : fitChip(mapFit(r, S.maps))}</div>
+      <div class="pstats">${hide() ? `<span>Played</span>` : `<span>ACS <b class="num">${fmt(r.acs, 0)}</b></span><span>K/D <b class="num">${fmt(r.kd)}</b></span><span class="rnds">Rnds <b class="num">${r.rnd}</b></span><span class="mainag">${esc(r.ag[0] === "Kayo" ? "KAY/O" : r.ag[0])}</span>${r.at ? `<span>${r.span} · ${r.nEv} event${r.nEv > 1 ? "s" : ""}${r.titles ? ` · ${"★".repeat(r.titles)}` : ""}</span>` : ""}`}<span class="agents ${hide() ? "blind-ag" : ""}">${r.ag.map(a => agentImg(a, "s")).join("")}</span></div>
     </div>
     <div class="pright"><div class="rating num ${hide() ? "qm" : ""}">${hide() ? "?" : fmt(r.r)}</div>${slot ? `<span class="target" style="--rc:${S.anySlot ? ROLE_COL[r.role] : slotCol(slot)}">→ ${S.anySlot ? "Draft" : slot}</span>` : `<span class="slot-hint no">${why}</span>`}</div>
   </button>`;
@@ -2120,6 +2251,7 @@ function runResult(){
     if (S.mode === "daily"){}
     else if (S.mode === "cat"){ const b = store.get("thirteen-cbest", null); if (!b || w > b.w) store.set("thirteen-cbest", {w, l: list.length - w}); }
     else if (!G.gbest || w > G.gbest.w){ G.gbest = {w, l: list.length - w}; store.set("thirteen-gbest", G.gbest); }
+    if (S.mode === "gauntlet"){ store.set("thirteen-glast", list.map(x => x.w > x.l ? 1 : 0).join("")); if (w === list.length) store.set("thirteen-perfect", (store.get("thirteen-perfect", 0) | 0) + 1); }
   } else if (S.mode === "bot" || S.mode === "local"){
     const sr = simSeries(Math.random, rows, lineupRows(S.drafters[1]), 3, S.maps);
     S.result = {type: "series", sr, nameA: S.drafters[0].name, nameB: S.drafters[1].name};
@@ -2272,6 +2404,7 @@ function eventTeams(eid){ return [...TE.keys()].filter(k => k.startsWith(eid + "
 function sideRows(side){ return side.ev === "bot" ? (side.bot || []) : (TE.get(side.ev + "|" + side.t) || []).slice(0, 5); }
 function sideName(side){ if (side.ev === "bot") return "Bot draft"; const ev = EV[side.ev]; return `${teName(side.t)} ${ev.year}`; }
 function openBattle(){
+  closeSheet();
   if (!BT) BT = {a: {ev: "rey21", t: "SEN"}, b: {ev: "cha26", t: "LOUD"}, bo: 3, result: null};
   PLAYUI = "battle"; showPlay();
 }
@@ -2318,12 +2451,13 @@ function runBattle(){
 
 // ---------- events ----------
 function startMode(mode, o = {}){
+  closeSheet();
   if (mode !== "online") leaveRoom();
   clearInterval(simTimer);
   S = makeSession(mode, o); PLAYUI = "session"; showPlay();
 }
-function bindPlay(){
-  const on = (sel, fn, ev = "click") => document.querySelectorAll(sel).forEach(el => el.addEventListener(ev, fn));
+function bindPlay(root = app){
+  const on = (sel, fn, ev = "click") => root.querySelectorAll(sel).forEach(el => el.addEventListener(ev, fn));
   on("[data-start]", e => { const b = e.currentTarget; startMode(b.dataset.start, b.dataset.start === "challenge" ? {role: "maker", allEvents: true} : b.dataset.catvs ? {catVs: true} : {}); });
   on("[data-blind]", e => { G.blind = e.currentTarget.dataset.blind === "1"; store.set("thirteen-blind", G.blind); document.querySelectorAll("[data-blind]").forEach(b => b.setAttribute("aria-pressed", (b.dataset.blind === "1") === G.blind)); });
   on("[data-timer]", e => { G.timer = e.currentTarget.dataset.timer === "1"; store.set("thirteen-timer", G.timer); document.querySelectorAll("[data-timer]").forEach(b => b.setAttribute("aria-pressed", (b.dataset.timer === "1") === G.timer)); });
@@ -2333,8 +2467,8 @@ function bindPlay(){
   on("[data-dshare]", () => { const d = dailyDone(dailyInfo().key); if (d) shareOut(dailyShare(d)); });
   on("[data-quiz]", e => startQuiz(e.currentTarget.dataset.quiz));
   on("[data-level]", e => { G.level = e.currentTarget.dataset.level; store.set("thirteen-level", G.level); document.querySelectorAll("[data-level]").forEach(b => b.setAttribute("aria-pressed", b.dataset.level === G.level)); });
-  ["fy", "ft", "fr"].forEach((id, i) => { const el = document.getElementById(id); if (el) el.addEventListener("change", ev => { G.filt[["year", "type", "region"][i]] = ev.target.value; store.set("thirteen-filt", G.filt); }); });
-  [["p1", "p1"], ["p2", "p2"], ["nick", "nick"]].forEach(([id, k]) => { const el = document.getElementById(id); if (el) el.addEventListener("input", () => { G[k] = el.value.trim().slice(0, 16); store.set("thirteen-" + k, G[k]); }); });
+  ["fy", "ft", "fr"].forEach((id, i) => { const el = root.querySelector("#" + id); if (el) el.addEventListener("change", ev => { G.filt[["year", "type", "region"][i]] = ev.target.value; store.set("thirteen-filt", G.filt); }); });
+  [["p1", "p1"], ["p2", "p2"], ["nick", "nick"]].forEach(([id, k]) => { const el = root.querySelector("#" + id); if (el) el.addEventListener("input", () => { G[k] = el.value.trim().slice(0, 16); store.set("thirteen-" + k, G[k]); }); });
   on("#mkroom", () => { if (!G.nick){ document.getElementById("nick").focus(); toast("Add your name first"); return; } enterRoom(Math.random().toString(36).replace(/[^a-z0-9]/g, "").slice(2, 7), true); });
   on("[data-online-cat]", () => { if (!G.nick){ const n = document.getElementById("nick"); if (n){ n.scrollIntoView({block: "center"}); n.focus(); } toast("Add your name in the Online room card first"); return; } enterRoom(Math.random().toString(36).replace(/[^a-z0-9]/g, "").slice(2, 7), true, {cat: true, alltime: true}); });
   on("#joinroom", () => { if (!G.nick){ document.getElementById("nick").focus(); toast("Add your name first"); return; } enterRoom(document.getElementById("jcode").value); });
