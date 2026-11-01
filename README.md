@@ -5,13 +5,19 @@ An unofficial, free fan game. Draft five players from real VCT Masters and Champ
 ## What's in here
 
 ```
-public/index.html   the whole game (data and images are inside this one file)
-src/index.js        the Worker: serves the page and runs live rooms
-wrangler.jsonc      Cloudflare settings (one Durable Object per live room)
-package.json        scripts: npm run dev / npm run deploy
+public/index.html          the whole game (data and images are inside this one file)
+public/manifest.webmanifest, public/sw.js, public/icons/
+                           lets phones install the game like an app and open it offline
+src/index.js               the Worker: serves the page, runs live rooms and keeps leaderboards
+wrangler.jsonc             Cloudflare settings (Durable Objects: one per live room, one for all leaderboards)
+package.json               scripts: npm run dev / npm run deploy
 ```
 
-Live rooms use Durable Objects, which are included on the Workers free plan.
+Live rooms and leaderboards use Durable Objects with SQLite storage, which are included on the Workers free plan.
+
+Leaderboards need no accounts. Each browser gets a random device id, and players type a name when they post.
+Names are screened on the server (length, allowed characters and a blocked-words list). Boards: the daily draft
+(first finished run of the day only), Champions gauntlet, All-time category and the three Guess modes (best score kept).
 
 ## Deploy from your computer (about 5 minutes)
 

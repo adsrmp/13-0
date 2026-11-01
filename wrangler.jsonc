@@ -8,11 +8,17 @@
     "directory": "./public",
     "binding": "ASSETS"
   },
-  // One Durable Object per live room.
+  // GameRoom: one Durable Object per live room. Leaderboard: one Durable Object holding every board.
   "durable_objects": {
-    "bindings": [{ "name": "ROOMS", "class_name": "GameRoom" }]
+    "bindings": [
+      { "name": "ROOMS", "class_name": "GameRoom" },
+      { "name": "SCORES", "class_name": "Leaderboard" }
+    ]
   },
   // SQLite-backed Durable Objects are what the Workers free plan supports.
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["GameRoom"] }],
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["GameRoom"] },
+    { "tag": "v2", "new_sqlite_classes": ["Leaderboard"] }
+  ],
   "observability": { "enabled": true }
 }

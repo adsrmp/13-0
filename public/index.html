@@ -8,6 +8,12 @@
 <meta property="og:title" content="13–0 VCT Draft">
 <meta property="og:description" content="Draft real VCT rosters, play solo, versus a bot, or live with a friend.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230d131c'/%3E%3Ctext x='32' y='43' font-family='Arial Narrow,Arial' font-weight='900' font-size='30' text-anchor='middle' fill='%23ece6db'%3E13%3C/text%3E%3Crect x='14' y='48' width='36' height='4' fill='%23ef5059'/%3E%3C/svg%3E">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="13–0">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -334,6 +340,8 @@ footer a{color:var(--mute)}
 @media (max-width:640px){.mapchips{gap:5px}.mapchips>.eyebrow{display:none}.mchip{flex:1 1 0;padding-right:6px;gap:5px}.mchipimg{width:26px;height:26px;max-width:26px}.mchip b{font-size:13px}.mchip em{font-size:9px}}
 .ag.badge{font-family:var(--f-body);font-weight:800;font-size:13px;letter-spacing:-.01em;color:#0d131c}
 .ag.badge.s{font-size:10px}.ag.badge.l{font-size:18px}.ag.badge.xl{font-size:28px}.ag.badge.mvpimg{font-size:40px}
+.chip.igl{border-color:var(--gold);color:var(--gold)}
+.chip.duo{border-color:var(--teal);color:var(--teal)}
 .chip.blindc{border-color:var(--controller);color:var(--controller)}
 .rating.qm{color:var(--dim)}
 .blindbox{border-color:color-mix(in srgb,var(--controller) 45%,var(--line))}
@@ -427,6 +435,17 @@ footer a{color:var(--mute)}
 .bside select{max-width:100%}
 .bname{font-family:var(--f-display);font-weight:800;font-size:26px;text-transform:uppercase;line-height:1}
 @media (max-width:800px){.bgrid{grid-template-columns:1fr}.bmid{padding:2px}}
+.daily{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-color:var(--teal);background:linear-gradient(120deg,rgba(51,198,174,.10),transparent 60%),var(--panel)}
+.daily .dtext{flex:1 1 280px;min-width:0}.daily h3{margin:2px 0 4px;font-size:20px}.daily p{margin:0}
+.daily .dact{display:flex;flex-direction:column;gap:8px;align-items:flex-end}.daily .dres{display:flex;align-items:center;gap:10px}.daily .dres b{font-size:26px}
+.dsq{display:grid;grid-template-columns:repeat(9,16px);gap:4px;justify-content:center;margin-top:14px}.dsq i{width:16px;height:16px;border-radius:3px;background:var(--red)}.dsq i.w{background:var(--teal)}
+.dsq.sm{grid-template-columns:repeat(9,9px);gap:2px;margin:0}.dsq.sm i{width:9px;height:9px;border-radius:2px}
+.lbbox{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.lbbox .lbmsg{flex-basis:100%;text-align:center}.lbbox input{width:12em}.okc{color:var(--teal)}.badc{color:var(--red)}.lbnote{text-align:center;margin:12px 0 0}
+.rktabs{display:flex;flex-wrap:wrap}.rktable td.rk{width:2.5em;color:var(--mute)}.rktable tr.me td{background:rgba(51,198,174,.08)}.rktable td.r{white-space:nowrap}.rktable .rkd{max-width:52ch;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.rktable tr.gap td{text-align:center;color:var(--mute)}
+a.btn{text-decoration:none;color:var(--text);display:inline-flex;align-items:center}a.btn:hover{color:var(--text)}
+.instbtn{flex:none}.instbtn[hidden]{display:none!important}
+@media (max-width:640px){.daily .mglyph{display:none}.daily .dact{align-items:stretch;width:100%}.rktable th:nth-child(4),.rktable td:nth-child(4){display:none}.instbtn{order:1;margin-left:auto;font-size:13px;padding:6px 10px}.instbtn:not([hidden])+.sndbtn{margin-left:8px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -434,8 +453,9 @@ footer a{color:var(--mute)}
   <div class="wrap">
     <a class="brand" href="#play"><b>13<i>–</i>0</b><span>VCT draft · 2021–2026</span></a>
     <nav class="tabs" aria-label="Sections">
-      <a href="#play">Play</a><a href="#players">Players</a><a href="#teams">Teams</a><a href="#meta">Agents &amp; maps</a><a href="#events">Events</a>
+      <a href="#play">Play</a><a href="#players">Players</a><a href="#teams">Teams</a><a href="#meta">Agents &amp; maps</a><a href="#events">Events</a><a href="#ranks">Ranks</a>
     </nav>
+    <button class="btn sm2 instbtn" id="instbtn" hidden>Install app</button>
     <button class="sndbtn" id="sndbtn" aria-pressed="true" title="Sound"></button>
   </div>
 </header>
@@ -525,7 +545,7 @@ function toast(msg){
 }
 
 // ---------- routing ----------
-const VIEWS = {play: renderPlay, players: renderPlayers, teams: renderTeams, meta: renderMeta, events: renderEvents};
+const VIEWS = {play: renderPlay, players: renderPlayers, teams: renderTeams, meta: renderMeta, events: renderEvents, ranks: renderRanks};
 const UI = { player: null, team: null, event: null, mapEv: D.events[D.events.length-1].id, agent: "Omen", mapName: "Ascent",
   pf: {q:"", region:"", role:"", year:"", sort:"rating"}, af: {year:"", type:"", region:""} };
 function route(){
@@ -584,10 +604,41 @@ function fitChip(f){
 function teamStrength(rows, maps){
   if (!rows.length) return null;
   const avg = rows.reduce((s, r) => s + r.adj + fitBonus(mapFit(r, maps)), 0) / rows.length;
+  const chem = chemistry(rows);
+  return {avg, bonus: chem.total, chem, s: avg + chem.total};
+}
+// ---------- team chemistry ----------
+// Hand-picked in-game leaders (IGLs) who appear in the data.
+const IGLS = new Set(["boaster", "saadhak", "stax", "d4v41", "valyn", "kingg", "redgar", "boostio", "sscary", "melser", "johnqt", "ethan", "munchkin"]);
+// Everyone each player has shared a roster with at an event.
+const TEAMMATES = new Map();
+TE.forEach(rows => rows.forEach(a => { if (!TEAMMATES.has(a.key)) TEAMMATES.set(a.key, new Set()); rows.forEach(b => { if (b.key !== a.key) TEAMMATES.get(a.key).add(b.key); }); }));
+function chemistry(rows){
+  const full = rows.length === 5;
   const cnt = {}; rows.forEach(r => { const k = r.e + "|" + r.t; cnt[k] = (cnt[k] || 0) + 1; });
   const core = Math.max(...Object.values(cnt));
-  const bonus = rows.length === 5 ? 0.012 * (core - 1) : 0;
-  return {avg, bonus, s: avg + bonus};
+  const same = full ? 0.012 * (core - 1) : 0;
+  let pairs = 0;
+  for (let i = 0; i < rows.length; i++) for (let j = i + 1; j < rows.length; j++){
+    const a = rows[i], b = rows[j];
+    if (a.e === b.e && a.t === b.t) continue;
+    if (TEAMMATES.has(a.key) && TEAMMATES.get(a.key).has(b.key)) pairs++;
+  }
+  const duo = Math.min(0.04, pairs * 0.008);
+  const igls = rows.filter(r => IGLS.has(r.key)).length;
+  const igl = full ? (igls === 1 ? 0.015 : igls > 1 ? 0.005 : -0.01) : 0;
+  const smokes = full && !rows.some(r => r.ag.some(a => D.roles[a] === "Controller")) ? -0.02 : 0;
+  return {same, duo, pairs, igl, igls, smokes, total: same + duo + igl + smokes};
+}
+function chemLine(st){
+  if (!st || !st.chem) return "";
+  const c = st.chem, parts = [];
+  if (c.same) parts.push(`same roster +${fmt(c.same * 100, 1)}`);
+  if (c.duo) parts.push(`${c.pairs} former teammate pair${c.pairs > 1 ? "s" : ""} +${fmt(c.duo * 100, 1)}`);
+  if (c.igl > 0) parts.push(`${c.igls > 1 ? "two IGLs" : "IGL"} +${fmt(c.igl * 100, 1)}`);
+  if (c.igl < 0) parts.push(`no IGL ${fmt(c.igl * 100, 1)}`);
+  if (c.smokes) parts.push(`no smokes ${fmt(c.smokes * 100, 1)}`);
+  return parts.length ? `Chemistry (in hundredths of rating): ${parts.join(" · ")}.` : "";
 }
 const roundP = (a, b) => Math.min(0.9, Math.max(0.1, 0.5 + 1.6 * (a - b)));
 function simMap(rand, p){
@@ -645,7 +696,7 @@ function eligibleKeys(filt){
 function makeSession(mode, o = {}){
   const seed = o.seed != null ? o.seed >>> 0 : randSeed();
   const filt = o.allEvents ? {year:"", type:"", region:""} : {...G.filt};
-  const cat = mode === "cat" || o.catVs ? (o.cat || CATS[Math.floor(Math.random() * CATS.length)]) : null;
+  const cat = mode === "cat" || mode === "daily" || o.catVs ? (o.cat || CATS[Math.floor(Math.random() * CATS.length)]) : null;
   let keys = cat ? cat.deck() : eligibleKeys(filt); if (!keys.length) keys = eligibleKeys({year:"", type:"", region:""});
   const deck = shuffle(keys, rng(seed));
   const mr = rng(seed ^ 0x5bd1e995);
@@ -758,6 +809,154 @@ const ANYCAT = {id: "any", title: "All-time rosters", desc: "Every team's full i
 const CBEST = store.get("thirteen-cbest", null);
 
 const CHAMPS = D.events.map(e => ({e, rows: (TE.get(e.id + "|" + e.winner) || []).slice(0, 5)})).filter(c => c.rows.length === 5);
+
+// ---------- daily draft: one category and one deck for everyone, resets at 00:00 UTC ----------
+const DAILY_START = Date.UTC(2026, 10, 1);
+const DAILY = store.get("thirteen-daily", {});
+function dailyInfo(t = Date.now()){
+  const d = new Date(t); const key = d.toISOString().slice(0, 10);
+  const n = Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - DAILY_START) / 864e5) + 1;
+  const h = hashStr("daily:" + key);
+  return {key, n, seed: h, cat: CATS[h % CATS.length], board: "daily-" + key};
+}
+function startDaily(){
+  const di = dailyInfo();
+  startMode("daily", {seed: di.seed, cat: di.cat, dkey: di.key, dn: di.n, board: di.board, practice: !!DAILY[di.key]});
+}
+const siteURL = () => /^https?:$/.test(location.protocol) ? location.origin : "";
+function dailyShare(d, practice){
+  const sq = String(d.sq).split("").map(c => c === "1" ? "🟩" : "🟥");
+  const rows = []; for (let i = 0; i < sq.length; i += 9) rows.push(sq.slice(i, i + 9).join(""));
+  return `13–0 Daily #${d.n} · ${d.cat} · ${d.w}–${d.l}${practice ? " (practice)" : ""}\n${rows.join("\n")}${siteURL() ? "\n" + siteURL() : ""}`;
+}
+function dailyCardHTML(){
+  const di = dailyInfo(), done = DAILY[di.key];
+  return `<div class="panel pad daily">
+    <span class="mglyph">${modeGlyph("daily")}</span>
+    <div class="dtext"><div class="eyebrow">Daily draft #${di.n} · new one at 00:00 UTC</div><h3>${esc(di.cat.title)}</h3><p class="small muted">${esc(di.cat.desc)} Everyone gets the same spins today, then plays all ${CHAMPS.length} champions. Your first finished run counts.</p></div>
+    <div class="dact">${done ? `<div class="dres"><b class="num">${done.w}–${done.l}</b><div class="dsq sm">${String(done.sq).split("").map(c => `<i class="${c === "1" ? "w" : "l"}"></i>`).join("")}</div></div>
+      <div class="row"><button class="btn go sm" data-dshare>Share</button><button class="btn" data-daily>Practice</button><a class="btn" href="#ranks" data-rkboard="daily">Ranks</a></div>`
+      : `<div class="row"><button class="btn go" data-daily>Play today's draft</button><a class="btn" href="#ranks" data-rkboard="daily">Ranks</a></div>`}</div>
+  </div>`;
+}
+
+// ---------- leaderboards (website only; no accounts, just a screened name) ----------
+const LB = {ok: null};
+const DEV = (() => {
+  let d = store.get("thirteen-device", "");
+  if (!/^[a-f0-9]{24}$/.test(d)){
+    try { d = [...crypto.getRandomValues(new Uint8Array(12))].map(b => b.toString(16).padStart(2, "0")).join(""); }
+    catch(e){ d = Array.from({length: 24}, () => "0123456789abcdef"[Math.floor(Math.random() * 16)]).join(""); }
+    store.set("thirteen-device", d);
+  }
+  return d;
+})();
+// Same screening the score server runs (it has the final say).
+const BLOCK_ANY = ["fuck", "shit", "bitch", "cunt", "nigg", "retard", "whore", "slut", "pussy", "porn", "penis", "vagina", "hitler", "nazi", "killyourself", "tangina", "putang", "pakyu", "motherf"];
+const BLOCK_WORD = ["fuk", "fag", "fags", "rape", "rapist", "dick", "cock", "anal", "kys", "puta", "gago", "kupal", "ulol", "bobo", "tanga", "admin", "mod", "moderator", "riot", "official", "staff", "sex"];
+function nameProblem(name){
+  const n = String(name || "").trim();
+  if (n.length < 2 || n.length > 16) return "Names are 2 to 16 characters";
+  if (!/^[A-Za-z0-9 ._-]+$/.test(n)) return "Use letters, numbers, spaces, dots, dashes or underscores";
+  const norm = n.toLowerCase().replace(/[0@4]/g, m => ({"0": "o", "@": "a", "4": "a"}[m])).replace(/[1!|]/g, "i").replace(/3/g, "e").replace(/[5$]/g, "s").replace(/7/g, "t");
+  const flat = norm.replace(/[^a-z]/g, ""), words = norm.split(/[^a-z]+/).filter(Boolean);
+  if (BLOCK_ANY.some(w => flat.includes(w)) || words.some(w => BLOCK_WORD.includes(w))) return "Please pick a different name";
+  return null;
+}
+(async () => {
+  if (!/^https?:$/.test(location.protocol)){ LB.ok = false; }
+  else { try { const r = await fetch("/api/health", {cache: "no-store"}); const j = r.ok ? await r.json() : null; LB.ok = !!(j && j.scores); } catch(e){ LB.ok = false; } }
+  document.querySelectorAll(".lbbox[data-wait]").forEach(el => { if (!LB.ok) el.outerHTML = lbOffHTML(); else el.removeAttribute("data-wait"); });
+  if (curView() === "ranks") renderRanks();
+})();
+const lbOffHTML = () => `<p class="small muted lbnote">Leaderboards live on the 13–0 website, so scores from this copy aren't posted.</p>`;
+function lbBoxHTML(board, score, tb, detail, holder){
+  if (LB.ok === false) return lbOffHTML();
+  const done = holder && holder.posted;
+  return `<div class="lbbox" ${LB.ok === null ? "data-wait" : ""} data-board="${esc(board)}" data-score="${score}" data-tb="${tb}" data-detail="${esc(detail)}">
+    ${done ? "" : `<label class="f">Name on the leaderboard<input class="lbname" maxlength="16" value="${esc(G.nick)}" placeholder="2–16 letters or numbers" autocomplete="nickname"></label><button class="btn go sm lbpost">Post score</button>`}
+    <span class="lbmsg small ${done ? "okc" : "muted"}" role="status">${done || "No account needed. Names are checked before they go up."}</span></div>`;
+}
+async function lbGet(board){
+  const r = await fetch(`/api/scores?board=${encodeURIComponent(board)}&device=${DEV}`, {cache: "no-store"});
+  const j = await r.json(); if (!j.ok) throw new Error(j.error || "Couldn't load scores"); return j;
+}
+async function lbPost(board, name, score, tb, detail){
+  const r = await fetch("/api/scores", {method: "POST", headers: {"content-type": "application/json"}, body: JSON.stringify({board, name, device: DEV, score, tb, detail})});
+  let j; try { j = await r.json(); } catch(e){ j = {ok: false, error: "The score server didn't answer"}; }
+  if (!j.ok) throw new Error(j.error || "Couldn't post");
+  return {j, g: await lbGet(board)};
+}
+const rkKeyFor = board => board.startsWith("daily-") ? (board === dailyInfo().board ? "daily" : "yday") : board;
+document.addEventListener("click", async e => {
+  const rk = e.target.closest && e.target.closest("[data-rkboard]"); if (rk) RK.board = rk.dataset.rkboard;
+  const b = e.target.closest && e.target.closest(".lbpost"); if (!b) return;
+  const box = b.closest(".lbbox"), inp = box.querySelector(".lbname"), msg = box.querySelector(".lbmsg");
+  const name = inp.value.trim(), prob = nameProblem(name);
+  if (prob){ msg.textContent = prob; msg.className = "lbmsg small badc"; inp.focus(); return; }
+  G.nick = name; store.set("thirteen-nick", name);
+  b.disabled = true; msg.className = "lbmsg small muted"; msg.textContent = "Posting…";
+  const holder = PLAYUI === "quiz" ? QZ : S && S.result;
+  try {
+    const {j, g} = await lbPost(box.dataset.board, name, +box.dataset.score, +box.dataset.tb, box.dataset.detail);
+    const html = `${j.kept ? esc(j.note || "Your best score stays on the board") : `Posted as <b>${esc(name)}</b>`}.${g.mine ? ` You're <b>#${g.mine.rank}</b> of ${g.total}.` : ""} <a href="#ranks" data-rkboard="${esc(rkKeyFor(box.dataset.board))}">See ranks</a>`;
+    if (holder) holder.posted = html;
+    msg.className = "lbmsg small okc"; msg.innerHTML = html; b.remove(); const lab = box.querySelector("label"); if (lab) lab.remove();
+  } catch(err){ msg.className = "lbmsg small badc"; msg.textContent = err.message; b.disabled = false; }
+});
+
+const RK = {board: "daily"};
+function rkBoards(){
+  const di = dailyInfo(), y = dailyInfo(Date.now() - 864e5);
+  return [["daily", `Today · Daily #${di.n}`, di.board, "w"], ...(y.n >= 1 ? [["yday", `Yesterday · #${y.n}`, y.board, "w"]] : []), ["gauntlet", "Champions gauntlet", "gauntlet", "w"], ["cat", "All-time category", "cat", "w"],
+    ["quiz-map", "Guess the map", "quiz-map", "q"], ["quiz-agent", "Guess the agent", "quiz-agent", "q"], ["quiz-ability", "Guess the ability", "quiz-ability", "q"]];
+}
+function renderRanks(){
+  const bs = rkBoards(), cur = bs.find(b => b[0] === RK.board) || bs[0];
+  const di = dailyInfo();
+  app.innerHTML = `<section class="view">
+    <div><div class="eyebrow">Leaderboards</div><h2>Ranks</h2><p class="lede">No account needed: type a name when you post a score. Names are checked and rude ones are turned away. Your best score counts, except on the daily draft, where only your first finished run of the day counts.</p></div>
+    <div class="seg rktabs" role="group" aria-label="Leaderboard">${bs.map(b => `<button data-rk="${b[0]}" aria-pressed="${b[0] === cur[0]}">${esc(b[1])}</button>`).join("")}</div>
+    ${cur[0] === "daily" ? `<div class="small muted">Today's category: <b style="color:var(--text)">${esc(di.cat.title)}</b>. Ties are split by total round difference across the season.</div>` : cur[3] === "q" ? `<div class="small muted">Out of ${QROUNDS * 3}. Ties are split by best streak.</div>` : `<div class="small muted">Wins out of ${CHAMPS.length}. Ties are split by total round difference.</div>`}
+    <div class="panel" id="rkbody"><div class="pad muted">Loading…</div></div>
+  </section>`;
+  document.querySelectorAll("[data-rk]").forEach(b => b.addEventListener("click", () => { RK.board = b.dataset.rk; renderRanks(); }));
+  loadRanks(cur);
+}
+async function loadRanks(cur){
+  const el = document.getElementById("rkbody"); if (!el) return;
+  if (LB.ok === null) return;
+  if (!LB.ok){ el.innerHTML = `<div class="pad"><b>Leaderboards live on the 13–0 website.</b><p class="small muted" style="margin:6px 0 0">This copy of the game can't reach the score server. Open the website version to post scores and see the ranks.</p></div>`; return; }
+  let j; try { j = await lbGet(cur[2]); } catch(e){ el.innerHTML = `<div class="pad muted">Couldn't load scores. Try again in a moment.</div>`; return; }
+  if (curView() !== "ranks" || (RK.board !== cur[0] && !(cur[0] === "daily" && !rkBoards().some(b => b[0] === RK.board)))) return;
+  const q = cur[3] === "q";
+  const sc = r => q ? `${r.score}<span class="muted">/${QROUNDS * 3}</span>` : `${r.score}–${CHAMPS.length - r.score}`;
+  const tb = r => q ? `streak ${r.tb}` : `${r.tb > 0 ? "+" : ""}${r.tb}`;
+  const row = (r, rank) => `<tr class="${r.me ? "me" : ""}"><td class="num rk">${rank}</td><td><b>${esc(r.name)}</b>${r.me ? ` <span class="chip ok">You</span>` : ""}<div class="small muted rkd">${esc(r.detail || "")}</div></td><td class="r num">${sc(r)}</td><td class="r num muted">${tb(r)}</td></tr>`;
+  const mineIn = j.top.some(r => r.me);
+  el.innerHTML = j.top.length ? `<div class="scroll"><table class="rktable"><thead><tr><th>#</th><th>Name</th><th class="r">Score</th><th class="r">${q ? "Tiebreak" : "Rounds"}</th></tr></thead><tbody>
+      ${j.top.map((r, i) => row(r, i + 1)).join("")}
+      ${j.mine && !mineIn ? `<tr class="gap"><td colspan="4">…</td></tr>${row({...j.mine, me: true}, j.mine.rank)}` : ""}
+    </tbody></table></div><div class="pad small muted">${j.total} ${j.total === 1 ? "player" : "players"} on this board.</div>`
+    : `<div class="pad"><b>No scores yet.</b><p class="small muted" style="margin:6px 0 0">${cur[0] === "daily" ? "Be the first: play today's daily draft from the Play tab." : cur[0] === "yday" ? "Nobody posted yesterday." : "Finish a run and post your score to start this board."}</p></div>`;
+}
+
+// ---------- install as an app (website only) ----------
+(() => {
+  if (!/^https?:$/.test(location.protocol)) return;
+  if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+  const btn = document.getElementById("instbtn"); if (!btn) return;
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  if (standalone) return;
+  let ev = null;
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); ev = e; btn.hidden = false; });
+  window.addEventListener("appinstalled", () => { btn.hidden = true; toast("Installed. 13–0 is on your home screen"); });
+  if (/iphone|ipad|ipod/i.test(navigator.userAgent)) btn.hidden = false;
+  btn.addEventListener("click", async () => {
+    if (ev){ ev.prompt(); try { await ev.userChoice; } catch(e){} ev = null; btn.hidden = true; return; }
+    toast("Tap the Share button, then Add to Home Screen");
+  });
+})();
 
 // ---------- multiplayer (live room + challenge code) ----------
 const NET = {lobby: undefined, room: null, code: "", round: 0, peers: [], sig: "", unsub: null, host: false, rules: null, acts: [], gg: false, started: false, cache: null, tk: {key: "", deadline: 0}};
@@ -915,6 +1114,7 @@ const MODES = {
   classic:   {title: "Classic 13–0", tag: "Solo · 1 map", desc: "Draft five from real international rosters, then play one map against an average pro side. Chase the flawless 13–0."},
   map:       {title: "Map draft", tag: "Solo · map known", desc: "The map is revealed before you draft. Players whose agents suit that map get a boost, so draft for the map."},
   clash:     {title: "Category clash", tag: "Head to head · Bo3", desc: "A random category and all-time rosters, like the solo category mode, but two teams draft head to head and play a best-of-three. Online: turn on Random category in the room."},
+  daily:     {title: "Daily draft", tag: "Everyone · same spins today", desc: "One category and one deck of spins for everyone, every day. Draft your five, play a season against every champion, then share your score and see where you rank."},
   cat:       {title: "All-time category", tag: "Solo · 18-match season", desc: "A random category, like Duelists only or Americas only. Every spin deals a team's all-time international roster, then your five play every Masters and Champions winner."},
   gauntlet:  {title: "Champions gauntlet", tag: "Solo · 18 matches", desc: "Your five play every Masters and Champions winner since 2021, one map each. The Valorant 82–0: can you go 18–0?"},
   bot:       {title: "Versus bot", tag: "You vs bot · Bo3", desc: "You and a bot take turns picking from the same rosters, then play a best-of-three on maps shown up front."},
@@ -992,7 +1192,7 @@ function renderPlay(){
 // Redraft tokens: win a match, earn one. Spend it on an extra skip or to release a drafted player.
 const TOK = store.get("thirteen-tokens", {});
 const TOK_MAX = 3;
-const tok = d => !d || d.bot ? 0 : Math.max(0, Math.min(TOK_MAX, TOK[d.name] | 0));
+const tok = d => !d || d.bot || (S && S.mode === "daily") ? 0 : Math.max(0, Math.min(TOK_MAX, TOK[d.name] | 0));
 function spendTok(d){ TOK[d.name] = Math.max(0, tok(d) - 1); store.set("thirteen-tokens", TOK); }
 function awardTok(name){
   if (!name) return;
@@ -1337,6 +1537,7 @@ function quizEndHTML(){
     <p class="small muted" style="margin:0">Score ${Math.ceil(max * .7)} or more to win a redraft token.</p>
     <div class="qlog">${QZ.log.map((l, i) => `<div class="${l.ok ? "ok" : "no"}"><span>${i + 1}</span>${esc(l.label)}<b class="num">+${l.pts}</b></div>`).join("")}</div>
     <div class="row" style="justify-content:center"><button class="btn go" id="qagain">Play again</button><button class="btn" id="qshare">Copy score</button></div>
+    ${lbBoxHTML("quiz-" + QZ.kind, QZ.score, QZ.bestStreak, `${QZ.log.filter(l => l.ok).length}/${QROUNDS} right`, QZ)}
   </div>`;
 }
 async function drawQuiz(){
@@ -1408,6 +1609,7 @@ function hubHTML(){
       <p class="lede">Every mode deals real rosters from VCT Masters and Champions, 2021 to 2026. Ratings are what each player posted at that event.</p>
     </div>
     ${resume}
+    ${dailyCardHTML()}
     <div class="panel pad filters dealfrom" aria-label="Deal settings">
       <div style="min-width:0"><div class="eyebrow">Deal rosters from</div><div class="small muted">Applies to solo, versus bot and pass & play. Online and challenge games use every event so both players see the same spins.</div></div>
       ${selectHTML("fy", "Era", [["", "All years"], ...YEARS.map(y => [String(y), String(y)])], G.filt.year)}
@@ -1454,8 +1656,8 @@ function hubHTML(){
   </section>`;
 }
 function modeGlyph(id){
-  const c = {clash:"var(--gold)", cat:"var(--orange)", classic:"var(--red)", map:"var(--initiator)", gauntlet:"var(--gold)", bot:"var(--controller)", local:"var(--duelist)", online:"var(--teal)", challenge:"var(--orange)", battle:"var(--sentinel)"}[id];
-  const t = {clash:"CC", cat:"AT", classic:"13", map:"M", gauntlet:"18", bot:"B", local:"2P", online:"ON", challenge:"CH", battle:"VS"}[id];
+  const c = {daily:"var(--teal)", clash:"var(--gold)", cat:"var(--orange)", classic:"var(--red)", map:"var(--initiator)", gauntlet:"var(--gold)", bot:"var(--controller)", local:"var(--duelist)", online:"var(--teal)", challenge:"var(--orange)", battle:"var(--sentinel)"}[id];
+  const t = {daily:"D", clash:"CC", cat:"AT", classic:"13", map:"M", gauntlet:"18", bot:"B", local:"2P", online:"ON", challenge:"CH", battle:"VS"}[id];
   return `<span style="background:${c}">${t}</span>`;
 }
 
@@ -1466,7 +1668,7 @@ function sessionHTML(){
   <section class="view">
     <div class="modebar">
       <button class="btn" id="tohub">← Modes</button>
-      <div style="min-width:0"><div class="eyebrow">${S.cat && S.mode !== "cat" ? `${m.title} · all-time rosters` : m.tag}</div><h2>${S.cat && S.mode !== "cat" ? (S.cat === ANYCAT ? "All-time draft" : "Category clash") : m.title}</h2></div>
+      <div style="min-width:0"><div class="eyebrow">${S.mode === "daily" ? `Daily #${S.opts.dn} · ${esc(S.cat.title)}${S.opts.practice ? " · practice" : ""}` : S.cat && S.mode !== "cat" ? `${m.title} · all-time rosters` : m.tag}</div><h2>${S.mode !== "daily" && S.cat && S.mode !== "cat" ? (S.cat === ANYCAT ? "All-time draft" : "Category clash") : m.title}</h2></div>
       <span style="flex:1"></span>
       ${S.blind ? `<span class="chip blindc">Blind draft</span>` : ""}
       ${S.mode === "online" && S.started ? `<span class="chip">Room <b class="num" style="color:var(--text);margin-left:4px">${esc(NET.code)}</b></span>` : ""}
@@ -1544,11 +1746,18 @@ function dealHTML(){
       ${canAct(d) ? `<button class="btn" id="skip" ${d.skips + tok(d) ? "" : "disabled"}>Skip team (${d.skips + tok(d)} left)</button>` : ""}
     </div>`;
 }
+// a former teammate already in the current picker's lineup
+function duoWith(r){
+  if (!S || S.phase !== "draft") return "";
+  const d = curD(S); const mates = TEAMMATES.get(r.key); if (!mates) return "";
+  const m = lineupRows(d).find(x => mates.has(x.key) && !(x.e === r.e && x.t === r.t));
+  return m ? m.p : "";
+}
 function prowHTML(r, slot, clickable, why = ""){
   return `<button class="prow" ${slot && clickable ? `data-pick="${r.id}"` : "disabled"} aria-label="${esc(r.p)}${slot ? ", drafts as " + slot : ""}">
     ${agentImg(r.ag[0], "l")}
     <div style="min-width:0">
-      <div class="pname">${esc(r.p)} ${roleChip(r.role)} ${hide() ? "" : fitChip(mapFit(r, S.maps))}</div>
+      <div class="pname">${esc(r.p)} ${roleChip(r.role)}${IGLS.has(r.key) ? ` <span class="chip igl" title="In-game leader">IGL</span>` : ""}${!hide() && duoWith(r) ? ` <span class="chip duo" title="Played with ${esc(duoWith(r))}">Duo · ${esc(duoWith(r))}</span>` : ""} ${hide() ? "" : fitChip(mapFit(r, S.maps))}</div>
       <div class="pstats">${hide() ? `<span>Played</span>` : `<span>ACS <b class="num">${fmt(r.acs, 0)}</b></span><span>K/D <b class="num">${fmt(r.kd)}</b></span><span>Rnds <b class="num">${r.rnd}</b></span>${r.at ? `<span>${r.span} · ${r.nEv} event${r.nEv > 1 ? "s" : ""}${r.titles ? ` · ${"★".repeat(r.titles)}` : ""}</span>` : ""}`}<span class="agents ${hide() ? "blind-ag" : ""}">${r.ag.map(a => agentImg(a, "s")).join("")}</span></div>
     </div>
     <div class="pright"><div class="rating num ${hide() ? "qm" : ""}">${hide() ? "?" : fmt(r.r)}</div>${slot ? `<span class="target" style="--rc:${S.anySlot ? ROLE_COL[r.role] : slotCol(slot)}">→ ${S.anySlot ? "Draft" : slot}</span>` : `<span class="slot-hint no">${why}</span>`}</div>
@@ -1564,7 +1773,7 @@ function topPicks(m){
 }
 function infoHTML(){
   const parts = [];
-  if (S.cat) parts.push(`<div class="pad bline catinfo"><div class="eyebrow">Category</div><b>${esc(S.cat.title)}</b><p class="small muted" style="margin:4px 0 0">${esc(S.cat.desc)} Ratings are each player's all-time international numbers for that team.</p>${S.mode !== "online" && S.drafters.every(d => !lineupRows(d).length) && S.phase === "draft" ? `<button class="btn tiny" id="recat" style="margin-top:8px">Spin a different category</button>` : ""}</div>`);
+  if (S.cat) parts.push(`<div class="pad bline catinfo"><div class="eyebrow">Category</div><b>${esc(S.cat.title)}</b><p class="small muted" style="margin:4px 0 0">${esc(S.cat.desc)} Ratings are each player's all-time international numbers for that team.</p>${S.mode !== "online" && S.mode !== "daily" && S.drafters.every(d => !lineupRows(d).length) && S.phase === "draft" ? `<button class="btn tiny" id="recat" style="margin-top:8px">Spin a different category</button>` : ""}</div>`);
   parts.push(mapsStrip());
   if (hide()) parts.push(`<div class="pad bline"><span class="chip blindc">Blind draft</span><p class="small muted" style="margin:8px 0 0">Ratings, stats, map fit and win chances are hidden. Pick from memory. Everything is revealed after the ${S.mode === "gauntlet" ? "gauntlet" : S.drafters.length > 1 || VS_MODES.has(S.mode) ? "series" : "map"}.</p></div>`);
   if ((S.mode === "classic" || S.mode === "map") && !hide()){
@@ -1573,9 +1782,10 @@ function infoHTML(){
     parts.push(`<div class="pad bline meter">
       <div class="row" style="justify-content:space-between"><span class="eyebrow">Round win chance</span><span class="num">${p ? Math.round(p * 100) + "%" : "–"}</span></div>
       <div class="bar"><i style="width:${p ? Math.round((p - .1) / .8 * 100) : 0}%"></i></div>
-      <div class="small muted">${st ? `Avg rating ${fmt(st.avg)}${st.bonus ? ` · same-roster bonus +${fmt(st.bonus * 100, 1)}` : ""}. Small samples shrink toward 1.00.` : "Draft players to see your odds against an average pro side."}</div></div>`);
+      <div class="small muted">${st ? `Avg rating ${fmt(st.avg)}. Small samples shrink toward 1.00. ${chemLine(st)}` : "Draft players to see your odds against an average pro side."}</div></div>`);
   }
-  if (S.mode === "gauntlet" || S.mode === "cat"){
+  if (S.mode === "daily") parts.push(`<div class="pad bline"><p class="small" style="margin:0">${S.opts.practice ? "Practice run: you already played today's official draft, so this one won't be posted." : "Everyone gets these same spins today. Your first finished season is your official score."} Redraft tokens are off in the daily.</p></div>`);
+  if (S.mode === "gauntlet" || S.mode === "cat" || S.mode === "daily"){
     const st = teamStrength(lineupRows(S.drafters[0]), null);
     parts.push(`<div class="pad bline"><div class="eyebrow" style="margin-bottom:8px">You'll face</div><div class="champs">${CHAMPS.map(c => `<span class="chip" title="${esc(c.e.name)} ${c.e.year}">${esc(c.e.winner)} ${String(c.e.year).slice(2)}</span>`).join("")}</div>
       <div class="small muted" style="margin-top:8px">${hide() ? "" : st ? `Your strength ${fmt(st.s)} vs champions ${fmt(CHAMPS.reduce((s, c) => s + teamStrength(c.rows, null).s, 0) / CHAMPS.length)} on average.` : "Every event winner, with their real five."}</div></div>`);
@@ -1586,7 +1796,8 @@ function infoHTML(){
     parts.push(`<div class="pad bline meter"><div class="eyebrow">Head to head</div>
       <div class="h2h"><span style="color:var(--teal)">${esc(S.drafters[0].name)} <b class="num">${a ? fmt(a.s) : "–"}</b></span><span style="color:var(--orange)"><b class="num">${b ? fmt(b.s) : "–"}</b> ${esc(S.drafters[1].name)}</span></div>
       <div class="split2"><i style="width:${p ? p * 100 : 50}%"></i><i style="width:${p ? (1 - p) * 100 : 50}%"></i></div>
-      <div class="small muted">${p ? `${esc(S.drafters[0].name)} wins ${Math.round(p * 100)}% of rounds at this point.` : "Team strength includes map fit for the three series maps."}</div></div>`);
+      <div class="small muted">${p ? `${esc(S.drafters[0].name)} wins ${Math.round(p * 100)}% of rounds at this point.` : "Team strength includes map fit for the three series maps."}</div>
+      ${S.drafters.map((d, i) => { const st = teamStrength(lineupRows(d), S.maps); const l = chemLine(st); return l ? `<div class="small" style="color:${SIDE_COL[i]}">${esc(d.name)}: ${l.replace("Chemistry (in hundredths of rating): ", "")}</div>` : ""; }).join("")}</div>`);
   }
   if (S.mode === "online"){
     const o = opponent();
@@ -1620,6 +1831,10 @@ function readyHTML(){
     body = `<p class="muted">Your five play ${S.maps ? esc(S.maps[0]) : "a random map"} against an average international side.</p>
       ${hide() ? `<p class="small muted">Blind draft: your odds stay hidden until the map is played.</p>` : `<div class="kv"><div><b class="num">${Math.round(p * 100)}%</b><span>Round win chance</span></div><div><b class="num" style="color:var(--gold)">${(Math.pow(p, 13) * 100).toFixed(p > .75 ? 1 : 2)}%</b><span>Chance of 13–0</span></div></div>`}`;
     btn = again ? "Play another map" : "Play the map";
+  } else if (S.mode === "daily"){
+    if (again) return `<div class="pad readyp"><div class="eyebrow">Done</div><h2>${S.opts.practice ? "Practice over" : "Today's score is in"}</h2><p class="muted">A new daily draft starts at 00:00 UTC. You can keep drafting today's spins for practice; those runs aren't posted.</p><div class="row"><button class="btn go" id="newdraft2">Practice draft</button><a class="btn" href="#ranks">See ranks</a></div></div>`;
+    body = `<p class="muted">${esc(S.cat.title)}. One map against each of the ${CHAMPS.length} event winners. ${S.opts.practice ? "Practice run." : "This is your official run for today."}</p>`;
+    btn = "Start the season";
   } else if (S.mode === "gauntlet" || S.mode === "cat"){
     body = `<p class="muted">${S.cat ? `${esc(S.cat.title)}. ` : ""}One map against each of the ${CHAMPS.length} event winners, using their real lineups.</p>`;
     btn = again ? "Run it again" : "Start the gauntlet";
@@ -1680,12 +1895,23 @@ function runResult(){
     const g = simMap(Math.random, p); const won = g.w > g.l;
     S.result = {type: "single", map, w: g.w, l: g.l, seq: g.seq, p, box: boxScore(Math.random, rows, g.w + g.l, won), shown: 0};
     if (!G.best || g.w - g.l > G.best.w - G.best.l){ G.best = {w: g.w, l: g.l}; store.set("thirteen-best", G.best); }
-  } else if (S.mode === "gauntlet" || S.mode === "cat"){
+  } else if (S.mode === "gauntlet" || S.mode === "cat" || S.mode === "daily"){
     const me = teamStrength(rows, null).s;
-    const list = CHAMPS.map(c => { const map = MAP_LIST[Math.floor(Math.random() * MAP_LIST.length)]; const g = simMap(Math.random, roundP(me, teamStrength(c.rows, null).s)); return {c, map, w: g.w, l: g.l}; });
-    const w = list.filter(x => x.w > x.l).length;
-    S.result = {type: "gauntlet", list, w, l: list.length - w};
-    if (S.mode === "cat"){ const b = store.get("thirteen-cbest", null); if (!b || w > b.w) store.set("thirteen-cbest", {w, l: list.length - w}); }
+    // The daily season is the same for everyone who drafts the same five.
+    const rand = S.mode === "daily" ? rng(hashStr(S.opts.dkey + ":" + rows.map(r => r.id).sort((a, b) => a - b).join(","))) : Math.random;
+    const list = CHAMPS.map(c => { const map = MAP_LIST[Math.floor(rand() * MAP_LIST.length)]; const g = simMap(rand, roundP(me, teamStrength(c.rows, null).s)); return {c, map, w: g.w, l: g.l}; });
+    const w = list.filter(x => x.w > x.l).length, tb = list.reduce((t, x) => t + x.w - x.l, 0);
+    S.result = {type: "gauntlet", list, w, l: list.length - w, tb};
+    if (S.mode === "daily"){
+      S.result.daily = true; S.result.practice = !!S.opts.practice;
+      if (!S.opts.practice && !DAILY[S.opts.dkey]){
+        DAILY[S.opts.dkey] = {n: S.opts.dn, cat: S.cat.title, w, l: list.length - w, tb, sq: list.map(x => x.w > x.l ? 1 : 0).join(""), team: rows.map(r => r.p).join(", ")};
+        const keys = Object.keys(DAILY).sort(); while (keys.length > 30) delete DAILY[keys.shift()];
+        store.set("thirteen-daily", DAILY); S.result.official = true;
+      }
+    }
+    if (S.mode === "daily"){}
+    else if (S.mode === "cat"){ const b = store.get("thirteen-cbest", null); if (!b || w > b.w) store.set("thirteen-cbest", {w, l: list.length - w}); }
     else if (!G.gbest || w > G.gbest.w){ G.gbest = {w, l: list.length - w}; store.set("thirteen-gbest", G.gbest); }
   } else if (S.mode === "bot" || S.mode === "local"){
     const sr = simSeries(Math.random, rows, lineupRows(S.drafters[1]), 3, S.maps);
@@ -1703,6 +1929,8 @@ function runResult(){
     updateMatch();
   }
   const m = document.getElementById("match"); if (m) m.scrollIntoView({behavior: "smooth", block: "start"});
+  // the official daily run is posted straight away when a valid name is already saved
+  if (S.result && S.result.official && !nameProblem(G.nick)){ const b = document.querySelector(".lbbox .lbpost"); if (b) b.click(); }
 }
 function verdict(w, l){
   if (w === 13 && l === 0) return ["Flawless. 13–0.", "var(--gold)"];
@@ -1729,7 +1957,9 @@ function resultHTML(){
     <div class="score"><span class="big us num">${R.w}</span><span class="dash">–</span><span class="big them num">${R.l}</span></div>
     <div class="verdict" style="color:${R.l === 0 ? "var(--gold)" : R.w >= R.l ? "var(--teal)" : "var(--red)"}">${R.l === 0 ? "Perfect run. Every champion beaten." : R.w >= 14 ? "A dynasty" : R.w >= 10 ? "Title contender" : R.w >= 6 ? "Playoff team" : "Rebuild year"}</div>
     <div class="glist">${R.list.map((x, i) => `<div class="gm ${x.w > x.l ? "won" : "lost"}" style="--d:${(i * 0.06).toFixed(2)}s"><span class="res">${x.w > x.l ? "W" : "L"}</span><div style="min-width:0"><b>${esc(teName(x.c.e.winner))}</b><div class="small muted">${esc(x.c.e.name)} ${x.c.e.year} · ${esc(x.map)}</div></div><span class="num">${x.w}–${x.l}</span></div>`).join("")}</div>
-    <div class="row" style="justify-content:center;margin-top:14px"><button class="btn" id="share">Copy result</button></div></div>`;
+    ${R.daily ? `<div class="dsq" aria-label="Wins and losses">${R.list.map(x => `<i class="${x.w > x.l ? "w" : "l"}"></i>`).join("")}</div>` : ""}
+    <div class="row" style="justify-content:center;margin-top:14px"><button class="btn" id="share">${R.daily ? "Copy share text" : "Copy result"}</button></div>
+    ${R.daily && R.practice ? `<p class="small muted" style="text-align:center;margin:10px 0 0">Practice run, not posted.</p>` : lbBoxHTML(R.daily ? S.opts.board : S.mode, R.w, R.tb, (S.cat ? S.cat.title + ": " : "") + lineupRows(S.drafters[0]).map(r => r.p).join(", "), R)}</div>`;
   return seriesHTML(R.sr, R.nameA, R.nameB);
 }
 function boxTable(box, mvp = true){
@@ -1801,6 +2031,7 @@ function shareText(){
   const team = d => SLOTS.map(sl => `${sl}: ${line(d.lineup[sl])}`).join("\n");
   if (!R) return "";
   if (R.type === "single") return `13–0 VCT draft (${MODES[S.mode].title}): ${R.w}–${R.l} on ${R.map}\n${team(S.drafters[0])}`;
+  if (R.type === "gauntlet" && R.daily) return dailyShare({n: S.opts.dn, cat: S.cat.title, w: R.w, l: R.l, sq: R.list.map(x => x.w > x.l ? 1 : 0).join("")}, R.practice);
   if (R.type === "gauntlet") return `13–0 VCT draft, ${S.cat ? `All-time category (${S.cat.title})` : "Champions gauntlet"}: ${R.w}–${R.l} against every international winner\n${team(S.drafters[0])}`;
   return `13–0 VCT draft (${MODES[S.mode].title}): ${R.nameA} ${R.sr.wa}–${R.sr.wb} ${R.nameB}\n` + R.sr.games.map((g, i) => `Map ${i + 1} ${g.map}: ${g.w}–${g.l}`).join("\n");
 }
@@ -1867,6 +2098,8 @@ function bindPlay(){
   on("[data-timer]", e => { G.timer = e.currentTarget.dataset.timer === "1"; store.set("thirteen-timer", G.timer); document.querySelectorAll("[data-timer]").forEach(b => b.setAttribute("aria-pressed", (b.dataset.timer === "1") === G.timer)); });
   on("[data-resume]", () => { PLAYUI = "session"; renderPlay(); });
   on("[data-battle]", openBattle);
+  on("[data-daily]", startDaily);
+  on("[data-dshare]", () => { const d = DAILY[dailyInfo().key]; if (d) copyText(dailyShare(d), "Share text copied"); });
   on("[data-quiz]", e => startQuiz(e.currentTarget.dataset.quiz));
   on("[data-level]", e => { G.level = e.currentTarget.dataset.level; store.set("thirteen-level", G.level); document.querySelectorAll("[data-level]").forEach(b => b.setAttribute("aria-pressed", b.dataset.level === G.level)); });
   ["fy", "ft", "fr"].forEach((id, i) => { const el = document.getElementById(id); if (el) el.addEventListener("change", ev => { G.filt[["year", "type", "region"][i]] = ev.target.value; store.set("thirteen-filt", G.filt); }); });
@@ -1880,13 +2113,13 @@ function bindPlay(){
   // session
   on("#tohub", () => { PLAYUI = "hub"; clearInterval(simTimer); showPlay(); });
   on("#recat", () => startMode(S.mode, S.mode === "cat" ? {} : {catVs: true}));
-  on("#newdraft", () => startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : S.cat && S.mode !== "cat" ? {catVs: true} : {}));
+  on("#newdraft", () => S.mode === "daily" ? startDaily() : startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : S.cat && S.mode !== "cat" ? {catVs: true} : {}));
   on("#copyroom", () => copyText(NET.code, "Room code copied"));
   on("[data-pick]", e => { const r = getRow(+e.currentTarget.dataset.pick); if (!S || !canAct(curD(S))) return; if (S.mode === "online"){ if (slotFor(S, curD(S), r)) onlineAct("p" + r.id); return; } if (doPick(S, r)) renderPlay(); });
   on("#skip", () => { const d = curD(S); if (!canAct(d)) return; if (S.mode === "online"){ if (!d.skips){ if (!tok(d)) return; spendTok(d); } onlineAct("s"); return; } if (d.skips) d.skips--; else if (tok(d)) spendTok(d); else return; nextDeal(S); renderPlay(); });
   on("[data-rd]", e => { e.stopPropagation(); const [di, sl] = e.currentTarget.dataset.rd.split("|"); redraft(+di, sl); });
   on("#playgo", runResult);
-  on("#newdraft2", () => startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : S.cat && S.mode !== "cat" ? {catVs: true} : {}));
+  on("#newdraft2", () => S.mode === "daily" ? startDaily() : startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : S.cat && S.mode !== "cat" ? {catVs: true} : {}));
   on("#ggask", () => { S.askGG = true; renderPlay(); });
   on("#ggback", () => { S.askGG = false; renderPlay(); });
   on("[data-gg]", e => { const i = +e.currentTarget.dataset.gg; endBySurrender(S.drafters[i].name, S.drafters[1 - i].name); renderPlay(); });
