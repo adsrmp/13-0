@@ -9,7 +9,8 @@ makes Cloudflare (Workers Builds) redeploy the site in a couple of minutes.
    - Lines marked `watch`: check on vlr.gg whether the event has finished (grand final played).
      If it has, process it.
    - Look for newly announced or finished events that aren't in the tracker: current-season Kickoff,
-     Stage 1 and Stage 2 for Americas, EMEA, Pacific and China, Masters, Champions, and Ascension.
+     Stage 1 and Stage 2 for Americas, EMEA, Pacific and China, Masters, Champions, the Esports World Cup
+     (EWC, usually July) and Ascension.
      Add `watch` lines for upcoming ones.
    - Then work through the `todo` backlog, oldest first: **at most 4 events per run**, counting new
      events first.
@@ -51,7 +52,8 @@ PlayerName TAG,Agent1;Agent2,Rnd,R,ACS,K:D,KAST,ADR,KPR,APR,FKPR,FDPR,HS
 - **name**: `Americas Stage 2`, `Pacific Kickoff`, `EMEA League` (2023), `China Ascension`.
   For internationals: `Masters London`, `Champions Shanghai`.
 - **type**: `League` for Kickoff, Stage 1, Stage 2 and the 2023 leagues. `Ascension` for Ascension.
-  `Masters` or `Champions` for internationals; those take `city=<City>` instead of `region=`.
+  `Masters` or `Champions` for internationals, `EWC` for the Esports World Cup; those take `city=<City>` instead of `region=`.
+  EWC events never become Champions gauntlet opponents (only Masters and Champions winners do).
 - **end**: the date of the grand final. This sets the order events are listed in.
 - Optional: `note=partial data` if vlr is missing part of the table.
 

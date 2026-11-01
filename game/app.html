@@ -489,14 +489,14 @@ const app = $("#app");
 const ROLES = ["Duelist","Initiator","Controller","Sentinel"];
 const REGIONS = ["Americas","EMEA","Pacific","China"];
 const ROLE_COL = {Duelist:"var(--duelist)",Initiator:"var(--initiator)",Controller:"var(--controller)",Sentinel:"var(--sentinel)"};
-const EV = {}; D.events.forEach((e,i) => { e.i = i; e.scope = e.type === "Masters" || e.type === "Champions" ? "intl" : e.type === "League" ? "league" : "t2"; EV[e.id] = e; });
+const EV = {}; D.events.forEach((e,i) => { e.i = i; e.scope = e.type === "Masters" || e.type === "Champions" ? "intl" : e.type === "EWC" ? "ewc" : e.type === "League" ? "league" : "t2"; EV[e.id] = e; });
 D.born = D.born || {};
 const isIntl = id => EV[id] && EV[id].scope === "intl";
-const NEV = {intl: D.events.filter(e => e.scope === "intl").length, league: D.events.filter(e => e.scope === "league").length, t2: D.events.filter(e => e.scope === "t2").length};
+const NEV = {intl: D.events.filter(e => e.scope === "intl").length, ewc: D.events.filter(e => e.scope === "ewc").length, league: D.events.filter(e => e.scope === "league").length, t2: D.events.filter(e => e.scope === "t2").length};
 // Which events a deal filter ("Event" select) allows: "" = internationals (the default), "all" = everything.
-const typeOk = (ev, t) => !t ? ev.scope === "intl" : t === "all" ? true : t === "League" ? ev.scope === "league" : t === "T2" ? ev.scope === "t2" : ev.type === t;
-const typeOpts = () => [["", "Masters + Champions"], ["Masters", "Masters"], ["Champions", "Champions"], ...(NEV.league ? [["League", "Regional leagues"]] : []), ...(NEV.t2 ? [["T2", "Tier 2 (Ascension)"]] : []), ...(NEV.league || NEV.t2 ? [["all", "Every event"]] : [])];
-const EVCOUNT = () => [`${NEV.intl} international${NEV.intl === 1 ? "" : "s"}`, NEV.league ? `${NEV.league} regional league event${NEV.league === 1 ? "" : "s"}` : "", NEV.t2 ? `${NEV.t2} tier 2 event${NEV.t2 === 1 ? "" : "s"}` : ""].filter(Boolean).join(", ");
+const typeOk = (ev, t) => !t ? ev.scope === "intl" : t === "all" ? true : t === "EWC" ? ev.scope === "ewc" : t === "League" ? ev.scope === "league" : t === "T2" ? ev.scope === "t2" : ev.type === t;
+const typeOpts = () => [["", "Masters + Champions"], ["Masters", "Masters"], ["Champions", "Champions"], ...(NEV.ewc ? [["EWC", "Esports World Cup"]] : []), ...(NEV.league ? [["League", "Regional leagues"]] : []), ...(NEV.t2 ? [["T2", "Tier 2 (Ascension)"]] : []), ...(NEV.ewc || NEV.league || NEV.t2 ? [["all", "Every event"]] : [])];
+const EVCOUNT = () => [`${NEV.intl} international${NEV.intl === 1 ? "" : "s"}`, NEV.ewc ? `${NEV.ewc} Esports World Cup${NEV.ewc === 1 ? "" : "s"}` : "", NEV.league ? `${NEV.league} regional league event${NEV.league === 1 ? "" : "s"}` : "", NEV.t2 ? `${NEV.t2} tier 2 event${NEV.t2 === 1 ? "" : "s"}` : ""].filter(Boolean).join(", ");
 const YEARS = [...new Set(D.events.map(e => e.year))];
 const store = {
   get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
@@ -509,7 +509,7 @@ const TE = new Map(); // event|tag -> rows
 D.rows.forEach(r => { const k = r.e + "|" + r.t; if (!TE.has(k)) TE.set(k, []); TE.get(k).push(r); });
 TE.forEach(v => v.sort((a,b) => b.rnd - a.rnd || b.r - a.r));
 const teName = t => D.teams[t] || t;
-const evShort = e => e.name.replace("Masters ","M. ").replace("Champions ","Champs ") + " " + String(e.year).slice(2);
+const evShort = e => e.name.replace("Esports World Cup","EWC").replace("Masters ","M. ").replace("Champions ","Champs ") + " " + String(e.year).slice(2);
 const isWin = (e, t) => EV[e].winner === t;
 
 const PLAYERS = new Map();
@@ -2587,7 +2587,7 @@ function trendSVG(trend){
 // EVENTS
 // =====================================================================
 function renderEvents(){
-  const scopes = [["intl", "Internationals"], ["league", "Regional leagues"], ["t2", "Tier 2"]].filter(([k]) => NEV[k]);
+  const scopes = [["intl", "Internationals"], ["ewc", "Esports World Cup"], ["league", "Regional leagues"], ["t2", "Tier 2"]].filter(([k]) => NEV[k]);
   if (!UI.evScope || !NEV[UI.evScope]) UI.evScope = "intl";
   const list = D.events.filter(e => e.scope === UI.evScope);
   if (!UI.event || !EV[UI.event]) UI.event = list[list.length-1].id;
@@ -2602,7 +2602,7 @@ function renderEvents(){
     ${scopes.length > 1 ? `<div class="seg" role="group" aria-label="Event type">${scopes.map(([k, l]) => `<button data-evscope="${k}" aria-pressed="${k === UI.evScope}">${l} <span class="muted">${NEV[k]}</span></button>`).join("")}</div>` : ""}
     <div class="ev-grid">${list.slice().reverse().map(e => { const t = topOf(e.id); return `
       <button class="evc" aria-pressed="${e.id === UI.event}" data-ev="${e.id}">
-        <div class="eyebrow">${e.scope === "intl" ? e.type : e.scope === "league" ? "League" : "Tier 2"} · ${e.year} · ${esc(e.city || e.region || "")}</div>
+        <div class="eyebrow">${e.scope === "intl" ? e.type : e.scope === "ewc" ? "EWC" : e.scope === "league" ? "League" : "Tier 2"} · ${e.year} · ${esc(e.city || e.region || "")}</div>
         <div class="en">${esc(e.name)}</div>
         <div class="ew"><span class="trophy">★</span> ${esc(teName(e.winner))}</div>
         ${t ? `<div class="small muted">Top rated: <b style="color:var(--text)">${esc(t.p)}</b> <span class="num">${fmt(t.r)}</span></div>` : ""}
@@ -2623,7 +2623,7 @@ function renderEvents(){
   bindTeamLinks();
 }
 
-{ const n = document.getElementById("srcnote"); if (n && (NEV.league || NEV.t2)) n.innerHTML = `Player stats: event "Player Performance and Stats" tables on <a href="https://www.vlr.gg" target="_blank" rel="noopener">vlr.gg</a> for ${EVCOUNT()}, 2021 to ${D.events[D.events.length-1].year}. Masters Shanghai 2024 has no Rating column on vlr, so those ratings are estimated (marked "est."). LOCK//IN 2023 is partial. Updated after each event finishes.`; }
+{ const n = document.getElementById("srcnote"); if (n && (NEV.ewc || NEV.league || NEV.t2)) n.innerHTML = `Player stats: event "Player Performance and Stats" tables on <a href="https://www.vlr.gg" target="_blank" rel="noopener">vlr.gg</a> for ${EVCOUNT()}, 2021 to ${D.events[D.events.length-1].year}. Masters Shanghai 2024 has no Rating column on vlr, so those ratings are estimated (marked "est."). LOCK//IN 2023 is partial. Updated after each event finishes.`; }
 setHH();
 route();
 })();

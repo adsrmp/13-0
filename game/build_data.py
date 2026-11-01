@@ -16,7 +16,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, 'data')
 REGIONS = ('Americas', 'EMEA', 'Pacific', 'China')
 INTL = ('Masters', 'Champions')
-TYPES = INTL + ('League', 'Ascension', 'Challengers')
+TYPES = INTL + ('EWC', 'League', 'Ascension', 'Challengers')
+CITY_EVENTS = INTL + ('EWC',)   # international events: these take city= instead of region=
 
 # ---------- teams ----------
 TEAMS = {}
@@ -83,7 +84,7 @@ for f in files:
             assert re.fullmatch(r'\d{4}-\d{2}-\d{2}', extra.get('end', '')), (f, 'add end=YYYY-MM-DD to the header')
             ev = dict(id=eid, name=name, year=int(year), type=typ, winner=win, vlr=int(vlr),
                       city=extra.get('city', ''), end=extra['end'])
-            if typ not in INTL:
+            if typ not in CITY_EVENTS:
                 assert extra.get('region') in REGIONS, (f, 'regional events need region=Americas|EMEA|Pacific|China')
                 ev['region'] = extra['region']
             if extra.get('note'):

@@ -58,3 +58,6 @@ watch|emea26asc|EMEA Ascension|2026|Ascension|EMEA||check if finished
 watch|pac26asc|Pacific Ascension|2026|Ascension|Pacific||check if finished
 watch|chn26asc|China Ascension|2026|Ascension|China||check if finished
 # Future internationals and next season events: add a "watch" line when the schedule is announced.
+done|ewc25|Esports World Cup|2025|EWC|-|2449|partial: vlr table cut off below 0.96 rating
+done|ewc26|Esports World Cup|2026|EWC|-|2952|
+watch|ewc27|Esports World Cup|2027|EWC|-||usually July; add once the grand final is played
