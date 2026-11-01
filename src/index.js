@@ -86,10 +86,10 @@ export class GameRoom {
 // ---------- leaderboards ----------
 // Add an id here to wipe every board once (used 1 Nov 2026 when scores started posting automatically).
 const RESETS = ["2026-11-01-auto-post"];
-// Boards and the score range each accepts.
+// Boards and the score range each accepts. Draft boards have a "-blind" twin for runs drafted with stats hidden.
 const BOARDS = [
-  { re: /^daily-\d{4}-\d{2}-\d{2}$/, min: 0, max: 40, once: true },
-  { re: /^(gauntlet|cat)$/, min: 0, max: 40 },
+  { re: /^daily-\d{4}-\d{2}-\d{2}(-blind)?$/, min: 0, max: 40, once: true },
+  { re: /^(gauntlet|cat)(-blind)?$/, min: 0, max: 40 },
   { re: /^quiz-(map|agent|ability)$/, min: 0, max: 30 },
 ];
 // Name screening: letters, numbers, spaces and . _ - only, 2–16 characters, and no offensive or
