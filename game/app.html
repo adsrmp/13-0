@@ -448,7 +448,8 @@ body.noscroll{overflow:hidden}
 .mstats{display:flex;flex-direction:column;gap:10px}
 .msscore{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-family:var(--f-display);font-weight:900;font-size:44px;line-height:1}
 .msscore .dash{color:var(--mute)}.msscore b{font-size:22px;margin-left:8px;text-transform:uppercase}.msscore .msname{font-size:20px;text-transform:uppercase}
-.msmvp{font-size:15px}.mstabs{display:flex;flex-wrap:wrap;align-self:flex-start}
+.msmvp{font-size:15px}
+@media (max-width:640px){.seasontbl th:nth-child(n+4):nth-child(-n+6),.seasontbl td:nth-child(n+4):nth-child(-n+6){display:none}}.mstabs{display:flex;flex-wrap:wrap;align-self:flex-start}
 .instbtn{flex:none}.instbtn[hidden]{display:none!important}
 @media (max-width:640px){.daily .mglyph{display:none}.daily .dact{align-items:stretch;width:100%}.rktable th:nth-child(4),.rktable td:nth-child(4){display:none}.instbtn{order:1;margin-left:auto;font-size:13px;padding:6px 10px}.instbtn:not([hidden])+.sndbtn{margin-left:8px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -1372,7 +1373,7 @@ function maybeCelebrate(){
     if (S.mode === "local"){ kind = "neutral"; winner = aw ? R.nameA : R.nameB; label = `${winner} ${winsWord(winner)}`; } else { const iWon = S.mode === "online" ? (aw === (S.me === 0)) : aw; kind = iWon ? "win" : "loss"; if (iWon) winner = S.drafters[S.mode === "online" ? S.me : 0].name; } }
   if (winner) awardTok(winner);
   setTimeout(() => celebrate(kind, label), delay);
-  if (R.type === "series") autoMatchStats(R, delay + 1700);
+  if (R.type === "series" || R.type === "gauntlet") autoMatchStats(R, delay + 1700);
 }
 function soundBtn(){
   const b = document.getElementById("sndbtn"); if (!b) return;
@@ -1764,7 +1765,29 @@ function sessionHTML(){
   </section>`;
 }
 // ---------- match stats pop-up: opens by itself when a match ends, and from the Scoreboard button ----------
+// Season stats for the 18-match modes. Rating per map = the player's event rating scaled by how they played (ACS vs their usual).
+function seasonTotals(R){
+  const t = {};
+  R.list.forEach(x => (x.box || []).forEach((b, i) => {
+    const o = t[b.r.id] || (t[b.r.id] = {r: b.r, k: 0, d: 0, a: 0, acs: 0, rt: 0, n: 0, mvp: 0});
+    o.k += b.k; o.d += b.d; o.a += b.a; o.acs += b.acs; o.rt += b.r.r * (b.r.acs ? b.acs / b.r.acs : 1); o.n++; if (i === 0) o.mvp++;
+  }));
+  return Object.values(t).map(o => ({...o, acs: Math.round(o.acs / o.n), rating: o.rt / o.n})).sort((a, b) => b.rating - a.rating);
+}
+function seasonStatsHTML(R){
+  const rows = seasonTotals(R), top = rows[0];
+  const title = S.mode === "daily" ? `Daily #${S.opts.dn} · ${S.cat.title}` : S.cat ? `All-time category · ${S.cat.title}` : "Champions gauntlet";
+  return `<div class="pad mstats"><div class="eyebrow">${esc(title)}</div>
+    <div class="msscore"><span class="num" style="color:var(--teal)">${R.w}</span><span class="dash">–</span><span class="num" style="color:var(--red)">${R.l}</span><b style="color:${R.l === 0 ? "var(--gold)" : R.w >= R.l ? "var(--teal)" : "var(--red)"}">${esc(gauntletWord(R))}</b></div>
+    ${top ? `<div class="msmvp">🎖️ Season MVP <button class="pp plink" data-player="${esc(top.r.key)}" data-row="${top.r.id}">${esc(top.r.p)}</button> · ${fmt(top.rating)} rating · ${top.mvp} map MVP${top.mvp === 1 ? "" : "s"}</div>` : ""}
+    <div class="scroll"><table class="seasontbl"><thead><tr><th>Player</th><th class="r">Rating</th><th class="r">ACS</th><th class="r">K</th><th class="r">D</th><th class="r">A</th><th class="r">K/D</th><th class="r">MVPs</th></tr></thead><tbody>
+      ${rows.map((o, i) => `<tr><td><div class="row" style="gap:8px;flex-wrap:nowrap">${agentImg(o.r.ag[0], "s")}<button class="pp plink" data-player="${esc(o.r.key)}" data-row="${o.r.id}">${esc(o.r.p)}</button> <span class="tag">${esc(o.r.t)} ${o.r.at ? "AT" : String(EV[o.r.e].year).slice(2)}</span>${i === 0 ? ` <span class="mvp">MVP</span>` : ""}</div></td>
+        <td class="r num" style="font-weight:700;color:${o.rating >= 1.1 ? "var(--teal)" : o.rating < 0.95 ? "var(--red)" : "var(--text)"}">${fmt(o.rating)}</td><td class="r num">${o.acs}</td><td class="r num">${o.k}</td><td class="r num">${o.d}</td><td class="r num">${o.a}</td><td class="r num">${fmt(o.k / Math.max(1, o.d))}</td><td class="r num">${o.mvp}</td></tr>`).join("")}
+    </tbody></table></div>
+    <p class="small muted" style="margin:0">Totals across all ${R.list.length} maps. Rating is each player's event rating, scaled up or down by how they played this season.</p></div>`;
+}
 function matchStatsHTML(R){
+  if (R.type === "gauntlet") return seasonStatsHTML(R);
   if (R.type === "single"){
     const top = R.box[0], won = R.w > R.l;
     return `<div class="pad mstats"><div class="eyebrow">${esc(MODES[S.mode].title)} · ${esc(R.map)}</div>
@@ -1785,7 +1808,7 @@ function matchStatsHTML(R){
     ${body}</div>`;
 }
 function openMatchStats(){
-  const R = S && S.result; if (!R || (R.type !== "single" && R.type !== "series")) return;
+  const R = S && S.result; if (!R || !(R.type === "single" || R.type === "series" || (R.type === "gauntlet" && R.list[0] && R.list[0].box))) return;
   openSheet(matchStatsHTML(R) + `<p class="small muted pad" style="padding-top:0">Tap a player for their career stats.</p>`, "Match stats");
   const bind = () => document.querySelectorAll("#sheet [data-stab]").forEach(b => b.onclick = () => {
     R.statTab = b.dataset.stab; document.querySelector("#sheet .sheetbody").innerHTML = matchStatsHTML(R) + `<p class="small muted pad" style="padding-top:0">Tap a player for their career stats.</p>`; bind(); });
@@ -1798,8 +1821,8 @@ function autoMatchStats(R, ms){
 function againHTML(){
   if (S.mode === "online") return "";
   const daily = S.mode === "daily";
-  const R = S.result, board = R.type === "single" || R.type === "series";
-  return `<div class="againbar" role="group" aria-label="What next"><button class="btn go again" id="playagain">${daily ? "Practice draft" : "Play again"}</button>${board ? `<button class="btn" id="scoreboard">Match stats</button>` : ""}<button class="btn" id="tohub2">Back to modes</button></div>`;
+  const R = S.result, board = R.type === "single" || R.type === "series" || R.type === "gauntlet";
+  return `<div class="againbar" role="group" aria-label="What next"><button class="btn go again" id="playagain">${daily ? "Practice draft" : "Play again"}</button>${board ? `<button class="btn" id="scoreboard">${R.type === "gauntlet" ? "Season stats" : "Match stats"}</button>` : ""}<button class="btn" id="tohub2">Back to modes</button></div>`;
 }
 function newDraft(){
   if (!S) return;
@@ -2025,6 +2048,9 @@ function runResult(){
     const rand = S.mode === "daily" ? rng(hashStr(S.opts.dkey + ":" + rows.map(r => r.id).sort((a, b) => a - b).join(","))) : Math.random;
     const list = CHAMPS.map(c => { const map = MAP_LIST[Math.floor(rand() * MAP_LIST.length)]; const g = simMap(rand, roundP(me, teamStrength(c.rows, null).s)); return {c, map, w: g.w, l: g.l}; });
     const w = list.filter(x => x.w > x.l).length, tb = list.reduce((t, x) => t + x.w - x.l, 0);
+    // player stats per map come from their own random stream, so the wins and losses above never change
+    const brand = S.mode === "daily" ? rng(hashStr(S.opts.dkey + ":box:" + rows.map(r => r.id).sort((a, b) => a - b).join(","))) : Math.random;
+    list.forEach(x => { x.box = boxScore(brand, rows, x.w + x.l, x.w > x.l); });
     S.result = {type: "gauntlet", list, w, l: list.length - w, tb};
     if (S.mode === "daily"){
       S.result.daily = true; S.result.practice = !!S.opts.practice;
