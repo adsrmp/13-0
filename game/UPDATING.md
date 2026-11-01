@@ -67,6 +67,13 @@ PlayerName TAG,Agent1;Agent2,Rnd,R,ACS,K:D,KAST,ADR,KPR,APR,FKPR,FDPR,HS
   Sentinel).
 - The winner's tag must appear in the rows.
 
+### In-game leaders
+
+Add one line per team to `game/data/igl.txt`: `<event id>|<TAG>|<player>` (exact player name from the rows),
+or `-` if the team plays without a dedicated IGL. Most teams have one. Good sources: the team's IGL
+named in event previews and interviews (WebSearch "<team> IGL <year>"). If you can't confirm a team's
+IGL, leave it out rather than guess. `build_data.py` checks the player is on that roster.
+
 ### Internationals only: map picks
 
 For a new Masters or Champions event, also fetch its vlr Agents tab and add a block to

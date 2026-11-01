@@ -608,8 +608,11 @@ function teamStrength(rows, maps){
   return {avg, bonus: chem.total, chem, s: avg + chem.total};
 }
 // ---------- team chemistry ----------
-// Hand-picked in-game leaders (IGLs) who appear in the data.
-const IGLS = new Set(["boaster", "saadhak", "stax", "d4v41", "valyn", "kingg", "redgar", "boostio", "sscary", "melser", "johnqt", "ethan", "munchkin"]);
+// In-game leaders, per team per event (data/igl.txt). On an all-time roster, a player counts as the
+// IGL if they called for that team at any event.
+D.igl = D.igl || {};
+const IGL_AT = new Set(Object.entries(D.igl).filter(([, p]) => p !== "-").map(([k, p]) => k.split("|")[1] + "|" + p));
+const isIGL = r => r.e === "all" ? IGL_AT.has(r.t + "|" + r.key) : D.igl[r.e + "|" + r.t] === r.key;
 // Everyone each player has shared a roster with at an event.
 const TEAMMATES = new Map();
 TE.forEach(rows => rows.forEach(a => { if (!TEAMMATES.has(a.key)) TEAMMATES.set(a.key, new Set()); rows.forEach(b => { if (b.key !== a.key) TEAMMATES.get(a.key).add(b.key); }); }));
@@ -625,7 +628,7 @@ function chemistry(rows){
     if (TEAMMATES.has(a.key) && TEAMMATES.get(a.key).has(b.key)) pairs++;
   }
   const duo = Math.min(0.04, pairs * 0.008);
-  const igls = rows.filter(r => IGLS.has(r.key)).length;
+  const igls = rows.filter(r => isIGL(r)).length;
   const igl = full ? (igls === 1 ? 0.015 : igls > 1 ? 0.005 : -0.01) : 0;
   const smokes = full && !rows.some(r => r.ag.some(a => D.roles[a] === "Controller")) ? -0.02 : 0;
   return {same, duo, pairs, igl, igls, smokes, total: same + duo + igl + smokes};
@@ -1814,7 +1817,7 @@ function prowHTML(r, slot, clickable, why = ""){
   return `<button class="prow" ${slot && clickable ? `data-pick="${r.id}"` : "disabled"} aria-label="${esc(r.p)}${slot ? ", drafts as " + slot : ""}">
     ${agentImg(r.ag[0], "l")}
     <div style="min-width:0">
-      <div class="pname">${esc(r.p)} ${roleChip(r.role)}${IGLS.has(r.key) ? ` <span class="chip igl" title="In-game leader">IGL</span>` : ""}${!hide() && duoWith(r) ? ` <span class="chip duo" title="Played with ${esc(duoWith(r))}">Duo · ${esc(duoWith(r))}</span>` : ""} ${hide() ? "" : fitChip(mapFit(r, S.maps))}</div>
+      <div class="pname">${esc(r.p)} ${roleChip(r.role)}${isIGL(r) ? ` <span class="chip igl" title="In-game leader">IGL</span>` : ""}${!hide() && duoWith(r) ? ` <span class="chip duo" title="Played with ${esc(duoWith(r))}">Duo · ${esc(duoWith(r))}</span>` : ""} ${hide() ? "" : fitChip(mapFit(r, S.maps))}</div>
       <div class="pstats">${hide() ? `<span>Played</span>` : `<span>ACS <b class="num">${fmt(r.acs, 0)}</b></span><span>K/D <b class="num">${fmt(r.kd)}</b></span><span>Rnds <b class="num">${r.rnd}</b></span>${r.at ? `<span>${r.span} · ${r.nEv} event${r.nEv > 1 ? "s" : ""}${r.titles ? ` · ${"★".repeat(r.titles)}` : ""}</span>` : ""}`}<span class="agents ${hide() ? "blind-ag" : ""}">${r.ag.map(a => agentImg(a, "s")).join("")}</span></div>
     </div>
     <div class="pright"><div class="rating num ${hide() ? "qm" : ""}">${hide() ? "?" : fmt(r.r)}</div>${slot ? `<span class="target" style="--rc:${S.anySlot ? ROLE_COL[r.role] : slotCol(slot)}">→ ${S.anySlot ? "Draft" : slot}</span>` : `<span class="slot-hint no">${why}</span>`}</div>

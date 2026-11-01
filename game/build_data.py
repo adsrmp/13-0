@@ -151,6 +151,21 @@ for line in open(os.path.join(DATA, 'born.txt'), encoding='utf-8'):
     assert 1985 <= int(y) <= 2012, line
     born[p.strip().lower()] = int(y)
 
+# ---------- in-game leaders (optional) ----------
+igl = {}
+present = {}
+for r in rows: present.setdefault(r['e'] + '|' + r['t'], set()).add(r['p'].lower())
+p_igl = os.path.join(DATA, 'igl.txt')
+if os.path.exists(p_igl):
+    for line in open(p_igl, encoding='utf-8'):
+        line = line.strip()
+        if not line or line.startswith('#'): continue
+        e, t, pl = line.split('|')
+        k = e + '|' + t
+        assert k in present, ('igl.txt: no roster for', k)
+        assert pl == '-' or pl.lower() in present[k], ('igl.txt: player not on that roster', line)
+        igl[k] = pl.lower()
+
 # ---------- checks ----------
 order = sorted(events, key=lambda e: (events[e]['end'], e))
 bad = []
@@ -164,9 +179,9 @@ for eid in order:
     assert events[eid]['winner'] in by, ('winner has no rows', eid, events[eid]['winner'])
 
 out = dict(events=[events[e] for e in order], teams={k: v[0] for k, v in TEAMS.items()}, roles=ROLE,
-           rows=rows, meta=meta, born=born)
+           rows=rows, meta=meta, born=born, igl=igl)
 json.dump(out, open(os.path.join(HERE, 'data.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 by_type = {}
 for e in events.values(): by_type[e['type']] = by_type.get(e['type'], 0) + 1
-print('events', len(events), by_type, '| rows', len(rows), '| players', len({r['p'].lower() for r in rows}), '| birth years', len(born))
+print('events', len(events), by_type, '| rows', len(rows), '| players', len({r['p'].lower() for r in rows}), '| birth years', len(born), '| IGLs', sum(1 for v in igl.values() if v != '-'))
 print('teams with <5 players (left out of draft spins):', bad)
