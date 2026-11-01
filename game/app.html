@@ -839,10 +839,10 @@ function startDaily(){
   startMode("daily", {seed: di.seed, cat: di.cat, dkey: di.key, dn: di.n, board: di.board, practice: !!dailyDone(di.key)});
 }
 const siteURL = () => /^https?:$/.test(location.protocol) ? location.origin : "";
-function dailyShare(d, practice){
+function dailyShare(d, practice, blind){
   const sq = String(d.sq).split("").map(c => c === "1" ? "🟩" : "🟥");
   const rows = []; for (let i = 0; i < sq.length; i += 9) rows.push(sq.slice(i, i + 9).join(""));
-  return `13–0 Daily #${d.n} · ${d.cat} · ${d.w}–${d.l}${practice ? " (practice)" : ""}\n${rows.join("\n")}${siteURL() ? "\n" + siteURL() : ""}`;
+  return `13–0 Daily #${d.n} · ${d.cat}${blind || d.blind ? " · 🙈 blind" : ""}\n🏆 ${d.w}–${d.l}${practice ? " (practice)" : ""}\n${rows.join("\n")}${siteURL() ? "\n" + siteURL().replace(/^https?:\/\//, "") : ""}`;
 }
 function dailyCardHTML(){
   const di = dailyInfo(), done = dailyDone(di.key);
@@ -1601,7 +1601,7 @@ function quizEndHTML(){
     <p class="muted" style="margin:0">${QZ.log.filter(l => l.ok).length} of ${QROUNDS} right · best streak ${QZ.bestStreak}${b ? ` · your best ${b}` : ""}</p>
     <p class="small muted" style="margin:0">Score ${Math.ceil(max * .7)} or more to win a redraft token.</p>
     <div class="qlog">${QZ.log.map((l, i) => `<div class="${l.ok ? "ok" : "no"}"><span>${i + 1}</span>${esc(l.label)}<b class="num">+${l.pts}</b></div>`).join("")}</div>
-    <div class="row" style="justify-content:center"><button class="btn go again" id="qagain">Play again</button><button class="btn" id="qshare">Copy score</button></div>
+    <div class="row" style="justify-content:center"><button class="btn go again" id="qagain">Play again</button><button class="btn" id="qshare">Share score</button></div>
     ${lbBoxHTML("quiz-" + QZ.kind, QZ.score, QZ.bestStreak, `${QZ.log.filter(l => l.ok).length}/${QROUNDS} right`, QZ)}
   </div>`;
 }
@@ -1658,7 +1658,7 @@ function bindQuiz(){
   on("#qzoom", () => { if (QZ.cur.zoom < 2 && QZ.cur.chosen == null){ QZ.cur.zoom++; renderPlay(); } });
   on("#qnext", () => { if (QZ.i + 1 >= QROUNDS) finishQuiz(); else { QZ.i++; nextQuestion(); renderPlay(); } });
   on("#qagain", () => startQuiz(QZ.kind));
-  on("#qshare", () => copyText(`13–0 ${QUIZ[QZ.kind].title}: ${QZ.score}/${QROUNDS * 3} (${QZ.log.filter(l => l.ok).length}/${QROUNDS} right, best streak ${QZ.bestStreak})`, "Score copied"));
+  on("#qshare", () => shareOut(`13–0 · ${QUIZ[QZ.kind].title}\n🧠 ${QZ.score}/${QROUNDS * 3} · ${QZ.log.filter(l => l.ok).length}/${QROUNDS} right · best streak ${QZ.bestStreak}\n${QZ.log.map(l => l.ok ? (l.pts === 3 ? "🟩" : "🟨") : "🟥").join("")}${shareFoot()}`));
   drawQuiz();
 }
 
@@ -2026,14 +2026,14 @@ function resultHTML(){
       <div class="timeline" id="tl" aria-label="Round by round">${R.seq.map((_, i) => `<i class="${i === 12 ? "half" : ""}"></i>`).join("")}</div>
       ${boxTable(R.box)}
       ${mvpHTML([{...R.box[0], side: 0, label: R.w > R.l ? "Match MVP" : "Team MVP"}], R.seq.length * 0.09 + 0.2)}
-      <div class="row" style="justify-content:center"><button class="btn" id="share">Copy result</button></div>
+      <div class="row" style="justify-content:center"><button class="btn" id="share">Share result</button></div>
     </div></div>`;
   if (R.type === "gauntlet") return `<div class="panel pad" id="match">
     <div class="score"><span class="big us num">${R.w}</span><span class="dash">–</span><span class="big them num">${R.l}</span></div>
     <div class="verdict" style="color:${R.l === 0 ? "var(--gold)" : R.w >= R.l ? "var(--teal)" : "var(--red)"}">${R.l === 0 ? "Perfect run. Every champion beaten." : R.w >= 14 ? "A dynasty" : R.w >= 10 ? "Title contender" : R.w >= 6 ? "Playoff team" : "Rebuild year"}</div>
     <div class="glist">${R.list.map((x, i) => `<div class="gm ${x.w > x.l ? "won" : "lost"}" style="--d:${(i * 0.06).toFixed(2)}s"><span class="res">${x.w > x.l ? "W" : "L"}</span><div style="min-width:0"><b>${esc(teName(x.c.e.winner))}</b><div class="small muted">${esc(x.c.e.name)} ${x.c.e.year} · ${esc(x.map)}</div></div><span class="num">${x.w}–${x.l}</span></div>`).join("")}</div>
     ${R.daily ? `<div class="dsq" aria-label="Wins and losses">${R.list.map(x => `<i class="${x.w > x.l ? "w" : "l"}"></i>`).join("")}</div>` : ""}
-    <div class="row" style="justify-content:center;margin-top:14px"><button class="btn" id="share">${R.daily ? "Copy share text" : "Copy result"}</button></div>
+    <div class="row" style="justify-content:center;margin-top:14px"><button class="btn" id="share">Share result</button></div>
     ${R.daily && R.practice ? `<p class="small muted" style="text-align:center;margin:10px 0 0">Practice run, not posted.</p>` : lbBoxHTML((R.daily ? S.opts.board : S.mode) + (S.blind ? "-blind" : ""), R.w, R.tb, (S.cat ? S.cat.title + ": " : "") + lineupRows(S.drafters[0]).map(r => r.p).join(", "), R)}</div>`;
   return seriesHTML(R.sr, R.nameA, R.nameB);
 }
@@ -2060,7 +2060,7 @@ function seriesHTML(sr, nameA, nameB){
         </div></div>`; }).join("")}</div>
     ${seriesMvpHTML(sr, aw, sr.games.length * 0.35 + 0.3)}
     ${seriesBoxHTML(sr, nameA, nameB)}
-    <div class="row" style="justify-content:center"><button class="btn" id="share">Copy result</button></div>
+    <div class="row" style="justify-content:center"><button class="btn" id="share">Share result</button></div>
   </div>`;
 }
 function seriesTotals(sr, key){
@@ -2101,14 +2101,39 @@ function updateMatch(){
   if (m.shown >= m.seq.length){ const [t, c] = verdict(m.w, m.l); const v = document.getElementById("verdict"); v.textContent = t; v.style.color = c;
     if (!m.fx){ m.fx = 1; celebrate(m.w > m.l ? "win" : "loss", m.w === 13 && m.l === 0 ? "Flawless" : null); if (m.w > m.l) awardTok(S.drafters[0].name); } }
 }
+// ---------- share text (pasted into chats, so short lines and emoji instead of long sentences) ----------
+const ROLE_EMOJI = {Duelist: "🗡️", Initiator: "🔍", Controller: "💨", Sentinel: "🛡️", Flex: "⭐"};
+const shortTeam = t => { const n = teName(t); return n.length <= 10 ? n : t; };
+const yy = y => "'" + String(y).slice(2);
+const sqRows = (bits, per = 9) => { const sq = bits.map(b => b ? "🟩" : "🟥"); const out = []; for (let i = 0; i < sq.length; i += per) out.push(sq.slice(i, i + per).join("")); return out.join("\n"); };
+const gauntletWord = R => R.l === 0 ? "Perfect run" : R.w >= 14 ? "A dynasty" : R.w >= 10 ? "Title contender" : R.w >= 6 ? "Playoff team" : "Rebuild year";
+function teamLines(d){
+  return SLOTS.map(sl => { const r = d.lineup[sl]; if (!r) return "";
+    const when = r.at ? `all-time ${r.span}` : `${EV[r.e].name.replace(/^Masters /, "Masters ").replace(/^Champions /, "Champs ")} ${yy(EV[r.e].year)}`;
+    return `${ROLE_EMOJI[S.anySlot ? r.role : sl] || "⭐"} ${r.p} · ${shortTeam(r.t)} · ${when}`; }).filter(Boolean).join("\n");
+}
+const shareFoot = () => siteURL() ? "\n" + siteURL().replace(/^https?:\/\//, "") : "";
 function shareText(){
-  const R = S ? S.result : null; const line = r => r.at ? `${r.p} (${r.t}, all-time ${r.span})` : `${r.p} (${r.t}, ${EV[r.e].name} ${EV[r.e].year})`;
-  const team = d => SLOTS.map(sl => `${sl}: ${line(d.lineup[sl])}`).join("\n");
-  if (!R) return "";
-  if (R.type === "single") return `13–0 VCT draft (${MODES[S.mode].title}): ${R.w}–${R.l} on ${R.map}\n${team(S.drafters[0])}`;
-  if (R.type === "gauntlet" && R.daily) return dailyShare({n: S.opts.dn, cat: S.cat.title, w: R.w, l: R.l, sq: R.list.map(x => x.w > x.l ? 1 : 0).join("")}, R.practice);
-  if (R.type === "gauntlet") return `13–0 VCT draft, ${S.cat ? `All-time category (${S.cat.title})` : "Champions gauntlet"}: ${R.w}–${R.l} against every international winner\n${team(S.drafters[0])}`;
-  return `13–0 VCT draft (${MODES[S.mode].title}): ${R.nameA} ${R.sr.wa}–${R.sr.wb} ${R.nameB}\n` + R.sr.games.map((g, i) => `Map ${i + 1} ${g.map}: ${g.w}–${g.l}`).join("\n");
+  const R = S ? S.result : null; if (!R) return "";
+  const blind = S.blind ? " · 🙈 blind" : "";
+  if (R.type === "gauntlet" && R.daily) return dailyShare({n: S.opts.dn, cat: S.cat.title, w: R.w, l: R.l, sq: R.list.map(x => x.w > x.l ? 1 : 0).join("")}, R.practice, S.blind);
+  if (R.type === "gauntlet"){
+    const title = S.cat ? `All-time category · ${S.cat.title}` : "Champions gauntlet";
+    return `13–0 · ${title}${blind}\n🏆 ${R.w}–${R.l} vs every champion · ${gauntletWord(R)}\n${sqRows(R.list.map(x => x.w > x.l))}\n\n${teamLines(S.drafters[0])}${shareFoot()}`;
+  }
+  if (R.type === "single"){
+    const mvp = R.box[0];
+    return `13–0 · ${MODES[S.mode].title}${blind}\n${R.w === 13 && R.l === 0 ? "💯" : R.w > R.l ? "✅" : "❌"} ${R.w}–${R.l} on ${R.map} · ${verdict(R.w, R.l)[0]}\n🎖️ MVP ${mvp.r.p} · ${mvp.k}/${mvp.d}/${mvp.a}\n\n${teamLines(S.drafters[0])}${shareFoot()}`;
+  }
+  if (R.type === "forfeit") return `13–0 · ${MODES[S.mode].title}\n🏳️ ${R.loser} surrendered · ${R.winner} ${winsWord(R.winner)}${shareFoot()}`;
+  const sr = R.sr, aw = sr.wa > sr.wb, top = seriesTotals(sr, aw ? "boxA" : "boxB")[0];
+  return `13–0 · ${MODES[S.mode].title}${blind}\n🏆 ${R.nameA} ${sr.wa}–${sr.wb} ${R.nameB}\n` + sr.games.map(g => `${g.w > g.l ? "🟩" : "🟥"} ${g.map} ${g.w}–${g.l}`).join("\n")
+    + (top ? `\n🎖️ MVP ${top.r.p} · ${top.k}/${top.d}/${top.a}` : "") + `\n\n${R.nameA}:\n${teamLines(S.drafters[0])}${shareFoot()}`;
+}
+// On phones, open the share sheet; elsewhere copy to the clipboard.
+function shareOut(txt, msg = "Copied, ready to paste"){
+  if (navigator.share && matchMedia("(pointer: coarse)").matches){ navigator.share({text: txt}).catch(e => { if (e && e.name !== "AbortError") copyText(txt, msg); }); return; }
+  copyText(txt, msg);
 }
 
 // ---------- battle (bot vs bot / dream matchup) ----------
@@ -2174,7 +2199,7 @@ function bindPlay(){
   on("[data-resume]", () => { PLAYUI = "session"; renderPlay(); });
   on("[data-battle]", openBattle);
   on("[data-daily]", startDaily);
-  on("[data-dshare]", () => { const d = dailyDone(dailyInfo().key); if (d) copyText(dailyShare(d), "Share text copied"); });
+  on("[data-dshare]", () => { const d = dailyDone(dailyInfo().key); if (d) shareOut(dailyShare(d)); });
   on("[data-quiz]", e => startQuiz(e.currentTarget.dataset.quiz));
   on("[data-level]", e => { G.level = e.currentTarget.dataset.level; store.set("thirteen-level", G.level); document.querySelectorAll("[data-level]").forEach(b => b.setAttribute("aria-pressed", b.dataset.level === G.level)); });
   ["fy", "ft", "fr"].forEach((id, i) => { const el = document.getElementById(id); if (el) el.addEventListener("change", ev => { G.filt[["year", "type", "region"][i]] = ev.target.value; store.set("thirteen-filt", G.filt); }); });
@@ -2212,7 +2237,7 @@ function bindPlay(){
     b.textContent = what === "cancel" ? "Tap again to cancel" : "Tap again to surrender";
     setTimeout(() => { if (b.isConnected){ delete b.dataset.armed; b.classList.remove("armed"); b.textContent = label; } }, 3000);
   });
-  on("#share", () => copyText(PLAYUI === "battle" ? `13–0 VCT draft, Bot battle: ${BT.result.nameA} ${BT.result.sr.wa}–${BT.result.sr.wb} ${BT.result.nameB}\n` + BT.result.sr.games.map((g, i) => `Map ${i + 1} ${g.map}: ${g.w}–${g.l}`).join("\n") : shareText(), "Result copied"));
+  on("#share", () => shareOut(PLAYUI === "battle" ? `13–0 · Bot battle\n🏆 ${BT.result.nameA} ${BT.result.sr.wa}–${BT.result.sr.wb} ${BT.result.nameB}\n` + BT.result.sr.games.map(g => `${g.w > g.l ? "🟩" : "🟥"} ${g.map} ${g.w}–${g.l}`).join("\n") + shareFoot() : shareText()));
   on("#copych", () => copyText(challengeCode(S), "Challenge code copied"));
   on("#copymsg", () => copyText(`I drafted a VCT super team. Beat it: open 13–0, go to Challenge code and paste ${challengeCode(S)}`, "Message copied"));
   on("#nextgame", () => { if (!NET.host) return; NET.round++; NET.sig = ""; startOnlineRound(); });
