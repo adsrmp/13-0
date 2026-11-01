@@ -467,7 +467,7 @@ body.noscroll{overflow:hidden}
 .mstats{display:flex;flex-direction:column;gap:10px}
 .msscore{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-family:var(--f-display);font-weight:900;font-size:44px;line-height:1}
 .msscore .dash{color:var(--mute)}.msscore b{font-size:22px;margin-left:8px;text-transform:uppercase}.msscore .msname{font-size:20px;text-transform:uppercase}
-.msmvp{font-size:15px}
+.msmvp{font-size:15px}.msact{gap:8px}.msact .btn.go.sm{font-size:16px;padding:8px 18px}
 @media (max-width:640px){.seasontbl th:nth-child(n+4):nth-child(-n+6),.seasontbl td:nth-child(n+4):nth-child(-n+6){display:none}}.mstabs{display:flex;flex-wrap:wrap;align-self:flex-start}
 .instbtn{flex:none}.instbtn[hidden]{display:none!important}
 @media (max-width:640px){.daily .mglyph{display:none}.daily .dact{align-items:stretch;width:100%}.rktable th:nth-child(4),.rktable td:nth-child(4){display:none}.instbtn{order:1;margin-left:auto;font-size:13px;padding:6px 10px}.instbtn:not([hidden])+.sndbtn{margin-left:8px}}
@@ -1798,6 +1798,7 @@ function seasonStatsHTML(R){
   const title = S.mode === "daily" ? `Daily #${S.opts.dn} · ${S.cat.title}` : S.cat ? `All-time category · ${S.cat.title}` : "Champions gauntlet";
   return `<div class="pad mstats"><div class="eyebrow">${esc(title)}</div>
     <div class="msscore"><span class="num" style="color:var(--teal)">${R.w}</span><span class="dash">–</span><span class="num" style="color:var(--red)">${R.l}</span><b style="color:${R.l === 0 ? "var(--gold)" : R.w >= R.l ? "var(--teal)" : "var(--red)"}">${esc(gauntletWord(R))}</b></div>
+    ${statsActions()}
     ${top ? `<div class="msmvp">🎖️ Season MVP <button class="pp plink" data-player="${esc(top.r.key)}" data-row="${top.r.id}">${esc(top.r.p)}</button> · ${fmt(top.rating)} rating · ${top.mvp} map MVP${top.mvp === 1 ? "" : "s"}</div>` : ""}
     <div class="scroll"><table class="seasontbl"><thead><tr><th>Player</th><th class="r">Rating</th><th class="r">ACS</th><th class="r">K</th><th class="r">D</th><th class="r">A</th><th class="r">K/D</th><th class="r">MVPs</th></tr></thead><tbody>
       ${rows.map((o, i) => `<tr><td><div class="row" style="gap:8px;flex-wrap:nowrap">${agentImg(o.r.ag[0], "s")}<button class="pp plink" data-player="${esc(o.r.key)}" data-row="${o.r.id}">${esc(o.r.p)}</button> <span class="tag">${esc(o.r.t)} ${o.r.at ? "AT" : String(EV[o.r.e].year).slice(2)}</span>${i === 0 ? ` <span class="mvp">MVP</span>` : ""}</div></td>
@@ -1805,12 +1806,14 @@ function seasonStatsHTML(R){
     </tbody></table></div>
     <p class="small muted" style="margin:0">Totals across all ${R.list.length} maps. Rating is each player's event rating, scaled up or down by how they played this season.</p></div>`;
 }
+const statsActions = () => `<div class="row msact"><button class="btn go sm" data-sheetshare>Share result</button>${S.mode === "online" ? "" : `<button class="btn" data-sheetagain>${S.mode === "daily" ? "Practice draft" : "Play again"}</button>`}</div>`;
 function matchStatsHTML(R){
   if (R.type === "gauntlet") return seasonStatsHTML(R);
   if (R.type === "single"){
     const top = R.box[0], won = R.w > R.l;
     return `<div class="pad mstats"><div class="eyebrow">${esc(MODES[S.mode].title)} · ${esc(R.map)}</div>
       <div class="msscore"><span class="num" style="color:${won ? "var(--teal)" : "var(--red)"}">${R.w}</span><span class="dash">–</span><span class="num">${R.l}</span><b style="color:${verdict(R.w, R.l)[1]}">${esc(verdict(R.w, R.l)[0])}</b></div>
+      ${statsActions()}
       <div class="msmvp">🎖️ ${won ? "Match" : "Team"} MVP <button class="pp plink" data-player="${esc(top.r.key)}" data-row="${top.r.id}">${esc(top.r.p)}</button> · ${top.k}/${top.d}/${top.a} · ${top.acs} ACS</div>
       ${boxTable(R.box)}</div>`;
   }
@@ -1822,6 +1825,7 @@ function matchStatsHTML(R){
     : (g => `<div class="tbgrid"><div><div class="small" style="color:var(--teal)">${esc(R.nameA)}${g.w > g.l ? " · won" : ""}</div>${boxTable(g.boxA, false)}</div><div><div class="small" style="color:var(--orange)">${esc(R.nameB)}${g.l > g.w ? " · won" : ""}</div>${boxTable(g.boxB, false)}</div></div>`)(sr.games[+tab]);
   return `<div class="pad mstats"><div class="eyebrow">${esc(MODES[S.mode].title)} · best of ${sr.bo}</div>
     <div class="msscore"><span class="msname" style="color:var(--teal)">${esc(R.nameA)}</span><span class="num" style="color:var(--teal)">${sr.wa}</span><span class="dash">–</span><span class="num" style="color:var(--orange)">${sr.wb}</span><span class="msname" style="color:var(--orange)">${esc(R.nameB)}</span></div>
+    ${statsActions()}
     ${mvp ? `<div class="msmvp">🎖️ Match MVP <button class="pp plink" data-player="${esc(mvp.r.key)}" data-row="${mvp.r.id}">${esc(mvp.r.p)}</button> · ${mvp.k}/${mvp.d}/${mvp.a} · ${mvp.acs} ACS</div>` : ""}
     <div class="seg mstabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" data-stab="${k}" aria-pressed="${k === tab}">${esc(l)}</button>`).join("")}</div>
     ${body}</div>`;
@@ -1829,8 +1833,12 @@ function matchStatsHTML(R){
 function openMatchStats(){
   const R = S && S.result; if (!R || !(R.type === "single" || R.type === "series" || (R.type === "gauntlet" && R.list[0] && R.list[0].box))) return;
   openSheet(matchStatsHTML(R) + `<p class="small muted pad" style="padding-top:0">Tap a player for their career stats.</p>`, "Match stats");
-  const bind = () => document.querySelectorAll("#sheet [data-stab]").forEach(b => b.onclick = () => {
-    R.statTab = b.dataset.stab; document.querySelector("#sheet .sheetbody").innerHTML = matchStatsHTML(R) + `<p class="small muted pad" style="padding-top:0">Tap a player for their career stats.</p>`; bind(); });
+  const bind = () => {
+    document.querySelectorAll("#sheet [data-stab]").forEach(b => b.onclick = () => {
+      R.statTab = b.dataset.stab; document.querySelector("#sheet .sheetbody").innerHTML = matchStatsHTML(R) + `<p class="small muted pad" style="padding-top:0">Tap a player for their career stats.</p>`; bind(); });
+    const sh = document.querySelector("#sheet [data-sheetshare]"); if (sh) sh.onclick = () => shareOut(shareText());
+    const ag = document.querySelector("#sheet [data-sheetagain]"); if (ag) ag.onclick = () => { closeSheet(); newDraft(); };
+  };
   bind();
 }
 function autoMatchStats(R, ms){
