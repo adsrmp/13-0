@@ -53,7 +53,8 @@ PlayerName TAG,Agent1;Agent2,Rnd,R,ACS,K:D,KAST,ADR,KPR,APR,FKPR,FDPR,HS
   For internationals: `Masters London`, `Champions Shanghai`.
 - **type**: `League` for Kickoff, Stage 1, Stage 2 and the 2023 leagues. `Ascension` for Ascension.
   `Masters` or `Champions` for internationals, `EWC` for the Esports World Cup; those take `city=<City>` instead of `region=`.
-  EWC events never become Champions gauntlet opponents (only Masters and Champions winners do).
+  EWC counts as an international everywhere: its winner joins the Champions gauntlet automatically
+  once that team has 5 players in the rows (a gauntlet opponent needs a full five).
 - **end**: the date of the grand final. This sets the order events are listed in.
 - Optional: `note=partial data` if vlr is missing part of the table.
 

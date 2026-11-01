@@ -85,7 +85,8 @@ export class GameRoom {
 
 // ---------- leaderboards ----------
 // Add an id here to wipe every board once (used 1 Nov 2026 when scores started posting automatically).
-const RESETS = ["2026-11-01-auto-post"];
+// An entry with boards only clears those boards (used when the Esports World Cup winner joined the gauntlet).
+const RESETS = ["2026-11-01-auto-post", { id: "2026-11-01-ewc-gauntlet", boards: ["gauntlet", "gauntlet-blind", "cat", "cat-blind"] }];
 // Boards and the score range each accepts. Draft boards have a "-blind" twin for runs drafted with stats hidden.
 const BOARDS = [
   { re: /^daily-\d{4}-\d{2}-\d{2}(-blind)?$/, min: 0, max: 40, once: true },
@@ -123,10 +124,12 @@ export class Leaderboard {
     this.sql.exec(`CREATE INDEX IF NOT EXISTS by_rank ON scores (board, score DESC, tb DESC, at ASC)`);
     // One-off resets. Each id runs once: every score posted before that moment is cleared.
     this.sql.exec(`CREATE TABLE IF NOT EXISTS resets (id TEXT PRIMARY KEY, at INTEGER NOT NULL)`);
-    for (const id of RESETS) {
+    for (const r of RESETS) {
+      const id = typeof r === "string" ? r : r.id;
       if (this.sql.exec(`SELECT id FROM resets WHERE id = ?`, id).toArray().length) continue;
       const now = Date.now();
-      this.sql.exec(`DELETE FROM scores WHERE at < ?`, now);
+      if (typeof r === "string" || !r.boards) this.sql.exec(`DELETE FROM scores WHERE at < ?`, now);
+      else for (const b of r.boards) this.sql.exec(`DELETE FROM scores WHERE board = ? AND at < ?`, b, now);
       this.sql.exec(`INSERT INTO resets (id, at) VALUES (?, ?)`, id, now);
     }
   }

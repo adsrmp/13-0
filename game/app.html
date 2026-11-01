@@ -580,14 +580,14 @@ const app = $("#app");
 const ROLES = ["Duelist","Initiator","Controller","Sentinel"];
 const REGIONS = ["Americas","EMEA","Pacific","China"];
 const ROLE_COL = {Duelist:"var(--duelist)",Initiator:"var(--initiator)",Controller:"var(--controller)",Sentinel:"var(--sentinel)"};
-const EV = {}; D.events.forEach((e,i) => { e.i = i; e.scope = e.type === "Masters" || e.type === "Champions" ? "intl" : e.type === "EWC" ? "ewc" : e.type === "League" ? "league" : "t2"; EV[e.id] = e; });
+const EV = {}; D.events.forEach((e,i) => { e.i = i; e.scope = e.type === "Masters" || e.type === "Champions" || e.type === "EWC" ? "intl" : e.type === "League" ? "league" : "t2"; EV[e.id] = e; });
 D.born = D.born || {};
 const isIntl = id => EV[id] && EV[id].scope === "intl";
-const NEV = {intl: D.events.filter(e => e.scope === "intl").length, ewc: D.events.filter(e => e.scope === "ewc").length, league: D.events.filter(e => e.scope === "league").length, t2: D.events.filter(e => e.scope === "t2").length};
+const NEV = {intl: D.events.filter(e => e.scope === "intl").length, ewc: D.events.filter(e => e.type === "EWC").length, league: D.events.filter(e => e.scope === "league").length, t2: D.events.filter(e => e.scope === "t2").length};
 // Which events a deal filter ("Event" select) allows: "" = internationals (the default), "all" = everything.
-const typeOk = (ev, t) => !t ? ev.scope === "intl" : t === "all" ? true : t === "EWC" ? ev.scope === "ewc" : t === "League" ? ev.scope === "league" : t === "T2" ? ev.scope === "t2" : ev.type === t;
-const typeOpts = () => [["", "Masters + Champions"], ["Masters", "Masters"], ["Champions", "Champions"], ...(NEV.ewc ? [["EWC", "Esports World Cup"]] : []), ...(NEV.league ? [["League", "Regional leagues"]] : []), ...(NEV.t2 ? [["T2", "Tier 2 (Ascension)"]] : []), ...(NEV.ewc || NEV.league || NEV.t2 ? [["all", "Every event"]] : [])];
-const EVCOUNT = () => [`${NEV.intl} international${NEV.intl === 1 ? "" : "s"}`, NEV.ewc ? `${NEV.ewc} Esports World Cup${NEV.ewc === 1 ? "" : "s"}` : "", NEV.league ? `${NEV.league} regional league event${NEV.league === 1 ? "" : "s"}` : "", NEV.t2 ? `${NEV.t2} tier 2 event${NEV.t2 === 1 ? "" : "s"}` : ""].filter(Boolean).join(", ");
+const typeOk = (ev, t) => !t ? ev.scope === "intl" : t === "all" ? true : t === "EWC" ? ev.type === "EWC" : t === "League" ? ev.scope === "league" : t === "T2" ? ev.scope === "t2" : ev.type === t;
+const typeOpts = () => [["", "All internationals"], ["Masters", "Masters"], ["Champions", "Champions"], ...(NEV.ewc ? [["EWC", "Esports World Cup"]] : []), ...(NEV.league ? [["League", "Regional leagues"]] : []), ...(NEV.t2 ? [["T2", "Tier 2 (Ascension)"]] : []), ...(NEV.ewc || NEV.league || NEV.t2 ? [["all", "Every event"]] : [])];
+const EVCOUNT = () => [`${NEV.intl} internationals${NEV.ewc ? ` (Masters, Champions and ${NEV.ewc} Esports World Cup${NEV.ewc === 1 ? "" : "s"})` : ""}`, NEV.league ? `${NEV.league} regional league event${NEV.league === 1 ? "" : "s"}` : "", NEV.t2 ? `${NEV.t2} tier 2 event${NEV.t2 === 1 ? "" : "s"}` : ""].filter(Boolean).join(", ");
 const YEARS = [...new Set(D.events.map(e => e.year))];
 const store = {
   get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
@@ -913,7 +913,7 @@ const regCat = (reg, title) => ({id: reg.toLowerCase(), title, desc: `Only teams
 const CATS = [
   roleCat("Duelist"), roleCat("Initiator"), roleCat("Controller"), roleCat("Sentinel"),
   regCat("Americas", "Americas only"), regCat("EMEA", "EMEA only"), regCat("Pacific", "Pacific only"), regCat("China", "China only"),
-  {id: "champs", title: "Trophy holders", desc: "Only players who won a Masters or Champions.", ok: r => career(r.key).titles > 0},
+  {id: "champs", title: "Trophy holders", desc: "Only players who won an international (Masters, Champions or Esports World Cup).", ok: r => career(r.key).titles > 0},
   {id: "underdogs", title: "Underdogs", desc: "Only players who never won an international.", ok: r => career(r.key).titles === 0},
   {id: "rookies", title: "New blood", desc: "Only players whose first VCT event was in 2024 or later.", ok: r => career(r.key).tfirst >= 2024},
   {id: "og", title: "Class of 2021", desc: "Only players who played an international in 2021.", ok: r => career(r.key).ifirst === 2021},
@@ -1309,8 +1309,8 @@ const MODES = {
   map:       {title: "Map draft", tag: "Solo · map known", desc: "The map is revealed before you draft. Players whose agents suit that map get a boost, so draft for the map."},
   clash:     {title: "Category clash", tag: "Head to head · Bo3", desc: "A random category and all-time rosters, like the solo category mode, but two teams draft head to head and play a best-of-three. Online: turn on Random category in the room."},
   daily:     {title: "Daily draft", tag: "Everyone · same spins today", desc: "One category and one deck of spins for everyone, every day. Draft your five, play a season against every champion, then share your score and see where you rank."},
-  cat:       {title: "All-time category", tag: "Solo · 18-match season", desc: "A random category, like Duelists only or Americas only. Every spin deals a team's all-time roster, then your five play every Masters and Champions winner."},
-  gauntlet:  {title: "Champions gauntlet", tag: "Solo · 18 matches", desc: "Your five play every Masters and Champions winner since 2021, one map each. The Valorant 82–0: can you go 18–0?"},
+  cat:       {title: "All-time category", tag: `Solo · ${CHAMPS.length}-match season`, desc: "A random category, like Duelists only or Americas only. Every spin deals a team's all-time roster, then your five play every international winner."},
+  gauntlet:  {title: "Champions gauntlet", tag: `Solo · ${CHAMPS.length} matches`, desc: `Your five play every international winner since 2021 (Masters, Champions and the Esports World Cup), one map each. The Valorant 82–0: can you go ${CHAMPS.length}–0?`},
   bot:       {title: "Versus bot", tag: "You vs bot · Bo3", desc: "You and a bot take turns picking from the same rosters, then play a best-of-three on maps shown up front."},
   local:     {title: "Pass & play", tag: "2 players · one device", desc: "Two people share one phone or laptop, take turns drafting, then play a best-of-three."},
   online:    {title: "Online room", tag: "2 players · live", desc: "Make a room and send the code. Once your friend joins, the host starts the draft and you take turns picking from the same rosters, then play a best-of-three. The host sets blind draft and the timer."},
@@ -1806,10 +1806,10 @@ function bindQuiz(){
 // ---------- hub ----------
 // Home: the Champions gauntlet is the main game; other modes are tiles that open a sheet with their options.
 const TILES = [
-  ["classic", "Classic 13–0", "1 map, solo"], ["cat", "All-time category", "Random rules, 18 games"], ["bot", "Versus bot", "Best of 3"], ["online", "Online room", "Play a friend live"],
+  ["classic", "Classic 13–0", "1 map, solo"], ["cat", "All-time category", `Random rules, ${CHAMPS.length} games`], ["bot", "Versus bot", "Best of 3"], ["online", "Online room", "Play a friend live"],
   ["local", "Pass & play", "2 players, 1 device"], ["guess", "Guess games", "Map · agent · ability"], ["map", "Map draft", "Draft for the map"], ["clash", "Category clash", "Head to head"],
   ["challenge", "Challenge code", "Send a friend your five"], ["battle", "Bot battle", "Watch any two rosters"]];
-const dealSummary = () => `${G.filt.year || "All years"} · ${(typeOpts().find(o => o[0] === G.filt.type) || ["", "Masters + Champions"])[1]} · ${G.filt.region || "All regions"}`;
+const dealSummary = () => `${G.filt.year || "All years"} · ${(typeOpts().find(o => o[0] === G.filt.type) || ["", "All internationals"])[1]} · ${G.filt.region || "All regions"}`;
 function hubHTML(){
   const resume = S && (S.phase === "draft" || S.phase === "ready") && !S.result ? `<div class="panel row resume"><div style="min-width:0;flex:1"><div class="eyebrow">In progress</div><b>${esc(MODES[S.mode].title)}</b> <span class="muted small">· ${lineupRows(S.drafters[0]).length}/5 drafted</span></div><div class="row"><button class="btn go sm" data-resume>Resume</button>${S.mode === "online" ? "" : `<button class="btn warn xbtn" data-arm="cancel" aria-label="Cancel this match" title="Cancel this match">✕</button>`}</div></div>` : "";
   const gb = G.gbest, last = store.get("thirteen-glast", ""), perfect = store.get("thirteen-perfect", 0) | 0;
@@ -1820,7 +1820,7 @@ function hubHTML(){
       <div class="big18" aria-hidden="true">${CHAMPS.length}</div>
       <div class="eyebrow" style="color:var(--gold)">The main event</div>
       <h2>Champions<br>Gauntlet</h2>
-      <p>Draft five. Face every Masters &amp; Champions winner since 2021. Go ${CHAMPS.length}–0.</p>
+      <p>Draft five. Face every international winner since 2021. Go ${CHAMPS.length}–0.</p>
       <div class="hstats"><div><b class="num">${gb ? `${gb.w}–${gb.l}` : "–"}</b><span>Your best</span></div><div><b class="num" id="grank">–</b><span>Rank</span></div><div><b class="num">${perfect}</b><span>Perfect runs</span></div></div>
       <button class="btn go herogo" data-start="gauntlet">Play</button>
       <div class="hface" aria-label="Champions you'll face"><div class="eyebrow">You'll face</div>${CHAMPS.map(c => `<span title="${esc(c.e.name)} ${c.e.year}"><b>${esc(teName(c.e.winner))}</b> ${String(c.e.year).slice(2)}</span>`).join("")}</div>
@@ -2721,7 +2721,7 @@ function trendSVG(trend){
 // EVENTS
 // =====================================================================
 function renderEvents(){
-  const scopes = [["intl", "Internationals"], ["ewc", "Esports World Cup"], ["league", "Regional leagues"], ["t2", "Tier 2"]].filter(([k]) => NEV[k]);
+  const scopes = [["intl", "Internationals"], ["league", "Regional leagues"], ["t2", "Tier 2"]].filter(([k]) => NEV[k]);
   if (!UI.evScope || !NEV[UI.evScope]) UI.evScope = "intl";
   const list = D.events.filter(e => e.scope === UI.evScope);
   if (!UI.event || !EV[UI.event]) UI.event = list[list.length-1].id;
@@ -2736,7 +2736,7 @@ function renderEvents(){
     ${scopes.length > 1 ? `<div class="seg" role="group" aria-label="Event type">${scopes.map(([k, l]) => `<button data-evscope="${k}" aria-pressed="${k === UI.evScope}">${l} <span class="muted">${NEV[k]}</span></button>`).join("")}</div>` : ""}
     <div class="ev-grid">${list.slice().reverse().map(e => { const t = topOf(e.id); return `
       <button class="evc" aria-pressed="${e.id === UI.event}" data-ev="${e.id}">
-        <div class="eyebrow">${e.scope === "intl" ? e.type : e.scope === "ewc" ? "EWC" : e.scope === "league" ? "League" : "Tier 2"} · ${e.year} · ${esc(e.city || e.region || "")}</div>
+        <div class="eyebrow">${e.scope === "intl" ? e.type : e.scope === "league" ? "League" : "Tier 2"} · ${e.year} · ${esc(e.city || e.region || "")}</div>
         <div class="en">${esc(e.name)}</div>
         <div class="ew"><span class="trophy">★</span> ${esc(teName(e.winner))}</div>
         ${t ? `<div class="small muted">Top rated: <b style="color:var(--text)">${esc(t.p)}</b> <span class="num">${fmt(t.r)}</span></div>` : ""}
