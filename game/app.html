@@ -445,6 +445,10 @@ body.noscroll{overflow:hidden}
 .infob:hover{border-color:var(--text)}
 .pp.plink{background:none;padding:0;font-weight:700;color:var(--text);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 @media (max-width:640px){.sheetwrap{align-items:flex-end;padding:0}.sheet{max-height:88vh;border-radius:14px 14px 0 0}}
+.mstats{display:flex;flex-direction:column;gap:10px}
+.msscore{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-family:var(--f-display);font-weight:900;font-size:44px;line-height:1}
+.msscore .dash{color:var(--mute)}.msscore b{font-size:22px;margin-left:8px;text-transform:uppercase}.msscore .msname{font-size:20px;text-transform:uppercase}
+.msmvp{font-size:15px}.mstabs{display:flex;flex-wrap:wrap;align-self:flex-start}
 .instbtn{flex:none}.instbtn[hidden]{display:none!important}
 @media (max-width:640px){.daily .mglyph{display:none}.daily .dact{align-items:stretch;width:100%}.rktable th:nth-child(4),.rktable td:nth-child(4){display:none}.instbtn{order:1;margin-left:auto;font-size:13px;padding:6px 10px}.instbtn:not([hidden])+.sndbtn{margin-left:8px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -1368,6 +1372,7 @@ function maybeCelebrate(){
     if (S.mode === "local"){ kind = "neutral"; winner = aw ? R.nameA : R.nameB; label = `${winner} ${winsWord(winner)}`; } else { const iWon = S.mode === "online" ? (aw === (S.me === 0)) : aw; kind = iWon ? "win" : "loss"; if (iWon) winner = S.drafters[S.mode === "online" ? S.me : 0].name; } }
   if (winner) awardTok(winner);
   setTimeout(() => celebrate(kind, label), delay);
+  if (R.type === "series") autoMatchStats(R, delay + 1700);
 }
 function soundBtn(){
   const b = document.getElementById("sndbtn"); if (!b) return;
@@ -1758,12 +1763,43 @@ function sessionHTML(){
     </div>`}
   </section>`;
 }
+// ---------- match stats pop-up: opens by itself when a match ends, and from the Scoreboard button ----------
+function matchStatsHTML(R){
+  if (R.type === "single"){
+    const top = R.box[0], won = R.w > R.l;
+    return `<div class="pad mstats"><div class="eyebrow">${esc(MODES[S.mode].title)} · ${esc(R.map)}</div>
+      <div class="msscore"><span class="num" style="color:${won ? "var(--teal)" : "var(--red)"}">${R.w}</span><span class="dash">–</span><span class="num">${R.l}</span><b style="color:${verdict(R.w, R.l)[1]}">${esc(verdict(R.w, R.l)[0])}</b></div>
+      <div class="msmvp">🎖️ ${won ? "Match" : "Team"} MVP <button class="pp plink" data-player="${esc(top.r.key)}" data-row="${top.r.id}">${esc(top.r.p)}</button> · ${top.k}/${top.d}/${top.a} · ${top.acs} ACS</div>
+      ${boxTable(R.box)}</div>`;
+  }
+  const sr = R.sr, aw = sr.wa > sr.wb, tab = R.statTab == null ? "total" : R.statTab;
+  const A = seriesTotals(sr, "boxA"), B = seriesTotals(sr, "boxB"), mvp = (aw ? A : B)[0];
+  const tabs = [...sr.games.map((g, i) => [String(i), `Map ${i + 1} · ${g.map} ${g.w}–${g.l}`]), ["total", "Series totals"]];
+  const body = tab === "total"
+    ? `<div class="tbgrid"><div><div class="small" style="color:var(--teal)">${esc(R.nameA)}</div>${boxTable(A, false)}</div><div><div class="small" style="color:var(--orange)">${esc(R.nameB)}</div>${boxTable(B, false)}</div></div>`
+    : (g => `<div class="tbgrid"><div><div class="small" style="color:var(--teal)">${esc(R.nameA)}${g.w > g.l ? " · won" : ""}</div>${boxTable(g.boxA, false)}</div><div><div class="small" style="color:var(--orange)">${esc(R.nameB)}${g.l > g.w ? " · won" : ""}</div>${boxTable(g.boxB, false)}</div></div>`)(sr.games[+tab]);
+  return `<div class="pad mstats"><div class="eyebrow">${esc(MODES[S.mode].title)} · best of ${sr.bo}</div>
+    <div class="msscore"><span class="msname" style="color:var(--teal)">${esc(R.nameA)}</span><span class="num" style="color:var(--teal)">${sr.wa}</span><span class="dash">–</span><span class="num" style="color:var(--orange)">${sr.wb}</span><span class="msname" style="color:var(--orange)">${esc(R.nameB)}</span></div>
+    ${mvp ? `<div class="msmvp">🎖️ Match MVP <button class="pp plink" data-player="${esc(mvp.r.key)}" data-row="${mvp.r.id}">${esc(mvp.r.p)}</button> · ${mvp.k}/${mvp.d}/${mvp.a} · ${mvp.acs} ACS</div>` : ""}
+    <div class="seg mstabs" role="tablist">${tabs.map(([k, l]) => `<button role="tab" data-stab="${k}" aria-pressed="${k === tab}">${esc(l)}</button>`).join("")}</div>
+    ${body}</div>`;
+}
+function openMatchStats(){
+  const R = S && S.result; if (!R || (R.type !== "single" && R.type !== "series")) return;
+  openSheet(matchStatsHTML(R) + `<p class="small muted pad" style="padding-top:0">Tap a player for their career stats.</p>`, "Match stats");
+  const bind = () => document.querySelectorAll("#sheet [data-stab]").forEach(b => b.onclick = () => {
+    R.statTab = b.dataset.stab; document.querySelector("#sheet .sheetbody").innerHTML = matchStatsHTML(R) + `<p class="small muted pad" style="padding-top:0">Tap a player for their career stats.</p>`; bind(); });
+  bind();
+}
+function autoMatchStats(R, ms){
+  setTimeout(() => { if (S && S.result === R && PLAYUI === "session" && curView() === "play" && !document.getElementById("sheet") && !document.getElementById("namebox")) openMatchStats(); }, ms);
+}
 // Big "Play again" right under the result (sticks to the bottom of the screen until you scroll to it).
 function againHTML(){
   if (S.mode === "online") return "";
   const daily = S.mode === "daily";
   const R = S.result, board = R.type === "single" || R.type === "series";
-  return `<div class="againbar" role="group" aria-label="What next"><button class="btn go again" id="playagain">${daily ? "Practice draft" : "Play again"}</button>${board ? `<button class="btn" id="scoreboard">Scoreboard</button>` : ""}<button class="btn" id="tohub2">Back to modes</button></div>`;
+  return `<div class="againbar" role="group" aria-label="What next"><button class="btn go again" id="playagain">${daily ? "Practice draft" : "Play again"}</button>${board ? `<button class="btn" id="scoreboard">Match stats</button>` : ""}<button class="btn" id="tohub2">Back to modes</button></div>`;
 }
 function newDraft(){
   if (!S) return;
@@ -2111,7 +2147,7 @@ function updateMatch(){
   document.getElementById("sw").textContent = w; document.getElementById("sl").textContent = l;
   [...document.getElementById("tl").children].forEach((el, i) => { el.classList.toggle("w", i < m.shown && m.seq[i]); el.classList.toggle("l", i < m.shown && !m.seq[i]); });
   if (m.shown >= m.seq.length){ const [t, c] = verdict(m.w, m.l); const v = document.getElementById("verdict"); v.textContent = t; v.style.color = c;
-    if (!m.fx){ m.fx = 1; celebrate(m.w > m.l ? "win" : "loss", m.w === 13 && m.l === 0 ? "Flawless" : null); if (m.w > m.l) awardTok(S.drafters[0].name); } }
+    if (!m.fx){ m.fx = 1; autoMatchStats(m, 1900); celebrate(m.w > m.l ? "win" : "loss", m.w === 13 && m.l === 0 ? "Flawless" : null); if (m.w > m.l) awardTok(S.drafters[0].name); } }
 }
 // ---------- share text (pasted into chats, so short lines and emoji instead of long sentences) ----------
 const ROLE_EMOJI = {Duelist: "🗡️", Initiator: "🔍", Controller: "💨", Sentinel: "🛡️", Flex: "⭐"};
@@ -2227,12 +2263,7 @@ function bindPlay(){
   on("#recat", () => startMode(S.mode, S.mode === "cat" ? {} : {catVs: true}));
   on("#newdraft", newDraft);
   on("#playagain", newDraft);
-  on("#scoreboard", () => {
-    const R = S && S.result; if (!R) return;
-    const html = R.type === "single" ? `<div class="pad"><div class="eyebrow">${esc(R.map)} · ${R.w}–${R.l}</div><h2 style="margin:4px 0 12px">Scoreboard</h2>${boxTable(R.box)}</div>`
-      : `<div class="pad"><div class="eyebrow">${esc(R.nameA)} ${R.sr.wa}–${R.sr.wb} ${esc(R.nameB)}</div><h2 style="margin:4px 0 12px">Scoreboard</h2>${R.sr.games.map((g, i) => `<div class="eyebrow" style="margin:14px 0 6px">Map ${i + 1} · ${esc(g.map)} · ${g.w}–${g.l}</div><div class="tbgrid"><div><div class="small" style="color:var(--teal)">${esc(R.nameA)}</div>${boxTable(g.boxA, false)}</div><div><div class="small" style="color:var(--orange)">${esc(R.nameB)}</div>${boxTable(g.boxB, false)}</div></div>`).join("")}<div class="eyebrow" style="margin:18px 0 6px">Series totals</div>${seriesBoxHTML(R.sr, R.nameA, R.nameB)}</div>`;
-    openSheet(html + `<p class="small muted pad" style="padding-top:0">Tap a player for their career stats.</p>`, "Scoreboard");
-  });
+  on("#scoreboard", () => openMatchStats());
   on("#tohub2", () => { PLAYUI = "hub"; clearInterval(simTimer); S = null; showPlay(); });
   on("#copyroom", () => copyText(NET.code, "Room code copied"));
   on("[data-pick]", e => { const r = getRow(+e.currentTarget.dataset.pick); if (!S || !canAct(curD(S))) return; if (S.mode === "online"){ if (slotFor(S, curD(S), r)) onlineAct("p" + r.id); return; } if (doPick(S, r)) renderPlay(); });
@@ -2356,7 +2387,9 @@ function closeSheet(){ const w = document.getElementById("sheet"); if (w){ w.rem
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".infob")){ e.preventDefault(); e.target.click(); } });
 function openPlayer(key, rowId){
   const p = PLAYERS.get(key); if (!p) return;
-  openSheet(profileHTML(p, rowId) + `<div class="pad" style="padding-top:0"><button class="btn" data-fullprofile="${esc(key)}">Open in Players tab</button></div>`, p.name + " stats");
+  const fromMatch = !!document.querySelector("#sheet .mstats");
+  openSheet(profileHTML(p, rowId) + `<div class="pad row" style="padding-top:0">${fromMatch ? `<button class="btn go sm" data-backstats>← Match stats</button>` : ""}<button class="btn" data-fullprofile="${esc(key)}">Open in Players tab</button></div>`, p.name + " stats");
+  const bk = document.querySelector("#sheet [data-backstats]"); if (bk) bk.onclick = openMatchStats;
   const hl = document.querySelector("#sheet tr.hl"); if (hl) hl.scrollIntoView({block: "nearest"});
   const f = document.querySelector("#sheet [data-fullprofile]"); if (f) f.onclick = () => { closeSheet(); UI.player = key; go("players"); };
 }

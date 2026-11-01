@@ -31,7 +31,7 @@ const { chromium } = require('playwright');
   const draft = async () => {
     for (let i = 0; i < 40; i++) {
       if (await p.$('#playgo')) return true;
-      const btn = await p.$('[data-pick]');
+      const btn = await p.$('[data-pick] .pright');
       if (btn) await btn.click(); else { const sk = await p.$('#skip'); if (sk) await sk.click(); }
       await p.waitForTimeout(60);
     }
