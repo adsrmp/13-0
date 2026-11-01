@@ -45,6 +45,8 @@ const { chromium } = require('playwright');
     await p.click('#playgo'); await p.waitForTimeout(1500);
     const res = await p.$('#match');
     if (!res) fail(mode + ': no result'); else console.log(mode + ':', (await res.textContent()).replace(/\s+/g, ' ').slice(0, 60));
+    if (!await p.$('#sheet .mstats')) fail(mode + ': stats pop-up did not open');
+    await p.keyboard.press('Escape'); await p.waitForTimeout(150);   // close the stats pop-up
   }
   await p.click('#tohub'); await p.waitForTimeout(200);
   await p.click('[data-daily]'); await p.waitForTimeout(300);
