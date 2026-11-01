@@ -49,4 +49,4 @@ Challenge codes made before a data update may stop working afterwards.
 
 Unofficial fan project, not endorsed by or affiliated with Riot Games. VALORANT and all related
 assets belong to Riot Games. Keep it free and ad-free to stay within Riot's fan content rules.
-Stats from vlr.gg; agent portraits from hfatih/valorant-icon-pack (MIT); minimaps via pistachiostudio/valorant_map.
+Stats from vlr.gg; minimaps via pistachiostudio/valorant_map; ability icons from valorantstats.one. Agents are shown as name badges, not character art.
