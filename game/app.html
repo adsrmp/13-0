@@ -434,6 +434,17 @@ a.btn{text-decoration:none;color:var(--text);display:inline-flex;align-items:cen
 .againbar{position:sticky;bottom:12px;z-index:6;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;padding:12px;margin-top:-4px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(6px);box-shadow:0 8px 28px rgba(0,0,0,.45)}
 .btn.go.again{font-size:26px;padding:14px 40px;min-width:min(320px,100%)}
 .xbtn{font-size:16px;line-height:1;padding:8px 12px}
+.sheetwrap{position:fixed;inset:0;z-index:55;background:rgba(5,8,12,.72);display:flex;align-items:center;justify-content:center;padding:16px}
+.sheet{position:relative;width:min(900px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden}
+.sheetbody{overflow:auto;overscroll-behavior:contain}
+.sheetx{position:absolute;top:10px;right:10px;z-index:2;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:16px}
+.sheet .profile-head{padding-right:56px}
+.sheet tr.hl td{background:rgba(51,198,174,.12)}
+body.noscroll{overflow:hidden}
+.infob{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:4px;border:1px solid var(--line);color:var(--text);background:var(--panel2);cursor:pointer;vertical-align:middle}
+.infob:hover{border-color:var(--text)}
+.pp.plink{background:none;padding:0;font-weight:700;color:var(--text);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+@media (max-width:640px){.sheetwrap{align-items:flex-end;padding:0}.sheet{max-height:88vh;border-radius:14px 14px 0 0}}
 .instbtn{flex:none}.instbtn[hidden]{display:none!important}
 @media (max-width:640px){.daily .mglyph{display:none}.daily .dact{align-items:stretch;width:100%}.rktable th:nth-child(4),.rktable td:nth-child(4){display:none}.instbtn{order:1;margin-left:auto;font-size:13px;padding:6px 10px}.instbtn:not([hidden])+.sndbtn{margin-left:8px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -1751,7 +1762,8 @@ function sessionHTML(){
 function againHTML(){
   if (S.mode === "online") return "";
   const daily = S.mode === "daily";
-  return `<div class="againbar" role="group" aria-label="What next"><button class="btn go again" id="playagain">${daily ? "Practice draft" : "Play again"}</button><button class="btn" id="tohub2">Back to modes</button></div>`;
+  const R = S.result, board = R.type === "single" || R.type === "series";
+  return `<div class="againbar" role="group" aria-label="What next"><button class="btn go again" id="playagain">${daily ? "Practice draft" : "Play again"}</button>${board ? `<button class="btn" id="scoreboard">Scoreboard</button>` : ""}<button class="btn" id="tohub2">Back to modes</button></div>`;
 }
 function newDraft(){
   if (!S) return;
@@ -1833,7 +1845,7 @@ function prowHTML(r, slot, clickable, why = ""){
   return `<button class="prow" ${slot && clickable ? `data-pick="${r.id}"` : "disabled"} aria-label="${esc(r.p)}${slot ? ", drafts as " + slot : ""}">
     ${agentImg(r.ag[0], "l")}
     <div style="min-width:0">
-      <div class="pname">${esc(r.p)} ${roleChip(r.role)}${isIGL(r) ? ` <span class="chip igl" title="In-game leader">IGL</span>` : ""}${!hide() && duoWith(r) ? ` <span class="chip duo" title="Played with ${esc(duoWith(r))}">Duo · ${esc(duoWith(r))}</span>` : ""} ${hide() ? "" : fitChip(mapFit(r, S.maps))}</div>
+      <div class="pname">${esc(r.p)} ${hide() ? "" : `<span class="infob" role="button" tabindex="0" data-player="${esc(r.key)}" data-row="${r.id}" title="See ${esc(r.p)}'s stats">Stats</span>`} ${roleChip(r.role)}${isIGL(r) ? ` <span class="chip igl" title="In-game leader">IGL</span>` : ""}${!hide() && duoWith(r) ? ` <span class="chip duo" title="Played with ${esc(duoWith(r))}">Duo · ${esc(duoWith(r))}</span>` : ""} ${hide() ? "" : fitChip(mapFit(r, S.maps))}</div>
       <div class="pstats">${hide() ? `<span>Played</span>` : `<span>ACS <b class="num">${fmt(r.acs, 0)}</b></span><span>K/D <b class="num">${fmt(r.kd)}</b></span><span>Rnds <b class="num">${r.rnd}</b></span>${r.at ? `<span>${r.span} · ${r.nEv} event${r.nEv > 1 ? "s" : ""}${r.titles ? ` · ${"★".repeat(r.titles)}` : ""}</span>` : ""}`}<span class="agents ${hide() ? "blind-ag" : ""}">${r.ag.map(a => agentImg(a, "s")).join("")}</span></div>
     </div>
     <div class="pright"><div class="rating num ${hide() ? "qm" : ""}">${hide() ? "?" : fmt(r.r)}</div>${slot ? `<span class="target" style="--rc:${S.anySlot ? ROLE_COL[r.role] : slotCol(slot)}">→ ${S.anySlot ? "Draft" : slot}</span>` : `<span class="slot-hint no">${why}</span>`}</div>
@@ -2039,7 +2051,7 @@ function resultHTML(){
 }
 function boxTable(box, mvp = true){
   return `<div class="scroll"><table><thead><tr><th>Player</th><th class="r">ACS</th><th class="r">K</th><th class="r">D</th><th class="r">A</th></tr></thead><tbody>
-    ${box.map((b, i) => `<tr><td><div class="row" style="gap:8px;flex-wrap:nowrap">${agentImg(b.r.ag[0], "s")}<b>${esc(b.r.p)}</b> <span class="tag">${esc(b.r.t)} ${b.r.at ? "AT" : String(EV[b.r.e].year).slice(2)}</span>${i === 0 && mvp ? ` <span class="mvp">MVP</span>` : ""}</div></td><td class="r num">${b.acs}</td><td class="r num">${b.k}</td><td class="r num">${b.d}</td><td class="r num">${b.a}</td></tr>`).join("")}
+    ${box.map((b, i) => `<tr><td><div class="row" style="gap:8px;flex-wrap:nowrap">${agentImg(b.r.ag[0], "s")}<button class="pp plink" data-player="${esc(b.r.key)}" data-row="${b.r.id}">${esc(b.r.p)}</button> <span class="tag">${esc(b.r.t)} ${b.r.at ? "AT" : String(EV[b.r.e].year).slice(2)}</span>${i === 0 && mvp ? ` <span class="mvp">MVP</span>` : ""}</div></td><td class="r num">${b.acs}</td><td class="r num">${b.k}</td><td class="r num">${b.d}</td><td class="r num">${b.a}</td></tr>`).join("")}
   </tbody></table></div>`;
 }
 function seriesHTML(sr, nameA, nameB){
@@ -2215,6 +2227,12 @@ function bindPlay(){
   on("#recat", () => startMode(S.mode, S.mode === "cat" ? {} : {catVs: true}));
   on("#newdraft", newDraft);
   on("#playagain", newDraft);
+  on("#scoreboard", () => {
+    const R = S && S.result; if (!R) return;
+    const html = R.type === "single" ? `<div class="pad"><div class="eyebrow">${esc(R.map)} · ${R.w}–${R.l}</div><h2 style="margin:4px 0 12px">Scoreboard</h2>${boxTable(R.box)}</div>`
+      : `<div class="pad"><div class="eyebrow">${esc(R.nameA)} ${R.sr.wa}–${R.sr.wb} ${esc(R.nameB)}</div><h2 style="margin:4px 0 12px">Scoreboard</h2>${R.sr.games.map((g, i) => `<div class="eyebrow" style="margin:14px 0 6px">Map ${i + 1} · ${esc(g.map)} · ${g.w}–${g.l}</div><div class="tbgrid"><div><div class="small" style="color:var(--teal)">${esc(R.nameA)}</div>${boxTable(g.boxA, false)}</div><div><div class="small" style="color:var(--orange)">${esc(R.nameB)}</div>${boxTable(g.boxB, false)}</div></div>`).join("")}<div class="eyebrow" style="margin:18px 0 6px">Series totals</div>${seriesBoxHTML(R.sr, R.nameA, R.nameB)}</div>`;
+    openSheet(html + `<p class="small muted pad" style="padding-top:0">Tap a player for their career stats.</p>`, "Scoreboard");
+  });
   on("#tohub2", () => { PLAYUI = "hub"; clearInterval(simTimer); S = null; showPlay(); });
   on("#copyroom", () => copyText(NET.code, "Room code copied"));
   on("[data-pick]", e => { const r = getRow(+e.currentTarget.dataset.pick); if (!S || !canAct(curD(S))) return; if (S.mode === "online"){ if (slotFor(S, curD(S), r)) onlineAct("p" + r.id); return; } if (doPick(S, r)) renderPlay(); });
@@ -2289,10 +2307,10 @@ function renderPlayers(){
   </section>`;
   const q = $("#pq"); q.addEventListener("input", () => { f.q = q.value; const pos = q.selectionStart; renderPlayers(); const n = $("#pq"); n.focus(); n.setSelectionRange(pos, pos); });
   [["pr","region"],["pro","role"],["py","year"],["ps","sort"]].forEach(([id,k]) => $("#"+id).addEventListener("change", e => { f[k] = e.target.value; renderPlayers(); }));
-  document.querySelectorAll(".li[data-k]").forEach(b => b.onclick = () => { UI.player = b.dataset.k; renderPlayers(); if (innerWidth < 900) $("#profile").scrollIntoView({behavior:"smooth"}); });
+  document.querySelectorAll(".li[data-k]").forEach(b => b.onclick = () => { UI.player = b.dataset.k; if (innerWidth < 900){ document.querySelectorAll(".li[data-k]").forEach(x => x.setAttribute("aria-selected", x === b)); openPlayer(b.dataset.k); } else renderPlayers(); });
   bindTeamLinks();
 }
-function profileHTML(p){
+function profileHTML(p, hlRow){
   return `
     <div class="profile-head">
       ${avatar(p.name, p.teams[p.teams.length-1], "xl")}
@@ -2311,20 +2329,45 @@ function profileHTML(p){
     <div class="pad">
       <div class="row" style="justify-content:space-between;margin-bottom:8px"><h3>Event by event</h3><div class="agents">${p.agents.slice(0,6).map(a => agentImg(a)).join("")}</div></div>
       <div class="scroll"><table>
-        <thead><tr><th>Event</th><th>Team</th><th>Agents</th><th class="r">Rating</th><th class="r">ACS</th><th class="r">K/D</th><th class="r">KAST</th><th class="r">Rnds</th></tr></thead>
-        <tbody>${p.rows.slice().reverse().map(r => { const ev = EV[r.e]; return `<tr>
+        <thead><tr><th>Event</th><th>Team</th><th class="r">Rating</th><th class="r">ACS</th><th class="r">K/D</th><th class="r">KAST</th><th class="r">Rnds</th><th>Agents</th></tr></thead>
+        <tbody>${p.rows.slice().reverse().map(r => { const ev = EV[r.e]; return `<tr class="${r.id === hlRow || (hlRow >= 100000 && getRow(hlRow) && getRow(hlRow).t === r.t) ? "hl" : ""}">
           <td><div style="font-weight:600;white-space:nowrap">${esc(ev.name)} ${ev.year}</div>${isWin(r.e,r.t) ? `<span class="chip win">★ Won</span>` : ""}</td>
           <td><span class="tag">${esc(r.t)}</span></td>
-          <td><div class="agents">${r.ag.map(a => agentImg(a,"s")).join("")}</div></td>
-          <td class="r num">${fmt(r.r)}${r.est ? `<span class="muted" title="Estimated">*</span>` : ""}</td><td class="r num">${fmt(r.acs,0)}</td><td class="r num">${fmt(r.kd)}</td><td class="r num">${r.kast==null?"–":r.kast+"%"}</td><td class="r num">${r.rnd}</td></tr>`; }).join("")}</tbody>
+          <td class="r num">${fmt(r.r)}${r.est ? `<span class="muted" title="Estimated">*</span>` : ""}</td><td class="r num">${fmt(r.acs,0)}</td><td class="r num">${fmt(r.kd)}</td><td class="r num">${r.kast==null?"–":r.kast+"%"}</td><td class="r num">${r.rnd}</td>
+          <td><div class="agents">${r.ag.map(a => agentImg(a,"s")).join("")}</div></td></tr>`; }).join("")}</tbody>
       </table></div>
       <p class="note" style="margin-top:12px">Teams are as listed on each event's stats page. Rating is vlr's Rating 2.0 for that event${p.rows.some(r=>r.est) ? "; * marks an estimate (Masters Shanghai 2024)" : ""}.</p>
     </div>`;
 }
 function bindTeamLinks(){
-  document.querySelectorAll("[data-team]").forEach(b => b.onclick = () => { UI.team = b.dataset.team; go("teams"); });
-  document.querySelectorAll("[data-player]").forEach(b => b.onclick = () => { UI.player = b.dataset.player; go("players"); });
+  document.querySelectorAll("#app [data-team]").forEach(b => b.onclick = () => { UI.team = b.dataset.team; go("teams"); });
 }
+// ---------- pop-ups: player stats and scoreboards open over the page instead of scrolling ----------
+function openSheet(html, label){
+  closeSheet();
+  const w = document.createElement("div"); w.id = "sheet"; w.className = "sheetwrap";
+  w.innerHTML = `<div class="panel sheet" role="dialog" aria-modal="true" aria-label="${esc(label)}"><button class="sheetx" aria-label="Close">✕</button><div class="sheetbody">${html}</div></div>`;
+  document.body.appendChild(w); document.body.classList.add("noscroll");
+  w.addEventListener("click", e => { if (e.target === w || e.target.closest(".sheetx")) closeSheet(); });
+  w.querySelectorAll("[data-team]").forEach(b => b.onclick = () => { closeSheet(); UI.team = b.dataset.team; go("teams"); });
+  setTimeout(() => { const x = w.querySelector(".sheetx"); if (x) x.focus(); }, 30);
+}
+function closeSheet(){ const w = document.getElementById("sheet"); if (w){ w.remove(); document.body.classList.remove("noscroll"); } }
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".infob")){ e.preventDefault(); e.target.click(); } });
+function openPlayer(key, rowId){
+  const p = PLAYERS.get(key); if (!p) return;
+  openSheet(profileHTML(p, rowId) + `<div class="pad" style="padding-top:0"><button class="btn" data-fullprofile="${esc(key)}">Open in Players tab</button></div>`, p.name + " stats");
+  const hl = document.querySelector("#sheet tr.hl"); if (hl) hl.scrollIntoView({block: "nearest"});
+  const f = document.querySelector("#sheet [data-fullprofile]"); if (f) f.onclick = () => { closeSheet(); UI.player = key; go("players"); };
+}
+// Any player name anywhere opens their stats (capture phase, so it doesn't also draft the player).
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-player]"); if (!b) return;
+  if (b.closest(".li")) return;   // the Players tab list handles its own clicks
+  e.preventDefault(); e.stopPropagation();
+  if (curView() === "play" && hide()){ toast("Stats stay hidden until the match is played"); return; }
+  openPlayer(b.dataset.player, b.dataset.row != null ? +b.dataset.row : null);
+}, true);
 
 // =====================================================================
 // TEAMS
