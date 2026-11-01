@@ -1,0 +1,1 @@
+# player|birth year   (player name exactly as in the stats, case-insensitive). Source: Liquipedia player pages.

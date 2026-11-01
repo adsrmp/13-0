@@ -1,0 +1,60 @@
+# 13–0 event tracker. One line per event: status|id|name|year|type|region|vlr id|notes
+# status: done = in the game; todo = finished, still to add (backlog); watch = not finished yet; skip = not available
+# The scheduled check adds finished events, oldest first, and flips their status to done.
+# International events (Masters, Champions) use region "-". vlr id is filled in once found.
+todo|ame23lg|Americas League|2023|League|Americas||
+todo|emea23lg|EMEA League|2023|League|EMEA||
+todo|pac23lg|Pacific League|2023|League|Pacific||
+todo|ame24ko|Americas Kickoff|2024|League|Americas||
+todo|emea24ko|EMEA Kickoff|2024|League|EMEA||
+todo|pac24ko|Pacific Kickoff|2024|League|Pacific||
+todo|chn24ko|China Kickoff|2024|League|China||
+todo|ame24s1|Americas Stage 1|2024|League|Americas||
+todo|emea24s1|EMEA Stage 1|2024|League|EMEA||
+todo|pac24s1|Pacific Stage 1|2024|League|Pacific||
+todo|chn24s1|China Stage 1|2024|League|China||
+todo|ame24s2|Americas Stage 2|2024|League|Americas||
+todo|emea24s2|EMEA Stage 2|2024|League|EMEA||
+todo|pac24s2|Pacific Stage 2|2024|League|Pacific||
+todo|chn24s2|China Stage 2|2024|League|China||
+todo|ame25ko|Americas Kickoff|2025|League|Americas||
+todo|emea25ko|EMEA Kickoff|2025|League|EMEA||
+todo|pac25ko|Pacific Kickoff|2025|League|Pacific||
+todo|chn25ko|China Kickoff|2025|League|China||
+todo|ame25s1|Americas Stage 1|2025|League|Americas||
+todo|emea25s1|EMEA Stage 1|2025|League|EMEA||
+todo|pac25s1|Pacific Stage 1|2025|League|Pacific||
+todo|chn25s1|China Stage 1|2025|League|China||
+todo|ame25s2|Americas Stage 2|2025|League|Americas||
+todo|emea25s2|EMEA Stage 2|2025|League|EMEA||
+todo|pac25s2|Pacific Stage 2|2025|League|Pacific||
+todo|chn25s2|China Stage 2|2025|League|China||
+todo|ame26ko|Americas Kickoff|2026|League|Americas||
+todo|emea26ko|EMEA Kickoff|2026|League|EMEA||
+todo|pac26ko|Pacific Kickoff|2026|League|Pacific||
+todo|chn26ko|China Kickoff|2026|League|China||
+todo|ame26s1|Americas Stage 1|2026|League|Americas||
+todo|emea26s1|EMEA Stage 1|2026|League|EMEA||
+done|pac26s1|Pacific Stage 1|2026|League|Pacific|2775|
+todo|chn26s1|China Stage 1|2026|League|China||
+todo|ame26s2|Americas Stage 2|2026|League|Americas||
+todo|emea26s2|EMEA Stage 2|2026|League|EMEA||
+todo|pac26s2|Pacific Stage 2|2026|League|Pacific||
+todo|chn26s2|China Stage 2|2026|League|China||
+todo|ame23asc|Americas Ascension|2023|Ascension|Americas||
+todo|emea23asc|EMEA Ascension|2023|Ascension|EMEA||
+todo|pac23asc|Pacific Ascension|2023|Ascension|Pacific||
+todo|chn23asc|China Ascension|2023|Ascension|China||may not exist for China in 2023
+todo|ame24asc|Americas Ascension|2024|Ascension|Americas||
+todo|emea24asc|EMEA Ascension|2024|Ascension|EMEA||
+todo|pac24asc|Pacific Ascension|2024|Ascension|Pacific||
+todo|chn24asc|China Ascension|2024|Ascension|China||
+todo|ame25asc|Americas Ascension|2025|Ascension|Americas||
+todo|emea25asc|EMEA Ascension|2025|Ascension|EMEA||
+todo|pac25asc|Pacific Ascension|2025|Ascension|Pacific||
+todo|chn25asc|China Ascension|2025|Ascension|China||
+watch|ame26asc|Americas Ascension|2026|Ascension|Americas||check if finished
+watch|emea26asc|EMEA Ascension|2026|Ascension|EMEA||check if finished
+watch|pac26asc|Pacific Ascension|2026|Ascension|Pacific||check if finished
+watch|chn26asc|China Ascension|2026|Ascension|China||check if finished
+# Future internationals and next season events: add a "watch" line when the schedule is announced.

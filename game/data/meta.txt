@@ -1,0 +1,154 @@
+## rey21
+All maps|41|51|49|Jett:80;Sova:72;Killjoy:57;Viper:49;Astra:43;Sage:38;Skye:34;Raze:32
+Haven|12|55|45|Jett:79;Astra:79;Sova:58;Killjoy:58;Skye:42;Sage:38
+Ascent|10|43|57|Jett:85;Sova:85;Killjoy:85;Astra:50;Omen:50;Skye:35;Phoenix:30
+Icebox|9|53|47|Jett:100;Sova:100;Viper:78;Killjoy:67;Sage:56;Omen:33
+Bind|6|59|41|Raze:92;Sova:83;Viper:75;Skye:58;Brimstone:58;Jett:33
+Split|4|47|53|Jett:100;Sage:75;Viper:63;Killjoy:50;Astra:50;Skye:38;Raze:38
+## ber21
+All maps|66|52|48|Jett:85;Sova:64;Astra:60;Skye:58;Viper:48;Sage:44;Killjoy:43
+Split|14|45|55|Astra:89;Jett:79;Sage:68;Skye:54;Viper:46;Raze:46;Killjoy:39;Cypher:39
+Haven|13|52|48|Jett:92;Astra:81;Skye:73;Killjoy:65;Sova:58;Cypher:35
+Icebox|13|61|39|Sova:100;Viper:100;Jett:92;Sage:85;Reyna:62;Killjoy:31
+Ascent|11|49|51|Sova:95;Jett:86;Astra:82;Skye:68;Killjoy:59;Sage:32
+Bind|9|56|44|Skye:89;Astra:83;Sova:67;Jett:61;Viper:61;Raze:61
+Breeze|6|54|46|Jett:100;Viper:100;Skye:92;Sova:83;Killjoy:50;Reyna:33;Cypher:33
+## cha21
+All maps|71|50|50|Jett:82;Sova:68;Astra:59;Viper:58;Skye:43;Killjoy:43
+Haven|12|51|49|Astra:100;Jett:96;Killjoy:88;Sova:71;Skye:58;Breach:50
+Breeze|12|51|49|Jett:100;Sova:100;Viper:100;Cypher:71;Skye:54;Kayo:42
+Icebox|12|50|50|Jett:100;Sova:100;Viper:100;Sage:96;Reyna:67
+Split|11|48|52|Astra:86;Raze:68;Viper:59;Jett:55;Skye:55;Killjoy:45;Breach:41;Sage:32
+Ascent|10|45|55|Sova:100;Astra:100;Jett:95;Killjoy:70;Kayo:35;Skye:30;Cypher:30
+Bind|8|51|49|Viper:94;Skye:81;Astra:75;Sova:69;Jett:50;Raze:38;Sage:31
+Fracture|6|60|40|Breach:100;Astra:75;Cypher:67;Jett:58;Viper:50;Raze:50;Killjoy:33
+## rey22
+All maps|60|49|51|Jett:65;Sova:49;Viper:46;Chamber:44;Sage:43;Omen:38;Kayo:33;Skye:33;Breach:30
+Ascent|12|46|54|Jett:100;Sova:100;Omen:79;Killjoy:75;Kayo:71
+Icebox|12|52|48|Sova:100;Viper:100;Sage:96;Jett:79;Chamber:58;Kayo:38
+Split|10|46|54|Sage:90;Raze:80;Omen:50;Astra:50;Skye:45;Jett:40;Viper:40;Cypher:40;Breach:35
+Haven|9|52|48|Jett:83;Omen:78;Skye:78;Breach:67;Killjoy:50;Chamber:33
+Fracture|8|46|54|Breach:94;Chamber:81;Brimstone:69;Viper:44;Jett:38;Raze:38;Neon:38;Astra:31;Kayo:31
+Bind|6|49|51|Skye:100;Raze:100;Viper:83;Brimstone:50;Chamber:42;Sage:33;Astra:33
+Breeze|3|59|41|Jett:100;Sova:100;Viper:100;Chamber:100;Kayo:83
+## cop22
+All maps|66|50|50|Chamber:77;Raze:54;Fade:52;Viper:46;Kayo:44;Breach:33;Brimstone:30
+Bind|13|51|49|Raze:96;Viper:88;Brimstone:81;Skye:65;Chamber:54;Fade:50
+Fracture|13|55|45|Chamber:100;Raze:65;Breach:65;Brimstone:65;Neon:46;Viper:42;Fade:35;Kayo:31
+Ascent|11|45|55|Kayo:100;Fade:91;Chamber:68;Astra:59;Omen:41;Sova:32;Jett:32;Killjoy:32
+Haven|11|54|46|Chamber:77;Breach:77;Omen:77;Raze:55;Fade:50;Jett:32;Skye:32
+Split|7|44|56|Raze:86;Chamber:71;Astra:57;Fade:50;Kayo:50;Viper:43;Omen:43;Breach:36
+Icebox|6|48|52|Chamber:100;Viper:100;Sage:83;Kayo:75;Fade:50;Sova:50
+Breeze|5|49|51|Viper:90;Sova:80;Chamber:70;Jett:70;Kayo:50;Skye:50
+## cha22
+All maps|86|49|51|Chamber:67;Fade:53;Viper:46;Kayo:45;Omen:35;Raze:34;Sova:33;Jett:31
+Ascent|17|45|55|Kayo:97;Fade:71;Omen:65;Jett:65;Sova:56;Killjoy:47;Chamber:35;Astra:35
+Haven|16|48|52|Fade:84;Omen:84;Chamber:78;Breach:66;Raze:53
+Bind|13|52|48|Raze:100;Viper:88;Skye:85;Brimstone:85;Fade:46;Chamber:35
+Breeze|11|47|53|Sova:100;Viper:100;Jett:82;Chamber:68;Kayo:64
+Fracture|10|49|51|Chamber:100;Breach:85;Neon:80;Brimstone:65;Kayo:35;Omen:35;Fade:30;Raze:30
+Icebox|10|54|46|Viper:100;Chamber:90;Sage:90;Sova:65;Kayo:50;Fade:35
+Pearl|9|47|53|Chamber:89;Fade:89;Astra:83;Viper:50;Kayo:50;Neon:39
+## lock23
+All maps|77|52|48|Killjoy:70;Jett:60;Kayo:41;Viper:40;Omen:39;Sova:39;Astra:32;Breach:32
+Pearl|16|49|51|Astra:75;Jett:72;Killjoy:69;Kayo:50;Viper:47;Skye:41;Fade:38
+Haven|13|55|45|Killjoy:85;Breach:81;Jett:77;Omen:69;Sova:58
+Icebox|12|52|48|Viper:100;Killjoy:92;Sova:88;Jett:67;Sage:67
+Fracture|10|53|47|Breach:85;Brimstone:75;Raze:75;Killjoy:55;Kayo:50;Cypher:35;Fade:30
+Lotus|10|60|40|Killjoy:75;Omen:70;Raze:55;Fade:40;Kayo:30;Viper:30;Breach:30;Skye:30
+Ascent|9|47|53|Jett:100;Kayo:89;Omen:89;Killjoy:78;Sova:72
+Split|7|49|51|Raze:100;Astra:79;Viper:64;Skye:57;Jett:50;Kayo:36;Sage:36
+## tok23
+All maps|62|51|49|Jett:59;Skye:59;Killjoy:59;Raze:48;Viper:44;Omen:43;Breach:34
+Lotus|12|53|47|Omen:83;Skye:71;Killjoy:71;Viper:58;Raze:54;Jett:38
+Fracture|12|52|48|Breach:96;Brimstone:88;Killjoy:83;Raze:67
+Split|9|47|53|Skye:100;Raze:83;Jett:78;Viper:72;Astra:72
+Bind|8|52|48|Skye:94;Raze:94;Viper:75;Brimstone:69;Harbor:44;Gekko:31
+Haven|8|44|56|Jett:100;Breach:88;Killjoy:81;Omen:81;Sova:56;Skye:31
+Pearl|7|49|51|Jett:100;Skye:93;Killjoy:93;Viper:79;Harbor:79
+Ascent|6|56|44|Jett:100;Omen:100;Kayo:100;Sova:83;Killjoy:75
+## cha23
+All maps|84|51|49|Killjoy:63;Skye:56;Raze:55;Viper:55;Jett:52;Omen:42;Astra:30
+Split|15|57|43|Skye:100;Raze:97;Viper:63;Astra:60;Jett:40;Omen:40;Breach:33
+Bind|15|47|53|Skye:93;Raze:93;Viper:93;Breach:87;Chamber:33
+Ascent|13|51|49|Jett:88;Omen:88;Killjoy:85;Kayo:85;Sova:77
+Pearl|13|50|50|Jett:100;Killjoy:96;Astra:58;Skye:50;Viper:42
+Lotus|12|55|45|Raze:100;Killjoy:92;Viper:88;Omen:71;Fade:58;Skye:33
+Haven|11|50|50|Killjoy:91;Jett:91;Breach:64;Omen:50;Sova:50;Skye:41;Astra:32
+Fracture|5|49|51|Breach:90;Killjoy:80;Brimstone:80;Raze:70;Sova:40;Skye:30;Viper:30
+## sha24
+All maps|64|51|49|Viper:66;Omen:64;Raze:57;Sova:38;Killjoy:38;Jett:35;Cypher:32;Kayo:32;Gekko:31
+Lotus|14|53|47|Omen:100;Raze:89;Viper:86;Fade:75;Killjoy:61
+Icebox|11|48|52|Viper:91;Killjoy:86;Sova:73;Jett:73;Kayo:59;Gekko:50
+Sunset|11|48|52|Omen:100;Cypher:86;Raze:82;Gekko:59;Breach:36;Kayo:32
+Bind|10|59|41|Raze:100;Viper:85;Skye:70;Brimstone:70;Gekko:65;Omen:30
+Ascent|7|42|58|Omen:100;Sova:93;Jett:93;Kayo:93;Killjoy:86
+Breeze|6|47|53|Viper:100;Sova:100;Jett:83;Yoru:58;Cypher:50;Kayo:33;Astra:33
+Split|5|62|38|Omen:100;Raze:100;Viper:90;Skye:70;Cypher:60;Breach:30
+## mad24
+All maps|45|51|49|Viper:78;Omen:68;Raze:52;Jett:43;Kayo:36;Sova:33
+Split|9|45|55|Omen:100;Raze:100;Viper:94;Skye:83;Cypher:33
+Lotus|8|55|45|Omen:100;Raze:88;Viper:75;Killjoy:69;Fade:56
+Sunset|8|52|48|Omen:94;Kayo:69;Viper:56;Sova:56;Cypher:44;Gekko:44;Raze:31;Phoenix:31
+Icebox|6|54|46|Viper:100;Jett:100;Killjoy:92;Kayo:58;Gekko:58;Sova:42
+Ascent|5|50|50|Omen:100;Kayo:70;Viper:50;Jett:50;Sova:40;Killjoy:40;Fade:40
+Breeze|5|55|45|Viper:100;Jett:100;Sova:100;Kayo:50;Cypher:50;Yoru:50;Astra:50
+Bind|4|49|51|Raze:88;Brimstone:75;Viper:63;Skye:63
+## cha24
+All maps|86|52|48|Omen:62;Sova:52;Viper:50;Cypher:42;Raze:41;Fade:34;Killjoy:33
+Lotus|20|55|45|Omen:100;Fade:90;Raze:75;Viper:68;Killjoy:53;Breach:33
+Bind|15|54|46|Viper:90;Raze:87;Gekko:73;Brimstone:73;Harbor:73;Fade:63;Sage:37
+Sunset|14|53|47|Omen:93;Cypher:93;Sova:75;Breach:57;Neon:54;Raze:46;Kayo:39
+Abyss|12|51|49|Sova:96;Jett:79;Cypher:75;Harbor:58;Omen:50;Kayo:38;Skye:38
+Icebox|12|52|48|Viper:100;Killjoy:100;Sova:92;Jett:71;Gekko:42;Kayo:33;Skye:33;Clove:33
+Haven|9|48|52|Omen:100;Sova:89;Cypher:78;Breach:67;Neon:50
+Ascent|4|47|53|Sova:100;Omen:88;Jett:88;Kayo:63;Killjoy:50;Cypher:38;Deadlock:38
+## bkk25
+All maps|42|50|50|Tejo:56;Omen:54;Yoru:46;Breach:45;Raze:39;Viper:36;Vyse:33
+Lotus|9|50|50|Omen:100;Viper:61;Breach:50;Raze:50;Tejo:44;Yoru:39;Fade:39;Vyse:33;Cypher:33
+Bind|7|46|54|Brimstone:100;Raze:86;Tejo:71;Vyse:50;Viper:43;Kayo:43;Skye:43;Clove:43
+Split|7|51|49|Omen:93;Viper:93;Breach:64;Yoru:57;Fade:50;Raze:50;Tejo:50
+## tor25
+All maps|60|53|47|Omen:82;Viper:63;Sova:53;Fade:40;Raze:33;Yoru:31;Killjoy:31;Cypher:31
+Lotus|12|45|55|Omen:100;Fade:92;Raze:83;Viper:75;Vyse:42;Killjoy:38
+Icebox|11|59|41|Viper:95;Killjoy:91;Sova:86;Jett:73;Gekko:32
+Sunset|11|51|49|Omen:100;Sova:82;Neon:77;Cypher:73;Viper:50
+Split|9|56|44|Viper:100;Omen:78;Fade:72;Raze:67;Yoru:61
+Ascent|7|57|43|Omen:100;Sova:79;Yoru:50;Cypher:43;Kayo:43
+Haven|6|48|52|Omen:100;Sova:83;Yoru:50;Cypher:50;Neon:50;Viper:42
+## cha25
+All maps|88|51|49|Omen:80;Sova:53;Yoru:53;Viper:43;Fade:43;Vyse:30;Cypher:30
+Lotus|18|51|49|Omen:100;Fade:94;Raze:61;Yoru:56;Vyse:53;Viper:47
+Abyss|14|58|42|Sova:100;Omen:68;Cypher:61;Yoru:50;Astra:43;Jett:39;Kayo:36;Waylay:32
+Corrode|13|53|47|Omen:85;Viper:77;Fade:65;Waylay:54;Yoru:46;Vyse:42;Sova:35;Kayo:31
+Ascent|11|50|50|Omen:100;Sova:100;Yoru:68;Vyse:68;Jett:41;Cypher:32;Kayo:32
+Bind|11|46|54|Viper:95;Yoru:77;Fade:77;Raze:45;Waylay:32
+Sunset|11|39|61|Omen:100;Cypher:82;Sova:73;Neon:68;Breach:36
+Haven|10|58|42|Omen:100;Sova:95;Neon:70;Viper:65;Killjoy:65;Yoru:30;Cypher:30
+## stg26
+All maps|59|53|47|Yoru:62;Viper:62;Omen:56;Sova:50;Neon:45;Fade:38;Astra:38;Waylay:36
+Split|11|48|52|Viper:100;Omen:82;Fade:68;Yoru:55;Raze:50;Neon:45;Waylay:36;Skye:32
+Haven|11|57|43|Omen:73;Sova:68;Neon:64;Yoru:59;Viper:41;Chamber:41;Killjoy:36;Fade:32;Phoenix:32
+Abyss|9|50|50|Sova:94;Waylay:94;Omen:72;Yoru:56;Astra:50
+Breeze|8|49|51|Yoru:100;Viper:100;Sova:100;Omen:56;Jett:56;Neon:44;Astra:31
+Pearl|8|49|51|Astra:94;Yoru:69;Sova:56;Neon:56;Killjoy:44;Fade:38;Waylay:38
+Corrode|7|56|44|Viper:86;Omen:71;Fade:71;Waylay:57;Neon:43;Vyse:43
+Bind|5|67|33|Viper:90;Gekko:80;Yoru:70;Fade:70;Waylay:40;Raze:40;Neon:30;Skye:30
+## lon26
+All maps|65|52|48|Omen:64;Jett:45;Fade:39;Raze:38;Sova:37;Viper:34;Phoenix:32;Neon:32;Vyse:30
+Lotus|15|57|43|Omen:100;Raze:80;Vyse:80;Fade:63;Skye:37;Viper:30
+Split|11|52|48|Viper:91;Omen:86;Raze:68;Fade:50;Skye:50;Jett:45
+Fracture|9|49|51|Brimstone:94;Fade:67;Cypher:67;Raze:50;Phoenix:44;Waylay:33
+Breeze|8|54|46|Sova:100;Viper:94;Jett:81;Omen:44;Neon:44;Harbor:38;Kayo:31
+Haven|8|51|49|Omen:88;Cypher:81;Sova:75;Jett:56;Phoenix:50;Neon:38;Waylay:38
+Ascent|7|43|57|Sova:100;Omen:93;Phoenix:64;Jett:43;Neon:43;Vyse:43
+Pearl|7|55|45|Skye:100;Phoenix:64;Fade:57;Jett:43;Sova:43;Neon:43;Vyse:43;Astra:43
+## cha26
+All maps|86|51|49|Omen:77;Neon:65;Chamber:52;Fade:51;Sova:40;Yoru:31;Viper:30
+Summit|18|52|48|Neon:83;Fade:83;Chamber:69;Sage:53;Harbor:44;Omen:42
+Lotus|15|46|54|Omen:100;Fade:77;Viper:77;Chamber:57;Neon:50;Raze:50;Vyse:37
+Ascent|13|45|55|Omen:100;Sova:100;Chamber:54;Cypher:46;Sage:42;Neon:38;Phoenix:38;Jett:35
+Sunset|12|51|49|Omen:100;Neon:79;Fade:71;Chamber:67;Sage:33;Cypher:33
+Haven|10|51|49|Neon:85;Sova:80;Omen:70;Chamber:60;Yoru:45;Phoenix:45
+Split|10|61|39|Viper:100;Omen:90;Neon:75;Fade:70;Yoru:60;Raze:35;Skye:30
+Abyss|8|55|45|Sova:100;Harbor:81;Yoru:69;Waylay:69;Astra:56;Omen:38;Neon:31

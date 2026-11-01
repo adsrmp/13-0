@@ -84,6 +84,8 @@ export class GameRoom {
 }
 
 // ---------- leaderboards ----------
+// Add an id here to wipe every board once (used 1 Nov 2026 when scores started posting automatically).
+const RESETS = ["2026-11-01-auto-post"];
 // Boards and the score range each accepts.
 const BOARDS = [
   { re: /^daily-\d{4}-\d{2}-\d{2}$/, min: 0, max: 40, once: true },
@@ -119,6 +121,14 @@ export class Leaderboard {
       score REAL NOT NULL, tb REAL NOT NULL DEFAULT 0, detail TEXT, at INTEGER NOT NULL,
       PRIMARY KEY (board, device))`);
     this.sql.exec(`CREATE INDEX IF NOT EXISTS by_rank ON scores (board, score DESC, tb DESC, at ASC)`);
+    // One-off resets. Each id runs once: every score posted before that moment is cleared.
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS resets (id TEXT PRIMARY KEY, at INTEGER NOT NULL)`);
+    for (const id of RESETS) {
+      if (this.sql.exec(`SELECT id FROM resets WHERE id = ?`, id).toArray().length) continue;
+      const now = Date.now();
+      this.sql.exec(`DELETE FROM scores WHERE at < ?`, now);
+      this.sql.exec(`INSERT INTO resets (id, at) VALUES (?, ?)`, id, now);
+    }
   }
 
   async fetch(request) {

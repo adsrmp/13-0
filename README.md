@@ -11,7 +11,11 @@ public/manifest.webmanifest, public/sw.js, public/icons/
 src/index.js               the Worker: serves the page, runs live rooms and keeps leaderboards
 wrangler.jsonc             Cloudflare settings (Durable Objects: one per live room, one for all leaderboards)
 package.json               scripts: npm run dev / npm run deploy
+game/                      the source: app.html (game code), data/ (vlr stats as text), build scripts, tests
+game/UPDATING.md           how new events are added (a scheduled check follows it after each event)
 ```
+
+To rebuild after changing anything in game/: `python3 game/build_data.py && python3 game/build_html.py`.
 
 Live rooms and leaderboards use Durable Objects with SQLite storage, which are included on the Workers free plan.
 

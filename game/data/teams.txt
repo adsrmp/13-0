@@ -1,0 +1,69 @@
+# TAG|Team name|Region   (Region is Americas, EMEA, Pacific or China. Tag must match the tag vlr.gg shows after player names.)
+SEN|Sentinels|Americas
+100T|100 Thieves|Americas
+NRG|NRG|Americas
+C9|Cloud9|Americas
+EG|Evil Geniuses|Americas
+ENVY|Team Envy|Americas
+XSET|XSET|Americas
+OPTC|OpTic Gaming|Americas
+V1|Version1|Americas
+LOUD|LOUD|Americas
+FUR|FURIA|Americas
+MIBR|MIBR|Americas
+LEV|LEVIATÁN|Americas
+KRÜ|KRÜ Esports|Americas
+VKS|Keyd Stars|Americas
+SHK|Sharks Esports|Americas
+LBR|Havan Liberty|Americas
+NIP|Ninjas in Pyjamas|Americas
+TGRD|The Guard|Americas
+G2|G2 Esports|Americas
+FPX|FunPlus Phoenix|China
+TL|Team Liquid|EMEA
+FNC|FNATIC|EMEA
+TH|Team Heretics|EMEA
+VIT|Team Vitality|EMEA
+NAVI|Natus Vincere|EMEA
+FUT|FUT Esports|EMEA
+KC|Karmine Corp|EMEA
+GIA|Giants Gaming|EMEA
+MKOI|KOI|EMEA
+GMB|Gambit Esports|EMEA
+ACE|Acend|EMEA
+SUP|SuperMassive Blaze|EMEA
+GLD|Guild Esports|EMEA
+M8|Gentle Mates|EMEA
+BBL|BBL Esports|EMEA
+GX|GIANTX|EMEA
+PRX|Paper Rex|Pacific
+KRX|DRX|Pacific
+GEN|Gen.G|Pacific
+T1|T1|Pacific
+TLN|Talon Esports|Pacific
+TS|Team Secret|Pacific
+ZETA|ZETA DIVISION|Pacific
+NTH|Northeption|Pacific
+XIA|XERXIA Esports|Pacific
+BME|BOOM Esports|Pacific
+FS|Full Sense|Pacific
+X10|X10 Esports|Pacific
+NU|NUTURN|Pacific
+VS|Vision Strikers|Pacific
+F4Q|F4Q|Pacific
+CR|Crazy Raccoon|Pacific
+RRQ|Rex Regum Qeon|Pacific
+DFM|DetonatioN FocusMe|Pacific
+GE|Global Esports|Pacific
+NS|Nongshim RedForce|Pacific
+EDG|EDward Gaming|China
+BLG|Bilibili Gaming|China
+TE|Trace Esports|China
+DRG|Dragon Ranger Gaming|China
+XLG|Xi Lai Gaming|China
+WOL|Wolves Esports|China
+AG|All Gamers|China
+TYL|TYLOO|China
+JDG|JD Gaming|China
+ASE|Attacking Soul Esports|China
+VL|VARREL|Pacific
