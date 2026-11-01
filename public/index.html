@@ -1087,7 +1087,7 @@ function askName(canCancel){
     <div class="eyebrow">${G.nick ? "Change your name" : "Welcome to 13–0"}</div>
     <h2 id="nbh">What's your name or IGN?</h2>
     <p class="small muted">It goes on the leaderboards next to your scores, and friends see it in online rooms. No account needed. 2–16 letters or numbers.</p>
-    <input id="nbname" maxlength="16" autocomplete="nickname" placeholder="e.g. Ads" value="${esc(G.nick)}" aria-describedby="nbmsg">
+    <input id="nbname" maxlength="16" autocomplete="nickname" placeholder="e.g. Phantom" value="${esc(G.nick)}" aria-describedby="nbmsg">
     <span class="nbmsg small badc" id="nbmsg" role="alert"></span>
     <div class="row"><button class="btn go" type="submit">${G.nick ? "Save" : "Let's play"}</button>${canCancel && !nameProblem(G.nick) ? `<button class="btn" type="button" id="nbcancel">Cancel</button>` : ""}</div></form>`;
   document.body.appendChild(w);
