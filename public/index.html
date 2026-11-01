@@ -450,6 +450,9 @@ a.btn{text-decoration:none;color:var(--text);display:inline-flex;align-items:cen
 .nbform{width:min(420px,100%);display:flex;flex-direction:column;gap:10px}.nbform h2{margin:0}.nbform p{margin:0}.nbform input{font-size:18px;padding:10px 12px}
 .linkbtn{background:none;border:0;padding:0;color:var(--mute);text-decoration:underline;font:inherit;font-size:13px;cursor:pointer}.linkbtn:hover{color:var(--text)}
 .lbbox{flex-direction:column;align-items:center}
+.againbar{position:sticky;bottom:12px;z-index:6;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;padding:12px;margin-top:-4px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(6px);box-shadow:0 8px 28px rgba(0,0,0,.45)}
+.btn.go.again{font-size:26px;padding:14px 40px;min-width:min(320px,100%)}
+.xbtn{font-size:16px;line-height:1;padding:8px 12px}
 .instbtn{flex:none}.instbtn[hidden]{display:none!important}
 @media (max-width:640px){.daily .mglyph{display:none}.daily .dact{align-items:stretch;width:100%}.rktable th:nth-child(4),.rktable td:nth-child(4){display:none}.instbtn{order:1;margin-left:auto;font-size:13px;padding:6px 10px}.instbtn:not([hidden])+.sndbtn{margin-left:8px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -835,6 +838,8 @@ const DAILY_CATS = CATS.filter(c => !c.extra);
 const ANYCAT = {id: "any", title: "All-time rosters", desc: "Every team's full all-time roster, no restrictions.", ok: () => true, deck(){ return [...ATE.keys()].filter(k => ATE.get(k).length >= 5).sort(); }};
 const CBEST = store.get("thirteen-cbest", null);
 
+// A small edge for your five in the 18-match seasons, so a strong (not perfect) team can run the table.
+const SEASON_EDGE = 0.02;
 const CHAMPS = D.events.filter(e => e.scope === "intl").map(e => ({e, rows: (TE.get(e.id + "|" + e.winner) || []).slice(0, 5)})).filter(c => c.rows.length === 5);
 
 // ---------- daily draft: one category and one deck for everyone, resets at 00:00 UTC ----------
@@ -1615,7 +1620,7 @@ function quizEndHTML(){
     <p class="muted" style="margin:0">${QZ.log.filter(l => l.ok).length} of ${QROUNDS} right · best streak ${QZ.bestStreak}${b ? ` · your best ${b}` : ""}</p>
     <p class="small muted" style="margin:0">Score ${Math.ceil(max * .7)} or more to win a redraft token.</p>
     <div class="qlog">${QZ.log.map((l, i) => `<div class="${l.ok ? "ok" : "no"}"><span>${i + 1}</span>${esc(l.label)}<b class="num">+${l.pts}</b></div>`).join("")}</div>
-    <div class="row" style="justify-content:center"><button class="btn go" id="qagain">Play again</button><button class="btn" id="qshare">Copy score</button></div>
+    <div class="row" style="justify-content:center"><button class="btn go again" id="qagain">Play again</button><button class="btn" id="qshare">Copy score</button></div>
     ${lbBoxHTML("quiz-" + QZ.kind, QZ.score, QZ.bestStreak, `${QZ.log.filter(l => l.ok).length}/${QROUNDS} right`, QZ)}
   </div>`;
 }
@@ -1679,7 +1684,7 @@ function bindQuiz(){
 // ---------- hub ----------
 function hubHTML(){
   const card = (id, body) => { const m = MODES[id]; return `<div class="panel mcard"><div class="mtop"><span class="mglyph">${modeGlyph(id)}</span><div><div class="eyebrow">${m.tag}</div><h3>${m.title}</h3></div></div><p class="small muted">${m.desc}</p><div class="mfoot">${body}</div></div>`; };
-  const resume = S && (S.phase === "draft" || S.phase === "ready") && !S.result ? `<div class="panel pad row resume" style="justify-content:space-between"><div><div class="eyebrow">In progress</div><b>${esc(MODES[S.mode].title)}</b> <span class="muted small">· ${lineupRows(S.drafters[0]).length}/5 drafted</span></div><button class="btn" data-resume>Resume</button></div>` : "";
+  const resume = S && (S.phase === "draft" || S.phase === "ready") && !S.result ? `<div class="panel pad row resume" style="justify-content:space-between"><div><div class="eyebrow">In progress</div><b>${esc(MODES[S.mode].title)}</b> <span class="muted small">· ${lineupRows(S.drafters[0]).length}/5 drafted</span></div><div class="row"><button class="btn go sm" data-resume>Resume</button>${S.mode === "online" ? "" : `<button class="btn warn xbtn" data-arm="cancel" aria-label="Cancel this match" title="Cancel this match">✕</button>`}</div></div>` : "";
   return `
   <section class="view">
     <div>
@@ -1754,12 +1759,23 @@ function sessionHTML(){
       ${matchControls()}
     </div>
     ${S.mode === "online" && !S.started && !S.result ? lobbyHTML() : `${needbarHTML()}
-    ${S.result ? resultHTML() : ""}
+    ${S.result ? resultHTML() + againHTML() : ""}
     <div class="board">
       <div class="panel" id="deal">${S.phase === "draft" ? dealHTML() : readyHTML()}</div>
       <div class="panel info">${infoHTML()}</div>
     </div>`}
   </section>`;
+}
+// Big "Play again" right under the result (sticks to the bottom of the screen until you scroll to it).
+function againHTML(){
+  if (S.mode === "online") return "";
+  const daily = S.mode === "daily";
+  return `<div class="againbar" role="group" aria-label="What next"><button class="btn go again" id="playagain">${daily ? "Practice draft" : "Play again"}</button><button class="btn" id="tohub2">Back to modes</button></div>`;
+}
+function newDraft(){
+  if (!S) return;
+  if (S.mode === "daily") return startDaily();
+  startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : S.cat && S.mode !== "cat" ? {catVs: true} : {});
 }
 function matchControls(){
   const live = !S.result;
@@ -1770,7 +1786,7 @@ function matchControls(){
     ? `<span class="small muted">Who gives up?</span>${S.drafters.map((d, i) => `<button class="btn warn" data-gg="${i}">${esc(d.name)}</button>`).join("")}<button class="btn" id="ggback">Back</button>`
     : `<button class="btn warn" id="ggask">Surrender</button>`;
   if (live && S.mode === "online" && S.started) h += `<button class="btn warn" data-arm="surrender">Surrender</button>`;
-  if (S.mode !== "online" && (!pvp || !live)) h += `<button class="btn" id="newdraft">New draft</button>`;
+  if (S.mode !== "online" && (!pvp || !live)) h += S.result ? "" : `<button class="btn" id="newdraft">New draft</button>`;
   return h;
 }
 function endBySurrender(loser, winner, meWon = null){
@@ -1975,7 +1991,7 @@ function runResult(){
     S.result = {type: "single", map, w: g.w, l: g.l, seq: g.seq, p, box: boxScore(Math.random, rows, g.w + g.l, won), shown: 0};
     if (!G.best || g.w - g.l > G.best.w - G.best.l){ G.best = {w: g.w, l: g.l}; store.set("thirteen-best", G.best); }
   } else if (S.mode === "gauntlet" || S.mode === "cat" || S.mode === "daily"){
-    const me = teamStrength(rows, null).s;
+    const me = teamStrength(rows, null).s + SEASON_EDGE;
     // The daily season is the same for everyone who drafts the same five.
     const rand = S.mode === "daily" ? rng(hashStr(S.opts.dkey + ":" + rows.map(r => r.id).sort((a, b) => a - b).join(","))) : Math.random;
     const list = CHAMPS.map(c => { const map = MAP_LIST[Math.floor(rand() * MAP_LIST.length)]; const g = simMap(rand, roundP(me, teamStrength(c.rows, null).s)); return {c, map, w: g.w, l: g.l}; });
@@ -2191,7 +2207,9 @@ function bindPlay(){
   // session
   on("#tohub", () => { PLAYUI = "hub"; clearInterval(simTimer); showPlay(); });
   on("#recat", () => startMode(S.mode, S.mode === "cat" ? {} : {catVs: true}));
-  on("#newdraft", () => S.mode === "daily" ? startDaily() : startMode(S.mode, S.mode === "challenge" ? {role: "maker", allEvents: true} : S.cat && S.mode !== "cat" ? {catVs: true} : {}));
+  on("#newdraft", newDraft);
+  on("#playagain", newDraft);
+  on("#tohub2", () => { PLAYUI = "hub"; clearInterval(simTimer); S = null; showPlay(); });
   on("#copyroom", () => copyText(NET.code, "Room code copied"));
   on("[data-pick]", e => { const r = getRow(+e.currentTarget.dataset.pick); if (!S || !canAct(curD(S))) return; if (S.mode === "online"){ if (slotFor(S, curD(S), r)) onlineAct("p" + r.id); return; } if (doPick(S, r)) renderPlay(); });
   on("#skip", () => { const d = curD(S); if (!canAct(d)) return; if (S.mode === "online"){ if (!d.skips){ if (!tok(d)) return; spendTok(d); } onlineAct("s"); return; } if (d.skips) d.skips--; else if (tok(d)) spendTok(d); else return; nextDeal(S); renderPlay(); });
