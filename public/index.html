@@ -324,6 +324,14 @@ footer a{color:var(--mute)}
 .tbox{background:var(--panel2);border-radius:6px;padding:10px;min-width:0}
 .tbox table{font-size:13px}.tbox td,.tbox th{padding:6px 8px}
 .btn.sm2{font-size:14px;padding:7px 14px}
+.mapchips{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:6px;margin-bottom:2px;border-bottom:1px solid var(--line)}
+.mapchips>.eyebrow{width:142px;flex:none}
+.mchip{display:flex;align-items:center;gap:8px;padding:3px 10px 3px 3px;border-radius:6px;background:var(--panel2);min-width:0}
+.mchip span{display:flex;flex-direction:column;line-height:1.1}
+.mchip em{font-style:normal;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.mchip b{font-family:var(--f-display);font-weight:800;font-size:16px;text-transform:uppercase;letter-spacing:.02em}
+.mchipimg{width:34px;height:34px;max-width:34px;object-fit:contain;border-radius:4px;background:var(--bg);font-size:8px}
+@media (max-width:640px){.mapchips{gap:5px}.mapchips>.eyebrow{display:none}.mchip{flex:1 1 0;padding-right:6px;gap:5px}.mchipimg{width:26px;height:26px;max-width:26px}.mchip b{font-size:13px}.mchip em{font-size:9px}}
 .chip.blindc{border-color:var(--controller);color:var(--controller)}
 .rating.qm{color:var(--dim)}
 .blindbox{border-color:color-mix(in srgb,var(--controller) 45%,var(--line))}
@@ -1502,7 +1510,8 @@ function needbarHTML(){
     const them = S.opts.ids.map(i => D.rows[i]);
     rows.push(`<div class="needrow" style="--c:var(--orange)"><div class="who"><span>Challenger</span></div>${them.map(r => S.result ? `<div class="ns full">${agentImg(r.ag[0], "s")}<span class="nm">${esc(r.p)}</span></div>` : `<div class="ns full hid"><span class="nm">Hidden</span></div>`).join("")}</div>`);
   }
-  return `<div class="needbar" aria-label="Lineups">${rows.join("")}</div>`;
+  const mapRow = S.maps ? `<div class="mapchips" aria-label="${S.maps.length > 1 ? "Series maps" : "Map"}"><span class="eyebrow">${S.maps.length > 1 ? "Maps" : "Map"}</span>${S.maps.map((m, i) => `<span class="mchip">${mapImg(m, "mchipimg")}<span><em>${S.maps.length > 1 ? `Map ${i + 1}` : "Map"}</em><b>${esc(m)}</b></span></span>`).join("")}</div>` : "";
+  return `<div class="needbar" aria-label="Lineups">${mapRow}${rows.join("")}</div>`;
 }
 function dealHTML(){
   if (!S.deal) return `<div class="pad"><h3>No rosters left to deal</h3><p class="muted">Go back to Modes and widen the era, event or region.</p></div>`;
