@@ -341,7 +341,7 @@ footer a{color:var(--mute)}
 .ag.badge{font-family:var(--f-body);font-weight:800;font-size:13px;letter-spacing:-.01em;color:#0d131c}
 .ag.badge.pill{width:auto;height:22px;padding:0 7px;border-radius:11px;font-size:11px;letter-spacing:.01em;white-space:nowrap}
 .ag.badge.sq{letter-spacing:-.01em;line-height:1;text-align:center;padding:2px}
-.ag.badge.tagl,.prow .ag.badge.tagl{width:68px;height:28px;border-radius:6px;font-size:12px;letter-spacing:0}
+.ag.rolei{background:color-mix(in srgb,var(--rc) 20%,var(--panel2));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--rc) 55%,transparent)}.ag.rolei svg{width:64%;height:64%}
 .chip.igl{border-color:var(--gold);color:var(--gold)}
 .chip.duo{border-color:var(--teal);color:var(--teal)}
 .chip.blindc{border-color:var(--controller);color:var(--controller)}
@@ -383,7 +383,7 @@ footer a{color:var(--mute)}
 .deal-team{font-size:36px}
 .needline{display:flex;gap:5px;flex-wrap:wrap;align-items:center;justify-content:flex-end;max-width:260px}
 .needline .eyebrow{width:100%;text-align:right}
-@media (max-width:640px){.needline{display:none}.deal-team{font-size:28px}.modebar h2{font-size:22px}.prow{padding:8px 12px;gap:10px}.prow .pname .chip.role,.prow .pstats .agents:not(.blind-ag){display:none}.prow .ag.badge.tagl{width:60px;height:24px;font-size:11px}.pstats{gap:10px}.deal-head{padding:12px}}
+@media (max-width:640px){.needline{display:none}.deal-team{font-size:28px}.modebar h2{font-size:22px}.prow{padding:8px 12px;gap:10px}.prow .pname .chip.role,.prow .pstats .agents:not(.blind-ag){display:none}.prow .ag.l{width:40px;height:40px}.pstats{gap:10px}.deal-head{padding:12px}}
 .chip.needc{border:1.5px dashed var(--rc);color:var(--rc)}
 .prow{padding:8px 16px}
 .prow .ag.l{width:46px;height:46px}
@@ -540,14 +540,14 @@ function hue(s){ let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 
 const teamCol = t => `hsl(${hue(t)} 55% 62%)`;
 
 // Agents are shown as role-coloured name badges (no character art).
-// Agents are shown by name on a role-coloured tag (no character art).
-const AG_BOX = {xl: [84, 22], mvpimg: [112, 28]};
+// A player's main agent is shown as its role symbol on a role-tinted tile (no character art).
+// Agent pools in lists stay as small name tags so you can tell agents of the same role apart.
 function agentImg(a, size = ""){
   const role = D.roles[a] || "Duelist";
   const name = a === "Kayo" ? "KAY/O" : a;
-  const box = AG_BOX[size];
-  const fs = box ? `;font-size:${Math.min(box[1], Math.floor(box[0] * 1.3 / name.length))}px` : "";
-  return `<span class="ag badge ${box ? "sq " + size : size === "l" ? "tagl" : "pill"}" style="background:${ROLE_COL[role]}${fs}" title="${esc(name)} · ${role}">${esc(name)}</span>`;
+  if (size === "l" || size === "xl" || size === "mvpimg")
+    return `<span class="ag rolei ${size}" style="--rc:${ROLE_COL[role]}" title="${esc(name)} · ${role}" role="img" aria-label="${esc(name)}, ${role}">${roleGlyph(role)}</span>`;
+  return `<span class="ag badge pill" style="background:${ROLE_COL[role]}" title="${esc(name)} · ${role}">${esc(name)}</span>`;
 }
 function mapImg(m, cls = "mapimg"){
   const src = IMG.maps[m];
