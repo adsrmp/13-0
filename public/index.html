@@ -251,8 +251,8 @@ footer a{color:var(--mute)}
 .sndbtn{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:5px;width:36px;height:34px;display:grid;place-items:center;flex:none}
 .sndbtn[aria-pressed="false"]{color:var(--dim)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:30}
-.fxbanner{position:fixed;left:0;right:0;top:38%;z-index:31;pointer-events:none;text-align:center;font-family:var(--f-display);font-weight:900;font-size:clamp(48px,11vw,120px);letter-spacing:.08em;text-transform:uppercase;line-height:1;padding:18px 16px;animation:bannerin 2.6s ease-out forwards}
+.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
+.fxbanner{position:fixed;left:0;right:0;top:38%;z-index:71;pointer-events:none;text-align:center;font-family:var(--f-display);font-weight:900;font-size:clamp(48px,11vw,120px);letter-spacing:.08em;text-transform:uppercase;line-height:1;padding:18px 16px;animation:bannerin 2.6s ease-out forwards}
 .fxbanner.win{color:var(--gold);background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--bg) 85%,transparent) 20%,color-mix(in srgb,var(--bg) 85%,transparent) 80%,transparent);text-shadow:0 0 30px color-mix(in srgb,var(--gold) 45%,transparent)}
 .fxbanner.loss{color:var(--red);background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--bg) 88%,transparent) 20%,color-mix(in srgb,var(--bg) 88%,transparent) 80%,transparent)}
 @keyframes bannerin{0%{opacity:0;transform:scale(1.25);letter-spacing:.3em}12%{opacity:1;transform:scale(1);letter-spacing:.08em}75%{opacity:1}100%{opacity:0}}
@@ -1386,13 +1386,13 @@ function maybeCelebrate(){
   const R = S && S.result; if (!R || R.fx || R.type === "single") return;
   R.fx = 1; let kind, label, delay = 250;
   let winner = null;
-  if (R.type === "gauntlet"){ kind = R.w > R.l ? "win" : "loss"; label = R.l === 0 ? "Flawless" : null; delay = 1300; if (kind === "win") winner = S.drafters[0].name; }
+  if (R.type === "gauntlet"){ kind = R.w > R.l ? "win" : "loss"; label = R.l === 0 ? "Flawless" : null; delay = 500; if (kind === "win") winner = S.drafters[0].name; }
   else if (R.type === "forfeit"){ kind = R.meWon === false ? "loss" : R.meWon === true ? "win" : "neutral"; if (kind === "neutral"){ label = `${R.winner} ${winsWord(R.winner)}`; winner = R.winner; } else if (kind === "win") winner = S.drafters[S.mode === "online" ? S.me : 0].name; }
-  else { const aw = R.sr.wa > R.sr.wb; delay = R.sr.games.length * 350 + 350;
+  else { const aw = R.sr.wa > R.sr.wb; delay = R.sr.games.length * 150 + 150;
     if (S.mode === "local"){ kind = "neutral"; winner = aw ? R.nameA : R.nameB; label = `${winner} ${winsWord(winner)}`; } else { const iWon = S.mode === "online" ? (aw === (S.me === 0)) : aw; kind = iWon ? "win" : "loss"; if (iWon) winner = S.drafters[S.mode === "online" ? S.me : 0].name; } }
   if (winner) awardTok(winner);
   setTimeout(() => celebrate(kind, label), delay);
-  if (R.type === "series" || R.type === "gauntlet") autoMatchStats(R, delay + 1700);
+  if (R.type === "series" || R.type === "gauntlet") autoMatchStats(R, delay);
 }
 function soundBtn(){
   const b = document.getElementById("sndbtn"); if (!b) return;
@@ -2094,7 +2094,7 @@ function runResult(){
   if (S.result && S.result.type === "single"){
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) S.result.shown = S.result.seq.length;
-    else simTimer = setInterval(() => { if (!S || !S.result || S.result.type !== "single") return clearInterval(simTimer); S.result.shown++; updateMatch(); if (S.result.shown >= S.result.seq.length) clearInterval(simTimer); }, 90);
+    else simTimer = setInterval(() => { if (!S || !S.result || S.result.type !== "single") return clearInterval(simTimer); S.result.shown++; updateMatch(); if (S.result.shown >= S.result.seq.length) clearInterval(simTimer); }, 35);
     updateMatch();
   }
   const m = document.getElementById("match"); if (m) m.scrollIntoView({behavior: "smooth", block: "start"});
@@ -2118,13 +2118,13 @@ function resultHTML(){
       <div class="verdict" id="verdict" style="min-height:1.1em"></div>
       <div class="timeline" id="tl" aria-label="Round by round">${R.seq.map((_, i) => `<i class="${i === 12 ? "half" : ""}"></i>`).join("")}</div>
       ${boxTable(R.box)}
-      ${mvpHTML([{...R.box[0], side: 0, label: R.w > R.l ? "Match MVP" : "Team MVP"}], R.seq.length * 0.09 + 0.2)}
+      ${mvpHTML([{...R.box[0], side: 0, label: R.w > R.l ? "Match MVP" : "Team MVP"}], R.seq.length * 0.035 + 0.1)}
       <div class="row" style="justify-content:center"><button class="btn" id="share">Share result</button></div>
     </div></div>`;
   if (R.type === "gauntlet") return `<div class="panel pad" id="match">
     <div class="score"><span class="big us num">${R.w}</span><span class="dash">–</span><span class="big them num">${R.l}</span></div>
     <div class="verdict" style="color:${R.l === 0 ? "var(--gold)" : R.w >= R.l ? "var(--teal)" : "var(--red)"}">${R.l === 0 ? "Perfect run. Every champion beaten." : R.w >= 14 ? "A dynasty" : R.w >= 10 ? "Title contender" : R.w >= 6 ? "Playoff team" : "Rebuild year"}</div>
-    <div class="glist">${R.list.map((x, i) => `<div class="gm ${x.w > x.l ? "won" : "lost"}" style="--d:${(i * 0.06).toFixed(2)}s"><span class="res">${x.w > x.l ? "W" : "L"}</span><div style="min-width:0"><b>${esc(teName(x.c.e.winner))}</b><div class="small muted">${esc(x.c.e.name)} ${x.c.e.year} · ${esc(x.map)}</div></div><span class="num">${x.w}–${x.l}</span></div>`).join("")}</div>
+    <div class="glist">${R.list.map((x, i) => `<div class="gm ${x.w > x.l ? "won" : "lost"}" style="--d:${(i * 0.025).toFixed(2)}s"><span class="res">${x.w > x.l ? "W" : "L"}</span><div style="min-width:0"><b>${esc(teName(x.c.e.winner))}</b><div class="small muted">${esc(x.c.e.name)} ${x.c.e.year} · ${esc(x.map)}</div></div><span class="num">${x.w}–${x.l}</span></div>`).join("")}</div>
     ${R.daily ? `<div class="dsq" aria-label="Wins and losses">${R.list.map(x => `<i class="${x.w > x.l ? "w" : "l"}"></i>`).join("")}</div>` : ""}
     <div class="row" style="justify-content:center;margin-top:14px"><button class="btn" id="share">Share result</button></div>
     ${R.daily && R.practice ? `<p class="small muted" style="text-align:center;margin:10px 0 0">Practice run, not posted.</p>` : lbBoxHTML((R.daily ? S.opts.board : S.mode) + (S.blind ? "-blind" : ""), R.w, R.tb, (S.cat ? S.cat.title + ": " : "") + lineupRows(S.drafters[0]).map(r => r.p).join(", "), R)}</div>`;
@@ -2145,13 +2145,13 @@ function seriesHTML(sr, nameA, nameB){
     </div>
     <div class="verdict" style="color:${aw ? "var(--teal)" : "var(--orange)"}">${esc(aw ? nameA : nameB)} ${(aw ? nameA : nameB) === "You" ? "win" : "wins"} ${Math.max(sr.wa, sr.wb)}–${Math.min(sr.wa, sr.wb)}</div>
     <div class="games">${sr.games.map((g, i) => { const a = g.w > g.l; const top = (a ? g.boxA : g.boxB)[0]; return `
-      <div class="game" style="--d:${(i * 0.35).toFixed(2)}s">${mapImg(g.map, "gthumb")}
+      <div class="game" style="--d:${(i * 0.15).toFixed(2)}s">${mapImg(g.map, "gthumb")}
         <div style="min-width:0">
           <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b>Map ${i + 1} · ${esc(g.map)}</b><span class="num gscore"><span style="color:${a ? "var(--teal)" : "var(--mute)"}">${g.w}</span>–<span style="color:${a ? "var(--mute)" : "var(--orange)"}">${g.l}</span></span></div>
           <div class="mini">${g.seq.map(x => `<i class="${x ? "a" : "b"}"></i>`).join("")}</div>
           <div class="small muted">Map MVP ${esc(top.r.p)} · ${top.k}/${top.d}/${top.a}</div>
         </div></div>`; }).join("")}</div>
-    ${seriesMvpHTML(sr, aw, sr.games.length * 0.35 + 0.3)}
+    ${seriesMvpHTML(sr, aw, sr.games.length * 0.15 + 0.1)}
     ${seriesBoxHTML(sr, nameA, nameB)}
     <div class="row" style="justify-content:center"><button class="btn" id="share">Share result</button></div>
   </div>`;
@@ -2192,7 +2192,7 @@ function updateMatch(){
   document.getElementById("sw").textContent = w; document.getElementById("sl").textContent = l;
   [...document.getElementById("tl").children].forEach((el, i) => { el.classList.toggle("w", i < m.shown && m.seq[i]); el.classList.toggle("l", i < m.shown && !m.seq[i]); });
   if (m.shown >= m.seq.length){ const [t, c] = verdict(m.w, m.l); const v = document.getElementById("verdict"); v.textContent = t; v.style.color = c;
-    if (!m.fx){ m.fx = 1; autoMatchStats(m, 1900); celebrate(m.w > m.l ? "win" : "loss", m.w === 13 && m.l === 0 ? "Flawless" : null); if (m.w > m.l) awardTok(S.drafters[0].name); } }
+    if (!m.fx){ m.fx = 1; autoMatchStats(m, 0); celebrate(m.w > m.l ? "win" : "loss", m.w === 13 && m.l === 0 ? "Flawless" : null); if (m.w > m.l) awardTok(S.drafters[0].name); } }
 }
 // ---------- share text (pasted into chats, so short lines and emoji instead of long sentences) ----------
 const ROLE_EMOJI = {Duelist: "🗡️", Initiator: "🔍", Controller: "💨", Sentinel: "🛡️", Flex: "⭐"};
@@ -2274,7 +2274,7 @@ function runBattle(){
   BT.result = {sr, nameA: nA, nameB: nB};
   renderPlay();
   const winner = sr.wa > sr.wb ? nA : nB;
-  setTimeout(() => celebrate("neutral", `${winner} wins`), sr.games.length * 350 + 350);
+  setTimeout(() => celebrate("neutral", `${winner} wins`), sr.games.length * 150 + 150);
   const m = document.getElementById("match"); if (m) m.scrollIntoView({behavior: "smooth", block: "start"});
 }
 
