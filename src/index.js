@@ -1,7 +1,7 @@
 // 13–0 on Cloudflare: serves the game from /public, runs live rooms and keeps leaderboards.
 //
 // GET  /api/room/<name>          (WebSocket) joins a live room. Each room is one Durable Object.
-// GET  /api/scores?board=&device= top scores for a board, plus this device's own entry and rank
+// GET  /api/scores?board=&device= top 100 scores for a board, plus this device's own entry and rank
 // POST /api/scores                {board, name, device, score, tb, detail}
 // No logins: a device id (random, kept in the browser) owns its entries, and names are screened.
 
@@ -141,7 +141,7 @@ export class Leaderboard {
       if (!BOARDS.some(b => b.re.test(board))) return reply({ ok: false, error: "Unknown board" }, 400);
       const device = (url.searchParams.get("device") || "").slice(0, 40);
       const top = this.sql.exec(`SELECT name, score, tb, detail, device = ? AS me FROM scores WHERE board = ?
-        ORDER BY score DESC, tb DESC, at ASC LIMIT 50`, device, board).toArray().map(r => ({ ...r, me: !!r.me }));
+        ORDER BY score DESC, tb DESC, at ASC LIMIT 100`, device, board).toArray().map(r => ({ ...r, me: !!r.me }));
       const total = this.sql.exec(`SELECT COUNT(*) AS n FROM scores WHERE board = ?`, board).one().n;
       let mine = null;
       if (device) {

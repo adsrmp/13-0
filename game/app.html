@@ -840,18 +840,20 @@ const CBEST = store.get("thirteen-cbest", null);
 const SEASON_EDGE = 0.02;
 const CHAMPS = D.events.filter(e => e.scope === "intl").map(e => ({e, rows: (TE.get(e.id + "|" + e.winner) || []).slice(0, 5)})).filter(c => c.rows.length === 5);
 
-// ---------- daily draft: one category and one deck for everyone, resets at 00:00 UTC ----------
+// ---------- daily draft: one category and one deck for everyone, resets at 12am Philippine time ----------
 const DAILY_START = Date.UTC(2026, 10, 1);
 const DAILY_V = 2;   // bump to redraw the daily and void earlier local results
 const DAILY = store.get("thirteen-daily", {});
 const dailyDone = key => DAILY[key] && DAILY[key].v === DAILY_V ? DAILY[key] : null;
+// Days run on Philippine time (UTC+8): a new daily starts at 12am in Manila.
+const DAILY_TZ_MS = 8 * 3600e3;
 function dailyInfo(t = Date.now()){
-  const d = new Date(t); const key = d.toISOString().slice(0, 10);
+  const d = new Date(t + DAILY_TZ_MS); const key = d.toISOString().slice(0, 10);
   const n = Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - DAILY_START) / 864e5) + 1;
   const h = hashStr("daily:v" + DAILY_V + ":" + key);
   return {key, n, seed: h, cat: DAILY_CATS[h % DAILY_CATS.length], board: "daily-" + key};
 }
-// Daily streak: official daily runs on consecutive days (UTC). Rewards: every 3rd day a free skip,
+// Daily streak: official daily runs on consecutive days (Philippine time). Rewards: every 3rd day a free skip,
 // every 7th day a redraft token, and 2 bonus tokens on day 30.
 const STREAK = store.get("thirteen-streak", {cur: 0, best: 0, last: ""});
 const streakNow = () => STREAK.last === dailyInfo().key || STREAK.last === dailyInfo(Date.now() - 864e5).key ? STREAK.cur : 0;
@@ -881,7 +883,7 @@ function dailyCardHTML(){
   const di = dailyInfo(), done = dailyDone(di.key);
   return `<div class="panel pad daily">
     <span class="mglyph">${modeGlyph("daily")}</span>
-    <div class="dtext"><div class="eyebrow">Daily draft #${di.n} · new one at 00:00 UTC</div>
+    <div class="dtext"><div class="eyebrow">Daily draft #${di.n} · new one at 12am PH time</div>
       ${(() => { const cur = streakNow(), nx = nextStreakReward(cur); return `<div class="streak">${cur ? `🔥 <b>${cur}-day streak</b>` : STREAK.best ? `Streak lost. Play today to start a new one` : `🔥 Start a streak today`}${STREAK.best ? ` <span class="muted">· best ${STREAK.best}</span>` : ""}${nx ? ` <span class="muted">· day ${nx.day}: ${rewardText(nx.r)}</span>` : ""}</div>`; })()}<h3>${esc(di.cat.title)}</h3><p class="small muted">${esc(di.cat.desc)} Everyone gets the same spins today, then plays all ${CHAMPS.length} champions. Your first finished run counts.</p></div>
     <div class="dact">${done ? `<div class="dres"><b class="num">${done.w}–${done.l}</b><div class="dsq sm">${String(done.sq).split("").map(c => `<i class="${c === "1" ? "w" : "l"}"></i>`).join("")}</div></div>
       <div class="row"><button class="btn go sm" data-dshare>Share</button><button class="btn" data-daily>Practice</button><a class="btn" href="#ranks" data-rkboard="daily|${done && done.blind ? 1 : 0}">Ranks</a></div>`
@@ -1034,8 +1036,8 @@ async function loadRanks(cur){
   const mineIn = j.top.some(r => r.me);
   el.innerHTML = j.top.length ? `<div class="scroll"><table class="rktable"><thead><tr><th>#</th><th>Name</th><th class="r">Score</th><th class="r">${q ? "Tiebreak" : "Rounds"}</th></tr></thead><tbody>
       ${j.top.map((r, i) => row(r, i + 1)).join("")}
-      ${j.mine && !mineIn ? `<tr class="gap"><td colspan="4">…</td></tr>${row({...j.mine, me: true}, j.mine.rank)}` : ""}
-    </tbody></table></div><div class="pad small muted">${j.total} ${j.total === 1 ? "player" : "players"} on this board.</div>`
+
+    </tbody></table></div><div class="pad small muted">Top ${Math.min(100, j.total)} of ${j.total} ${j.total === 1 ? "player" : "players"}.${j.mine && !mineIn ? ` You're <b style="color:var(--text)">#${j.mine.rank}</b>, keep going to make the top 100.` : ""}</div>`
     : `<div class="pad"><b>No scores yet.</b><p class="small muted" style="margin:6px 0 0">${cur[0] === "daily" ? "Be the first: play today's daily draft from the Play tab." : cur[0] === "yday" ? "Nobody posted yesterday." : "Finish a run and post your score to start this board."}</p></div>`;
 }
 
@@ -2013,7 +2015,7 @@ function readyHTML(){
       ${hide() ? `<p class="small muted">Blind draft: your odds stay hidden until the map is played.</p>` : `<div class="kv"><div><b class="num">${Math.round(p * 100)}%</b><span>Round win chance</span></div><div><b class="num" style="color:var(--gold)">${(Math.pow(p, 13) * 100).toFixed(p > .75 ? 1 : 2)}%</b><span>Chance of 13–0</span></div></div>`}`;
     btn = again ? "Play another map" : "Play the map";
   } else if (S.mode === "daily"){
-    if (again) return `<div class="pad readyp"><div class="eyebrow">Done</div><h2>${S.opts.practice ? "Practice over" : "Today's score is in"}</h2><p class="muted">A new daily draft starts at 00:00 UTC. You can keep drafting today's spins for practice; those runs aren't posted.</p><div class="row"><button class="btn go" id="newdraft2">Practice draft</button><a class="btn" href="#ranks">See ranks</a></div></div>`;
+    if (again) return `<div class="pad readyp"><div class="eyebrow">Done</div><h2>${S.opts.practice ? "Practice over" : "Today's score is in"}</h2><p class="muted">A new daily draft starts at 12am Philippine time. You can keep drafting today's spins for practice; those runs aren't posted.</p><div class="row"><button class="btn go" id="newdraft2">Practice draft</button><a class="btn" href="#ranks">See ranks</a></div></div>`;
     body = `<p class="muted">${esc(S.cat.title)}. One map against each of the ${CHAMPS.length} event winners. ${S.opts.practice ? "Practice run." : "This is your official run for today."}</p>`;
     btn = "Start the season";
   } else if (S.mode === "gauntlet" || S.mode === "cat"){
