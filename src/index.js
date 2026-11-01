@@ -86,7 +86,8 @@ export class GameRoom {
 // ---------- leaderboards ----------
 // Add an id here to wipe every board once (used 1 Nov 2026 when scores started posting automatically).
 // An entry with boards only clears those boards (used when the Esports World Cup winner joined the gauntlet).
-const RESETS = ["2026-11-01-auto-post", { id: "2026-11-01-ewc-gauntlet", boards: ["gauntlet", "gauntlet-blind", "cat", "cat-blind"] }];
+const RESETS = ["2026-11-01-auto-post", { id: "2026-11-01-ewc-gauntlet", boards: ["gauntlet", "gauntlet-blind", "cat", "cat-blind"] },
+  { id: "2026-11-01-ewc25-heretics", boards: ["gauntlet", "gauntlet-blind", "cat", "cat-blind"] }];
 // Boards and the score range each accepts. Draft boards have a "-blind" twin for runs drafted with stats hidden.
 const BOARDS = [
   { re: /^daily-\d{4}-\d{2}-\d{2}(-blind)?$/, min: 0, max: 40, once: true },

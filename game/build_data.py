@@ -75,6 +75,11 @@ for f in files:
         line = line.rstrip('\n')
         if not line.strip() or (line.startswith('#') and not line.startswith('## ')):
             continue
+        if line.startswith('## +'):
+            # "## +<event id>": more players for an event added earlier (new files never touch old ones)
+            cur = line[4:].strip()
+            assert cur in events, (f, 'continues an unknown event', cur)
+            continue
         if line.startswith('## '):
             parts = line[3:].split('|')
             eid, name, year, typ, win, vlr = parts[:6]

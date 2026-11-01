@@ -58,6 +58,10 @@ PlayerName TAG,Agent1;Agent2,Rnd,R,ACS,K:D,KAST,ADR,KPR,APR,FKPR,FDPR,HS
 - **end**: the date of the grand final. This sets the order events are listed in.
 - Optional: `note=partial data` if vlr is missing part of the table.
 
+To add missing players to an event that's already in the game (e.g. a partial table), make a new
+file whose header is just `## +<event id>` followed by the extra rows. Match pages (vlr.gg/<id>/<slug>)
+have per-map stats for every player; weight them by rounds and say so in a `#` comment.
+
 ### Check the rows before building
 
 - The number of rows matches `TOTAL ROWS`.

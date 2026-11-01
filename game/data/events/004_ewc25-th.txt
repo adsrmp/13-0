@@ -1,0 +1,5 @@
+## +ewc25
+# Team Heretics' two missing players (they were below the cut-off of vlr's event table). Built from vlr's
+# per-map stats for the grand final vs FNATIC (5 maps) and the semifinal vs Gen.G (3 maps), weighted by rounds.
+benjyfishy TH,Cypher;Viper;Killjoy,172,0.76,144,0.70,66,99.8,0.50,0.11,0.05,0.10,32
+MiniBoo TH,Yoru;Neon;Omen,172,0.79,172,0.81,64,115.1,0.62,0.18,0.12,0.22,30
