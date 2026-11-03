@@ -6,11 +6,11 @@ done|ame23lg|Americas League|2023|League|Americas|1189|
 done|emea23lg|EMEA League|2023|League|EMEA|1190|
 todo|pac23lg|Pacific League|2023|League|Pacific|1191|vlr table shows wrong tags for ~10 players (showmatch teams BNY/SPB, e.g. xffero listed as BNY but played for RRQ); needs fixing from match pages
 done|ame24ko|Americas Kickoff|2024|League|Americas|1923|
-todo|emea24ko|EMEA Kickoff|2024|League|EMEA||
-todo|pac24ko|Pacific Kickoff|2024|League|Pacific||
-todo|chn24ko|China Kickoff|2024|League|China||
-todo|ame24s1|Americas Stage 1|2024|League|Americas||
-todo|emea24s1|EMEA Stage 1|2024|League|EMEA||
+done|emea24ko|EMEA Kickoff|2024|League|EMEA|1925|
+done|pac24ko|Pacific Kickoff|2024|League|Pacific|1924|
+todo|chn24ko|China Kickoff|2024|League|China|1926|vlr stats table has only Rnd/ACS/K:D/KPR/APR (no Rating/KAST/ADR/HS/FK/FD); needs another source
+done|ame24s1|Americas Stage 1|2024|League|Americas|2004|
+done|emea24s1|EMEA Stage 1|2024|League|EMEA|1998|
 todo|pac24s1|Pacific Stage 1|2024|League|Pacific||
 todo|chn24s1|China Stage 1|2024|League|China||
 todo|ame24s2|Americas Stage 2|2024|League|Americas||
