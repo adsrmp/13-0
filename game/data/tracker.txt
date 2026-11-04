@@ -11,11 +11,11 @@ done|pac24ko|Pacific Kickoff|2024|League|Pacific|1924|
 todo|chn24ko|China Kickoff|2024|League|China|1926|vlr stats table has only Rnd/ACS/K:D/KPR/APR (no Rating/KAST/ADR/HS/FK/FD); needs another source
 done|ame24s1|Americas Stage 1|2024|League|Americas|2004|
 done|emea24s1|EMEA Stage 1|2024|League|EMEA|1998|
-todo|pac24s1|Pacific Stage 1|2024|League|Pacific||
-todo|chn24s1|China Stage 1|2024|League|China||
-todo|ame24s2|Americas Stage 2|2024|League|Americas||
-todo|emea24s2|EMEA Stage 2|2024|League|EMEA||
-todo|pac24s2|Pacific Stage 2|2024|League|Pacific||
+done|pac24s1|Pacific Stage 1|2024|League|Pacific|2002|
+todo|chn24s1|China Stage 1|2024|League|China|2006|vlr stats table has only Rnd/ACS/K:D/KPR/APR (no Rating/KAST/ADR/HS/FK/FD) and some garbled names; needs another source
+done|ame24s2|Americas Stage 2|2024|League|Americas|2095|
+done|emea24s2|EMEA Stage 2|2024|League|EMEA|2094|
+done|pac24s2|Pacific Stage 2|2024|League|Pacific|2005|
 todo|chn24s2|China Stage 2|2024|League|China||
 todo|ame25ko|Americas Kickoff|2025|League|Americas||
 todo|emea25ko|EMEA Kickoff|2025|League|EMEA||
