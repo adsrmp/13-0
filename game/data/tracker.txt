@@ -16,10 +16,10 @@ todo|chn24s1|China Stage 1|2024|League|China|2006|vlr stats table has only Rnd/A
 done|ame24s2|Americas Stage 2|2024|League|Americas|2095|
 done|emea24s2|EMEA Stage 2|2024|League|EMEA|2094|
 done|pac24s2|Pacific Stage 2|2024|League|Pacific|2005|
-todo|chn24s2|China Stage 2|2024|League|China||
-todo|ame25ko|Americas Kickoff|2025|League|Americas||
-todo|emea25ko|EMEA Kickoff|2025|League|EMEA||
-todo|pac25ko|Pacific Kickoff|2025|League|Pacific||
+todo|chn24s2|China Stage 2|2024|League|China|2096|vlr stats table has no Rating/KAST/HS (only ACS/K:D/ADR/KPR/APR/FKPR/FDPR); needs another source
+done|ame25ko|Americas Kickoff|2025|League|Americas|2274|
+done|emea25ko|EMEA Kickoff|2025|League|EMEA|2276|
+done|pac25ko|Pacific Kickoff|2025|League|Pacific|2277|
 todo|chn25ko|China Kickoff|2025|League|China||
 todo|ame25s1|Americas Stage 1|2025|League|Americas||
 todo|emea25s1|EMEA Stage 1|2025|League|EMEA||
@@ -56,7 +56,7 @@ todo|chn25asc|China Ascension|2025|Ascension|China||
 skip|ame26asc|Americas Ascension|2026|Ascension|Americas||not held in 2026 (Challengers teams go to Stage 2 play-ins instead)
 skip|emea26asc|EMEA Ascension|2026|Ascension|EMEA||not held in 2026 (Challengers teams go to Stage 2 play-ins instead)
 skip|pac26asc|Pacific Ascension|2026|Ascension|Pacific||not held in 2026 (Challengers teams go to Stage 2 play-ins instead)
-watch|chn26asc|China Ascension|2026|Ascension|China|3166|now "VCT 2026: China Threshold", finished 2026-11-01 (DRG won week 1, Nova week 2). vlr stats table has no Rating/KAST/ADR/HS/FK/FD yet; retry when it fills in
+watch|chn26asc|China Ascension|2026|Ascension|China|3166|now "VCT 2026: China Threshold", ended 2026-11-01. vlr stats table still has no Rating/KAST/HS (checked 2026-11-05); retry when it fills in
 # Future internationals and next season events: add a "watch" line when the schedule is announced.
 done|ewc25|Esports World Cup|2025|EWC|-|2449|partial: vlr table cut off below 0.96 rating
 done|ewc26|Esports World Cup|2026|EWC|-|2952|
