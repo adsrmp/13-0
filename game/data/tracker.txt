@@ -20,12 +20,12 @@ todo|chn24s2|China Stage 2|2024|League|China|2096|vlr stats table has no Rating/
 done|ame25ko|Americas Kickoff|2025|League|Americas|2274|
 done|emea25ko|EMEA Kickoff|2025|League|EMEA|2276|
 done|pac25ko|Pacific Kickoff|2025|League|Pacific|2277|
-todo|chn25ko|China Kickoff|2025|League|China||
-todo|ame25s1|Americas Stage 1|2025|League|Americas||
-todo|emea25s1|EMEA Stage 1|2025|League|EMEA||
-todo|pac25s1|Pacific Stage 1|2025|League|Pacific||
-todo|chn25s1|China Stage 1|2025|League|China||
-todo|ame25s2|Americas Stage 2|2025|League|Americas||
+todo|chn25ko|China Kickoff|2025|League|China|2275|vlr stats table has no Rating/KAST/ADR/HS and FK/FD are all 0 (checked 2026-11-06); needs another source
+done|ame25s1|Americas Stage 1|2025|League|Americas|2347|
+done|emea25s1|EMEA Stage 1|2025|League|EMEA|2380|
+done|pac25s1|Pacific Stage 1|2025|League|Pacific|2379|
+todo|chn25s1|China Stage 1|2025|League|China|2359|vlr FK/FD counts look incomplete (e.g. 7 FK in 224 rounds) and S1Mon row has no Rating (checked 2026-11-06); needs match pages or another source
+done|ame25s2|Americas Stage 2|2025|League|Americas|2501|
 todo|emea25s2|EMEA Stage 2|2025|League|EMEA||
 todo|pac25s2|Pacific Stage 2|2025|League|Pacific||
 todo|chn25s2|China Stage 2|2025|League|China||
