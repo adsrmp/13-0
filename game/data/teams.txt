@@ -70,3 +70,5 @@ VL|VARREL|Pacific
 BLD|Bleed Esports|Pacific
 2G|2Game Esports|Americas
 APK|Apeks|EMEA
+NOVA|Nova Esports|China
+TEC|Titan Esports Club|China

@@ -26,10 +26,10 @@ done|emea25s1|EMEA Stage 1|2025|League|EMEA|2380|
 done|pac25s1|Pacific Stage 1|2025|League|Pacific|2379|
 todo|chn25s1|China Stage 1|2025|League|China|2359|vlr FK/FD counts look incomplete (e.g. 7 FK in 224 rounds) and S1Mon row has no Rating (checked 2026-11-06); needs match pages or another source
 done|ame25s2|Americas Stage 2|2025|League|Americas|2501|
-todo|emea25s2|EMEA Stage 2|2025|League|EMEA||
-todo|pac25s2|Pacific Stage 2|2025|League|Pacific||
-todo|chn25s2|China Stage 2|2025|League|China||
-todo|ame26ko|Americas Kickoff|2026|League|Americas||
+done|emea25s2|EMEA Stage 2|2025|League|EMEA|2498|
+done|pac25s2|Pacific Stage 2|2025|League|Pacific|2500|
+done|chn25s2|China Stage 2|2025|League|China|2499|left out XiYiJi (AG sub, 52 rnd): no Rating/KAST/ADR on vlr
+done|ame26ko|Americas Kickoff|2026|League|Americas|2682|
 todo|emea26ko|EMEA Kickoff|2026|League|EMEA||
 todo|pac26ko|Pacific Kickoff|2026|League|Pacific||
 todo|chn26ko|China Kickoff|2026|League|China||
