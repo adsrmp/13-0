@@ -8,11 +8,12 @@ makes Cloudflare (Workers Builds) redeploy the site in a couple of minutes.
 1. **Find finished events.** Read `game/data/tracker.txt`.
    - Lines marked `watch`: check on vlr.gg whether the event has finished (grand final played).
      If it has, process it.
-   - Look for newly announced or finished events that aren't in the tracker: current-season Kickoff,
-     Stage 1 and Stage 2 for Americas, EMEA, Pacific and China, Masters, Champions, the Esports World Cup
-     (EWC, usually July) and Ascension.
-     Add `watch` lines for upcoming ones.
-   - Then work through the `todo` backlog, oldest first: **at most 4 events per run**, counting new
+   - Look for newly announced or finished **international** events that aren't in the tracker:
+     Masters, Champions and the Esports World Cup (EWC, usually July). Add `watch` lines for upcoming ones.
+   - **The game covers international events only.** Do not add regional events (Kickoff, Stage 1,
+     Stage 2, the 2023 leagues, Ascension, Threshold or Challengers). They were removed on purpose in
+     November 2026 because there would be too many.
+   - Then work through any `todo` backlog, oldest first: **at most 4 events per run**, counting new
      events first.
 2. **Add each event** (below), then build, check and test.
 3. **Commit and push** to `main`, then confirm the Cloudflare build succeeded.
@@ -25,7 +26,7 @@ If nothing finished and the backlog is empty, change nothing and report "no new 
 The shell can't reach vlr.gg. Use the web tools instead. WebFetch only opens links that came from a
 search result or an earlier fetched page, so:
 
-1. WebSearch something like `vlr.gg VCT 2026 Americas Stage 2`. Fetch an event or pick'em link from the results.
+1. WebSearch something like `vlr.gg VCT 2027 Masters <city>`. Fetch an event or pick'em link from the results.
 2. Ask WebFetch for the event's dates, whether it's completed, the winner, and the full URL of its
    Stats tab (`https://www.vlr.gg/event/stats/<id>/<slug>`).
 3. Fetch the Stats URL and ask for every row of the "Player Performance and Stats" table as CSV, in
@@ -42,17 +43,14 @@ there. **Never edit or reorder existing files.** Rows of old events must stay by
 `tools/check_stable.py` enforces this.
 
 ```
-## <id>|<name>|<year>|<type>|<winner tag>|<vlr id>|region=<Region>|end=<YYYY-MM-DD>
+## <id>|<name>|<year>|<type>|<winner tag>|<vlr id>|city=<City>|end=<YYYY-MM-DD>
 PlayerName TAG,Agent1;Agent2,Rnd,R,ACS,K:D,KAST,ADR,KPR,APR,FKPR,FDPR,HS
 ...
 ```
 
-- **id**: region code + year + stage, as in the tracker (`ame26s2`, `pac25ko`, `emea24asc`).
-  For internationals use the city style (`stg26`, `cha26`, `mad24`).
-- **name**: `Americas Stage 2`, `Pacific Kickoff`, `EMEA League` (2023), `China Ascension`.
-  For internationals: `Masters London`, `Champions Shanghai`.
-- **type**: `League` for Kickoff, Stage 1, Stage 2 and the 2023 leagues. `Ascension` for Ascension.
-  `Masters` or `Champions` for internationals, `EWC` for the Esports World Cup; those take `city=<City>` instead of `region=`.
+- **id**: city style plus year (`stg26`, `cha26`, `mad24`, `ewc26`).
+- **name**: `Masters London`, `Champions Shanghai`, `Esports World Cup`.
+- **type**: `Masters`, `Champions` or `EWC`. Internationals take `city=<City>` (not `region=`).
   EWC counts as an international everywhere: its winner joins the Champions gauntlet automatically
   once that team has 5 players in the rows (a gauntlet opponent needs a full five).
 - **end**: the date of the grand final. This sets the order events are listed in.
@@ -111,7 +109,7 @@ tables, but a whole team showing up there is a sign of a tag mistake.
 
 Then:
 - update `game/data/tracker.txt`: set the line to `done` and fill in the vlr id
-- commit with a message like `Data: add Americas Stage 2 2026 (vlr 2774)` and push to `main`
+- commit with a message like `Data: add Masters London 2026 (vlr 2765)` and push to `main`
 - confirm the Cloudflare build passed: `gh api repos/adsrmp/13-0/commits/HEAD/check-runs`
 
 If any step fails and you can't fix it, don't push. Report what went wrong instead.

@@ -1,63 +1,9 @@
 # 13–0 event tracker. One line per event: status|id|name|year|type|region|vlr id|notes
 # status: done = in the game; todo = finished, still to add (backlog); watch = not finished yet; skip = not available
 # The scheduled check adds finished events, oldest first, and flips their status to done.
+# International events only (Masters, Champions, EWC). Regional leagues and Ascension are not part of the game.
 # International events (Masters, Champions) use region "-". vlr id is filled in once found.
-done|ame23lg|Americas League|2023|League|Americas|1189|
-done|emea23lg|EMEA League|2023|League|EMEA|1190|
-todo|pac23lg|Pacific League|2023|League|Pacific|1191|vlr table shows wrong tags for ~10 players (showmatch teams BNY/SPB, e.g. xffero listed as BNY but played for RRQ); needs fixing from match pages
-done|ame24ko|Americas Kickoff|2024|League|Americas|1923|
-done|emea24ko|EMEA Kickoff|2024|League|EMEA|1925|
-done|pac24ko|Pacific Kickoff|2024|League|Pacific|1924|
-todo|chn24ko|China Kickoff|2024|League|China|1926|vlr stats table has only Rnd/ACS/K:D/KPR/APR (no Rating/KAST/ADR/HS/FK/FD); needs another source
-done|ame24s1|Americas Stage 1|2024|League|Americas|2004|
-done|emea24s1|EMEA Stage 1|2024|League|EMEA|1998|
-done|pac24s1|Pacific Stage 1|2024|League|Pacific|2002|
-todo|chn24s1|China Stage 1|2024|League|China|2006|vlr stats table has only Rnd/ACS/K:D/KPR/APR (no Rating/KAST/ADR/HS/FK/FD) and some garbled names; needs another source
-done|ame24s2|Americas Stage 2|2024|League|Americas|2095|
-done|emea24s2|EMEA Stage 2|2024|League|EMEA|2094|
-done|pac24s2|Pacific Stage 2|2024|League|Pacific|2005|
-todo|chn24s2|China Stage 2|2024|League|China|2096|vlr stats table has no Rating/KAST/HS (only ACS/K:D/ADR/KPR/APR/FKPR/FDPR); needs another source
-done|ame25ko|Americas Kickoff|2025|League|Americas|2274|
-done|emea25ko|EMEA Kickoff|2025|League|EMEA|2276|
-done|pac25ko|Pacific Kickoff|2025|League|Pacific|2277|
-todo|chn25ko|China Kickoff|2025|League|China|2275|vlr stats table has no Rating/KAST/ADR/HS and FK/FD are all 0 (checked 2026-11-06); needs another source
-done|ame25s1|Americas Stage 1|2025|League|Americas|2347|
-done|emea25s1|EMEA Stage 1|2025|League|EMEA|2380|
-done|pac25s1|Pacific Stage 1|2025|League|Pacific|2379|
-todo|chn25s1|China Stage 1|2025|League|China|2359|vlr FK/FD counts look incomplete (e.g. 7 FK in 224 rounds) and S1Mon row has no Rating (checked 2026-11-06); needs match pages or another source
-done|ame25s2|Americas Stage 2|2025|League|Americas|2501|
-done|emea25s2|EMEA Stage 2|2025|League|EMEA|2498|
-done|pac25s2|Pacific Stage 2|2025|League|Pacific|2500|
-done|chn25s2|China Stage 2|2025|League|China|2499|left out XiYiJi (AG sub, 52 rnd): no Rating/KAST/ADR on vlr
-done|ame26ko|Americas Kickoff|2026|League|Americas|2682|
-done|emea26ko|EMEA Kickoff|2026|League|EMEA|2684|
-done|pac26ko|Pacific Kickoff|2026|League|Pacific|2683|
-done|chn26ko|China Kickoff|2026|League|China|2685|
-done|ame26s1|Americas Stage 1|2026|League|Americas|2860|
-todo|emea26s1|EMEA Stage 1|2026|League|EMEA||
-done|pac26s1|Pacific Stage 1|2026|League|Pacific|2775|
-todo|chn26s1|China Stage 1|2026|League|China||
-todo|ame26s2|Americas Stage 2|2026|League|Americas||
-todo|emea26s2|EMEA Stage 2|2026|League|EMEA||
-todo|pac26s2|Pacific Stage 2|2026|League|Pacific||
-todo|chn26s2|China Stage 2|2026|League|China||
-todo|ame23asc|Americas Ascension|2023|Ascension|Americas||
-todo|emea23asc|EMEA Ascension|2023|Ascension|EMEA||
-todo|pac23asc|Pacific Ascension|2023|Ascension|Pacific||
-todo|chn23asc|China Ascension|2023|Ascension|China||may not exist for China in 2023
-todo|ame24asc|Americas Ascension|2024|Ascension|Americas||
-todo|emea24asc|EMEA Ascension|2024|Ascension|EMEA||
-todo|pac24asc|Pacific Ascension|2024|Ascension|Pacific||
-todo|chn24asc|China Ascension|2024|Ascension|China||
-todo|ame25asc|Americas Ascension|2025|Ascension|Americas||
-todo|emea25asc|EMEA Ascension|2025|Ascension|EMEA||
-todo|pac25asc|Pacific Ascension|2025|Ascension|Pacific||
-todo|chn25asc|China Ascension|2025|Ascension|China||
-skip|ame26asc|Americas Ascension|2026|Ascension|Americas||not held in 2026 (Challengers teams go to Stage 2 play-ins instead)
-skip|emea26asc|EMEA Ascension|2026|Ascension|EMEA||not held in 2026 (Challengers teams go to Stage 2 play-ins instead)
-skip|pac26asc|Pacific Ascension|2026|Ascension|Pacific||not held in 2026 (Challengers teams go to Stage 2 play-ins instead)
-watch|chn26asc|China Ascension|2026|Ascension|China|3166|now "VCT 2026: China Threshold", ended 2026-11-01. vlr stats table still has no Rating/KAST/HS (checked 2026-11-05); retry when it fills in
-# Future internationals and next season events: add a "watch" line when the schedule is announced.
+# Future internationals (2027: two Masters, Champions, EWC): add a "watch" line once the city is announced, e.g. watch|<city>27|Masters <City>|2027|Masters|-||
 done|ewc25|Esports World Cup|2025|EWC|-|2449|partial: vlr table cut off below 0.96 rating
 done|ewc26|Esports World Cup|2026|EWC|-|2952|
 watch|ewc27|Esports World Cup|2027|EWC|-||usually July; add once the grand final is played
