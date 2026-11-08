@@ -72,3 +72,5 @@ BLD|Bleed Esports|Pacific
 APK|Apeks|EMEA
 NOVA|Nova Esports|China
 TEC|Titan Esports Club|China
+PCF|PCIFIC Esports|EMEA
+ULF|ULF Esports|EMEA

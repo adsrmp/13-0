@@ -30,10 +30,10 @@ done|emea25s2|EMEA Stage 2|2025|League|EMEA|2498|
 done|pac25s2|Pacific Stage 2|2025|League|Pacific|2500|
 done|chn25s2|China Stage 2|2025|League|China|2499|left out XiYiJi (AG sub, 52 rnd): no Rating/KAST/ADR on vlr
 done|ame26ko|Americas Kickoff|2026|League|Americas|2682|
-todo|emea26ko|EMEA Kickoff|2026|League|EMEA||
-todo|pac26ko|Pacific Kickoff|2026|League|Pacific||
-todo|chn26ko|China Kickoff|2026|League|China||
-todo|ame26s1|Americas Stage 1|2026|League|Americas||
+done|emea26ko|EMEA Kickoff|2026|League|EMEA|2684|
+done|pac26ko|Pacific Kickoff|2026|League|Pacific|2683|
+done|chn26ko|China Kickoff|2026|League|China|2685|
+done|ame26s1|Americas Stage 1|2026|League|Americas|2860|
 todo|emea26s1|EMEA Stage 1|2026|League|EMEA||
 done|pac26s1|Pacific Stage 1|2026|League|Pacific|2775|
 todo|chn26s1|China Stage 1|2026|League|China||
