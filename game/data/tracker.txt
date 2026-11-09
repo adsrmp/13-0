@@ -7,3 +7,6 @@
 done|ewc25|Esports World Cup|2025|EWC|-|2449|partial: vlr table cut off below 0.96 rating
 done|ewc26|Esports World Cup|2026|EWC|-|2952|
 watch|ewc27|Esports World Cup|2027|EWC|-||usually July; add once the grand final is played
+watch|seo27|Masters Seoul|2027|Masters|-||Feb 20 - Mar 3, 2027
+watch|val27|Masters Valencia|2027|Masters|-||Jun 5-20, 2027
+watch|cha27|Champions Austin|2027|Champions|-||Sep 16 - Oct 10, 2027
